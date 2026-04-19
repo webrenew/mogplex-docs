@@ -1,17 +1,26 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { appName, gitConfig } from './shared';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import Image from 'next/image';
+import { appName } from './shared';
 
 export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
-      title: appName,
-      children: <ThemeSwitcher />,
+      title: (
+        <span className="inline-flex items-center gap-2">
+          <Image
+            src="/brand/mogplex-icon.png"
+            alt=""
+            width={20}
+            height={20}
+            priority
+          />
+          {appName}
+        </span>
+      ),
     },
-    // Disable the default Fumadocs theme switch since we use our custom one
+    // Disable the default Fumadocs theme switch since we render our own in the sidebar footer
     themeSwitch: {
       enabled: false,
     },
-    githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
   };
 }

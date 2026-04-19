@@ -1,19 +1,31 @@
 ---
-title: Mogplex
-description: Documentation for the Mogplex CLI and web app.
+title: Get started
+description: Install the CLI or open the app — pick your surface and ship.
 ---
 
-Mogplex ships in two surfaces. Pick the one you're working with.
+Mogplex ships in two surfaces. Pick whichever fits the work in front of you.
 
 <Cards>
   <Card
     title="CLI"
-    href="/docs/cli"
+    href="/cli"
     description="The `mogplex` command, agent runtime, and local workflows."
   />
   <Card
-    title="Mogplex"
-    href="/docs/web"
-    description="Flows pane, agents, installations, and the hosted API."
+    title="App"
+    href="/web"
+    description="Flows pane, agents, automations, installations, and the hosted API."
   />
 </Cards>
+
+## Quickstart
+
+Install the CLI and run your first command.
+
+```bash
+curl -fsSL https://install.mogplex.dev/cli.sh | sh
+mogplex login
+mogplex exec "summarize this repo"
+```
+
+Prefer the hosted experience? Sign in to the [App](/web) and connect a GitHub installation to get started.

@@ -1,4 +1,4 @@
 {
-  "title": "Mogplex",
-  "pages": ["index", "getting-started", "flows", "agents", "installations", "api"]
+  "title": "App",
+  "pages": ["index", "flows", "agents", "automations", "installations", "api"]
 }
