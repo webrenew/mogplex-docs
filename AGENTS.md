@@ -2,7 +2,7 @@
 
 ## Overview
 
-Fumadocs site for Mogplex CLI and web app documentation.
+Fumadocs site for Mogplex CLI and Mogplex documentation.
 
 ## Local Development
 
@@ -13,7 +13,7 @@ pnpm install && pnpm dev
 ## Content Structure
 
 - `content/docs/cli/*` - CLI documentation
-- `content/docs/web/*` - Web app documentation
+- `content/docs/web/*` - Mogplex documentation
 
 ## Page Front-matter
 
