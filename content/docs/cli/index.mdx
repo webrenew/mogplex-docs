@@ -1,14 +1,25 @@
 ---
 title: Overview
-description: The Mogplex CLI — what it does and where to start.
+description: The Mogplex CLI for interactive sessions, one-off exec runs, slash commands, and local configuration.
 ---
 
-The Mogplex CLI (`mogplex`) runs agents locally, manages credentials, and drives
-flows from your terminal.
+The Mogplex CLI (`mogplex`) is the local runtime for Mogplex.
+
+Use it for interactive terminal sessions, one-off `exec` runs, slash-command
+workflows, local MCP configuration, and repo-scoped conventions like
+`AGENTS.md`, `agent.json`, and `.agents/commands/`.
 
 <Cards>
-  <Card title="Installation" href="/docs/cli/installation" />
-  <Card title="Quickstart" href="/docs/cli/quickstart" />
-  <Card title="Commands" href="/docs/cli/commands" />
-  <Card title="Guides" href="/docs/cli/guides" />
+  <Card title="Installation" href="/cli/installation" />
+  <Card title="Quickstart" href="/cli/quickstart" />
+  <Card title="Commands" href="/cli/commands" />
+  <Card title="Guides" href="/cli/guides" />
 </Cards>
+
+## Current surface
+
+- `mogplex` launches the interactive terminal UI.
+- `mogplex exec "<prompt>"` runs a single non-interactive task.
+- `mogplex "<prompt>"` also works as a shortcut for a one-off run.
+- `mogplex slash list` shows the in-session slash command surface.
+- `~/.mogplex/config.toml` and project files like `AGENTS.md` shape runtime behavior.

@@ -1,6 +1,26 @@
 ---
 title: Installations
-description: TODO — stub created during docs scaffold.
+description: GitHub installations, repo sync, and the connection between imported repos and automation coverage.
 ---
 
-Documentation for the installations surface is coming soon.
+Installations determine which GitHub repositories Mogplex can see and which
+repos are eligible for app-backed automation features.
+
+## What an installation unlocks
+
+- Import repositories into the default project
+- Keep repository metadata in sync with GitHub
+- Mark repos as eligible for trigger- and automation-driven work
+- Attach GitHub-backed automation coverage to the right repos
+
+## Important distinction
+
+GitHub OAuth can be enough to connect an account and discover repositories, but
+GitHub App coverage is what unlocks trigger-backed automation and related repo
+actions.
+
+## Where this shows up in the app
+
+- [Projects](/web/projects) shows the imported repos and workspaces
+- [Automations](/web/automations) uses installation-backed repos for GitHub events
+- [Settings](/web/settings) is where account connections and related setup live

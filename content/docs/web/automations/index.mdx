@@ -1,20 +1,27 @@
 ---
 title: Automations
-description: Run Mogplex on every pull request — automated GitHub code reviews and follow-up actions.
+description: Build GitHub-triggered automations on the Mogplex canvas.
 ---
 
-Automations connect a Mogplex project to a GitHub repository and run on
-pull-request events. Use them to post AI code reviews, gate merges, or
-trigger follow-up flows without leaving GitHub.
+Automations are the current flow-builder surface in the web app.
+
+They connect a Mogplex project to GitHub events and let you shape the runtime
+on a node canvas before publishing.
 
 ## What you can do
 
-- Review every PR opened against a repo
-- Comment inline with findings, suggestions, and risk callouts
-- Re-run a review when new commits are pushed
-- Chain into a Mogplex flow or agent for follow-up work
+- Start from a GitHub event
+- Chain agents sequentially or in parallel
+- Add notes and structure directly on the canvas
+- Publish the automation when the flow is ready
+- Inspect runs and failures from [Observability](/web/observability)
 
 ## Getting started
 
-Documentation for installation, configuration, and the supported event
-matrix is coming soon.
+1. Connect GitHub and make sure the repo is covered by an installation.
+2. Open the Automations canvas.
+3. Create the event entrypoint and add the agent steps you need.
+4. Publish the automation.
+
+Repo-level routing and older fixed trigger views still exist elsewhere in the
+app, but Automations is the primary authoring surface for new flow work.

@@ -1,31 +1,38 @@
 ---
 title: Get started
-description: Install the CLI or open the app — pick your surface and ship.
+description: Choose the CLI or web app and start with the Mogplex surface that matches the work.
 ---
 
-Mogplex ships in two surfaces. Pick whichever fits the work in front of you.
+Mogplex ships in two surfaces.
+
+Use the CLI when you want local, repo-in-place agent work from your terminal.
+Use the web app when you want the shared control plane for projects, agents,
+automations, observability, and settings.
 
 <Cards>
   <Card
     title="CLI"
     href="/cli"
-    description="The `mogplex` command, agent runtime, and local workflows."
+    description="Interactive sessions, `exec`, slash commands, and local MCP-aware workflows."
   />
   <Card
-    title="App"
+    title="Web app"
     href="/web"
-    description="Flows pane, agents, automations, installations, and the hosted API."
+    description="Projects, agents, automations, observability, settings, installations, and the hosted API."
   />
 </Cards>
 
 ## Quickstart
 
-Install the CLI and run your first command.
+Install the CLI, point it at a provider key, and run your first task.
 
 ```bash
-curl -fsSL https://install.mogplex.dev/cli.sh | sh
-mogplex login
-mogplex exec "summarize this repo"
+curl -fsSL https://www.mogplex.com/install.sh | sh
+export ANTHROPIC_API_KEY=sk-ant-...
+mogplex "summarize this repo"
 ```
 
-Prefer the hosted experience? Sign in to the [App](/web) and connect a GitHub installation to get started.
+`OPENAI_API_KEY` works too if you prefer OpenAI.
+
+Prefer the hosted experience? Open the [Web app](/web), connect GitHub, and
+start from Projects or Automations.

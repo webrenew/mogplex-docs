@@ -208,7 +208,7 @@ function generateMdx(cmd: CommandDoc): string {
   // See also
   lines.push("## See also");
   lines.push("");
-  lines.push("- [All commands](/docs/cli/commands)");
+  lines.push("- [All commands](/cli/commands)");
   lines.push("");
 
   return lines.join("\n");

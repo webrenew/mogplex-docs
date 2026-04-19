@@ -1,0 +1,23 @@
+---
+title: Settings
+description: Manage connections, provider keys, CLI tokens, models, and synced MCP server definitions.
+---
+
+Settings is where account- and runtime-level configuration lives in the web app.
+
+## What lives here
+
+- Account connections such as GitHub, Vercel, and other configured integrations
+- Encrypted provider keys for AI Gateway and supported model providers
+- Model configuration and defaults
+- CLI access tokens for browser-based auth and script access
+- Theme and account preferences
+- A dedicated MCP servers page for synced definitions the CLI can reuse
+
+## Why it matters
+
+The web app and CLI share parts of this control plane.
+
+Settings is the place to wire the hosted side once, then reuse those choices
+from local workflows when the CLI syncs model catalogs, tokens, or MCP server
+definitions.

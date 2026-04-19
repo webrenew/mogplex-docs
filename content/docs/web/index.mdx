@@ -1,12 +1,28 @@
 ---
 title: Overview
-description: Mogplex — flows, agents, installations, and the hosted API.
+description: The Mogplex web app for projects, agents, automations, observability, settings, installations, and the hosted API.
 ---
 
+The web app is the shared control plane for Mogplex.
+
+Use it to sync repositories, shape reusable agents, build GitHub-triggered
+automations, inspect runs and model calls, and manage the settings the CLI can
+reuse.
+
 <Cards>
-  <Card title="Getting started" href="/docs/web/getting-started" />
-  <Card title="Flows" href="/docs/web/flows" />
-  <Card title="Agents" href="/docs/web/agents" />
-  <Card title="Installations" href="/docs/web/installations" />
-  <Card title="API" href="/docs/web/api" />
+  <Card title="Projects" href="/web/projects" />
+  <Card title="Agents" href="/web/agents" />
+  <Card title="Automations" href="/web/automations" />
+  <Card title="Observability" href="/web/observability" />
+  <Card title="Settings" href="/web/settings" />
+  <Card title="Installations" href="/web/installations" />
+  <Card title="API" href="/web/api" />
 </Cards>
+
+## Current surface
+
+- **Projects** imports repos, organizes them into workspaces, and launches sandboxes.
+- **Agents** manages reusable agent definitions plus shared skills, rules, and context.
+- **Automations** is the flow-builder surface for GitHub-triggered work.
+- **Observability** tracks runs, pressure, failures, and model/tool calls.
+- **Settings** manages connections, provider keys, CLI tokens, models, and MCP servers.

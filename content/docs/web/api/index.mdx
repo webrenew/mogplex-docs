@@ -1,6 +1,26 @@
 ---
-title: Api
-description: TODO — stub created during docs scaffold.
+title: API
+description: The hosted control-plane API that backs the Mogplex web app.
 ---
 
-Documentation for the api surface is coming soon.
+The hosted API mirrors the current web app control plane.
+
+It is the surface behind Projects, Agents, Automations, Settings, sandboxes,
+and Observability.
+
+## Current route groups
+
+- `/api/agents` and `/api/agent-categories`
+- `/api/repos`, `/api/workspaces`, and `/api/connections`
+- `/api/flows`, `/api/triggers`, and `/api/assignments`
+- `/api/sandbox` and `/api/observability`
+- `/api/models`, `/api/settings`, and `/api/mcp-servers`
+- `/api/chat`, `/api/conversations`, `/api/commands`, `/api/skills`, and `/api/memories`
+
+## How to think about it
+
+Use the web app when you want the full product surface and discovery UX.
+Use the API when you are extending that control plane from internal tools,
+scripts, or adjacent product code.
+
+Browser-based CLI auth approval is handled separately at `/cli-auth`.

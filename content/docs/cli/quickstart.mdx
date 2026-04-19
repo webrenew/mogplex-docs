@@ -1,6 +1,56 @@
 ---
 title: Quickstart
-description: Run your first Mogplex agent from the terminal.
+description: Run your first Mogplex task from the terminal with the current CLI surface.
 ---
 
-TODO: stubbed during docs scaffold. Flesh out with a minimal end-to-end example.
+The fastest path is: install the binary, export a provider key, then start a
+session or run a one-off prompt.
+
+## 1. Install
+
+See [Installation](/cli/installation) for platform-specific commands.
+
+## 2. Set a provider key
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+# or
+export OPENAI_API_KEY=sk-...
+```
+
+Mogplex resolves environment variables first. If you prefer stored credentials,
+see [Authentication](/cli/guides/authentication).
+
+## 3. Start an interactive session
+
+```bash
+mogplex
+```
+
+Inside a session, the common entry points are:
+
+- `/help` to list in-session commands
+- `/status` to inspect model, usage, approval mode, and cwd
+- `/model` to switch models
+- `/compact` to summarize and continue with a smaller context window
+
+## 4. Run a one-off task
+
+```bash
+mogplex exec "review the staged diff for regressions"
+```
+
+Bare prompts also route to non-interactive exec mode:
+
+```bash
+mogplex "summarize this repository"
+```
+
+## 5. Inspect the slash surface
+
+```bash
+mogplex slash list
+```
+
+That shows the built-in in-session commands plus any project or user commands
+loaded from `.agents/commands/` and `~/.mogplex/commands/`.
