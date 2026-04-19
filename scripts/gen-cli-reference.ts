@@ -126,11 +126,21 @@ function parseHelpFile(content: string): Record<string, string> {
 }
 
 function loadRegistry(): CommandRegistry | null {
+  // Only skip when the CLI source tree itself is absent (e.g. Vercel builds
+  // that don't check out the sibling mogplex-cli repo). If the tree exists
+  // but required files are missing, fail loudly — that's a real breakage.
+  if (!fs.existsSync(CLI_SRC)) {
+    return null;
+  }
+
   const subcommandsPath = path.join(CLI_SRC, "subcommands.ts");
   const helpPath = path.join(CLI_SRC, "help.ts");
 
-  if (!fs.existsSync(subcommandsPath) || !fs.existsSync(helpPath)) {
-    return null;
+  if (!fs.existsSync(subcommandsPath)) {
+    throw new Error(`CLI subcommands.ts not found at ${subcommandsPath}`);
+  }
+  if (!fs.existsSync(helpPath)) {
+    throw new Error(`CLI help.ts not found at ${helpPath}`);
   }
 
   const subcommandsContent = fs.readFileSync(subcommandsPath, "utf-8");
@@ -246,7 +256,7 @@ function main(): void {
 
   if (!registry) {
     console.warn(
-      `CLI source not found at ${CLI_SRC}. Skipping CLI reference generation; keeping existing generated files.`
+      `CLI source tree not found at ${CLI_SRC}. Skipping CLI reference generation; keeping existing generated files.`
     );
     return;
   }
