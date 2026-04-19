@@ -1,6 +1,6 @@
 ---
 title: Authentication
-description: How Mogplex resolves stored credentials, when account login is enough, and what `/login` and `/logout` mean in the CLI.
+description: How Mogplex resolves stored credentials, when account login is enough, and what bare `mogplex`, `/login`, and `/logout` mean in the CLI.
 ---
 
 Mogplex can run with either direct provider credentials or your Mogplex account.
@@ -31,14 +31,15 @@ When a session starts, it resolves auth in this order.
    Mogplex browser login, the CLI starts against your account-backed model
    access and synced catalog.
 
-4. **No credentials → browser login or clear error.** In interactive TTY startup,
-   Mogplex opens browser login automatically. In non-interactive contexts it
-   exits with a clear message telling you to run `mogplex login`.
+4. **No credentials → startup prompt or clear error.** In interactive TTY startup,
+   bare `mogplex` prompts you to either sign in with Mogplex or store a provider
+   API key. In non-interactive contexts it exits with a clear message telling
+   you to run `mogplex`.
 
 ## Mogplex account login
 
-`mogplex login` opens the webapp login flow and stores a `mogplex` token in
-`~/.mogplex/auth.json`.
+Running `mogplex` and choosing **Sign in with Mogplex** opens the webapp login
+flow and stores a `mogplex` token in `~/.mogplex/auth.json`.
 
 That login now does three things for the CLI:
 
@@ -51,15 +52,15 @@ Anthropic key in **Settings > API Keys**.
 
 ## `/login`
 
-Use either form:
+Use `mogplex` as the normal entrypoint:
 
 ```bash
-mogplex login
-# or
-mogplex login mogplex
+mogplex
 ```
 
-That opens the browser flow against your Mogplex account.
+If you prefer to jump straight into the auth flow, `mogplex login` still opens
+the same chooser, and `mogplex login mogplex` still opens the browser flow
+directly.
 
 Inside the TUI, `/login` still works for storing direct provider keys when you
 want the CLI to use a specific provider credential locally.
