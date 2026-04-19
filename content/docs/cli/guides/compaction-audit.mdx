@@ -1,0 +1,106 @@
+---
+title: Compaction audit
+description: How Mogplex compacts conversation history, what gets persisted, and the race-condition analysis.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="info">
+Originally captured 2026-04-18 while investigating a compaction regression. Preserved as reference for engine behavior.
+</Callout>
+
+## Context
+
+User reported compaction "ran a fresh loop of the exact same previous process".
+
+## Findings
+
+### 1. Does `state.messages` actually get replaced?
+
+**Location:** `packages/engine/src/turn.ts` lines 257-259
+
+Yes, `state.messages` is correctly replaced with a single summary message. However, there was a **critical bug**: the replacement was destroying the new user message.
+
+**Bug found:** In `runTurn()`, the new user message is pushed to `state.messages` on line 35, BEFORE `maybeAutoCompact()` is called on line 42. When compaction triggered, it summarized ALL messages (including the new one) and replaced them with just the summary. The new user message was lost.
+
+**Fix applied:** `maybeAutoCompact()` now:
+
+1. Extracts the last message (the new user input)
+2. Summarizes only `messages[0..-1]` (the history)
+3. Sets `state.messages = [summaryMsg, newUserMessage]`
+
+### 2. Does tokenUsage reset?
+
+**Location:** `packages/engine/src/turn.ts` line 262
+
+Yes. After compaction, `state.tokenUsage` is reset to `{promptTokens: 0, completionTokens: 0}`. This is correct behavior.
+
+### 3. Is there a race condition?
+
+**No race condition found.** Auto-compaction runs synchronously at turn START, before the model stream begins. The `await summarizeHistory()` blocks, so no concurrent deltas can arrive during summarization.
+
+The summarization request itself does NOT count toward `state.tokenUsage` because it uses a separate `generateText()` call that doesn't update state. The reset to zero tokens happens after summarization completes.
+
+**No re-entry guard needed** because:
+
+- `runTurn` is an async generator that yields events sequentially
+- The host (TUI/CLI) awaits each turn to completion before starting another
+- Even if the host sent concurrent ops, each would be a separate `runTurn` call with its own state mutation
+
+### 4. Are summaries persisted to disk?
+
+**Location:** `packages/rollout/src/writer.ts` and `packages/rollout/src/schemas.ts`
+
+Yes. The rollout system has a `compaction` record kind (lines 102-111 in schemas.ts):
+
+```typescript
+export const CompactionPayloadSchema = z.object({
+  turn_id: z.number().int(),
+  compacted_tokens: z.number().int().nonnegative(),
+  summary: z.string(), // The full summary text is stored
+});
+```
+
+The writer has `writeCompaction(payload)` (lines 168-176). However, **the engine does not currently call this** — it only emits a `context_compacted` event to the TUI/CLI, which does not include the summary text.
+
+**Recommendation:** The engine should call `rolloutWriter.writeCompaction()` with the summary text when compaction occurs. This would:
+
+1. Allow session resume to restore the summary as the starting context
+2. Let users inspect summaries in the rollout JSONL file
+
+### 5. The user's specific symptom
+
+**Root cause:** The new user message was being discarded during compaction.
+
+After compaction, the model saw:
+
+- `[{summary of prior work}]`
+
+Instead of:
+
+- `[{summary of prior work}, {user's new request}]`
+
+The model then responded to the summary (which described what had already been done), effectively re-executing the same workflow because the summary mentioned the prior tasks but the actual request was missing.
+
+**This is now fixed.** The test `'excludes new user message from summarization input'` verifies the fix.
+
+## Summary
+
+| Question                       | Answer                                                        |
+| ------------------------------ | ------------------------------------------------------------- |
+| Messages replaced correctly?   | Yes (after fix)                                               |
+| Token usage reset?             | Yes                                                           |
+| Race condition?                | No                                                            |
+| Summary persisted to disk?     | Schema exists, but engine doesn't write it (future work)      |
+| Root cause of bug?             | New user message discarded during compaction                  |
+
+## Changes made
+
+1. `packages/core/src/compaction.ts`: Threshold 0.9 → 0.8
+2. `packages/engine/src/turn.ts`: Fixed `maybeAutoCompact()` to preserve new user message
+3. `packages/engine/src/__tests__/compact.test.ts`: Updated threshold tests, added regression test
+
+## Future work
+
+- Wire `rolloutWriter.writeCompaction()` in the engine when compaction occurs
+- Consider adding `context_compacted` event payload to include summary text for TUI display
