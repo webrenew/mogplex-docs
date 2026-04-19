@@ -1,5 +1,26 @@
 {
   "title": "Commands",
   "defaultOpen": true,
-  "pages": ["index"]
+  "pages": [
+    "index",
+    "app",
+    "app-server",
+    "apply",
+    "cloud",
+    "completion",
+    "debug",
+    "exec",
+    "exec-server",
+    "features",
+    "fork",
+    "login",
+    "logout",
+    "mcp",
+    "mcp-server",
+    "plugin",
+    "resume",
+    "review",
+    "sandbox",
+    "slash"
+  ]
 }
