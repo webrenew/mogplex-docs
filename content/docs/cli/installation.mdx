@@ -1,14 +1,50 @@
 ---
 title: Installation
-description: Install the Mogplex CLI.
+description: Install the Mogplex CLI on macOS, Linux, or Windows.
 ---
 
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="warn">
+  Install commands are finalized at release time. The snippets below are placeholders —
+  replace this page with the published installer commands before cutting v1.
+</Callout>
+
+## Install
+
+<Tabs items={['macOS / Linux', 'Windows']}>
+  <Tab value="macOS / Linux">
+
 ```bash
-pnpm add -g mogplex
+# TODO: publish curl-pipe-sh installer and paste the real command here.
+curl -fsSL https://install.mogplex.dev/cli.sh | sh
 ```
 
-Verify:
+  </Tab>
+  <Tab value="Windows">
+
+```powershell
+# TODO: publish PowerShell installer and paste the real command here.
+iwr -useb https://install.mogplex.dev/cli.ps1 | iex
+```
+
+  </Tab>
+</Tabs>
+
+## Verify
 
 ```bash
 mogplex --version
 ```
+
+If the binary is on your `PATH`, you should see the installed version string.
+
+## Upgrade
+
+Re-run the installer. It detects an existing installation and replaces the binary in place.
+
+## Uninstall
+
+Delete the `mogplex` binary from the location the installer reported. Your session data
+in `~/.mogplex/` is left untouched — remove that directory if you want a clean slate.

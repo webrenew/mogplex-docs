@@ -1,0 +1,66 @@
+---
+title: Authentication
+description: How Mogplex resolves provider API keys, and what `/login` and `/logout` do.
+---
+
+Mogplex talks to AI providers on your behalf. When a session starts, it resolves your
+credentials in this order.
+
+## Resolution order
+
+1. **Environment variable first.** If the provider's env var is set in your shell,
+   Mogplex uses it.
+
+   | Provider   | Environment variable             |
+   | ---------- | -------------------------------- |
+   | Anthropic  | `ANTHROPIC_API_KEY`              |
+   | OpenAI     | `OPENAI_API_KEY`                 |
+   | Google     | `GOOGLE_GENERATIVE_AI_API_KEY`   |
+   | Groq       | `GROQ_API_KEY`                   |
+   | Mistral    | `MISTRAL_API_KEY`                |
+   | DeepSeek   | `DEEPSEEK_API_KEY`               |
+   | xAI        | `XAI_API_KEY`                    |
+   | Cohere     | `COHERE_API_KEY`                 |
+   | Vercel     | `VERCEL_API_TOKEN`               |
+
+2. **Fallback to stored credentials.** If the env var is not set, Mogplex reads
+   `~/.mogplex/auth.json`, which is populated by `/login <provider>`.
+
+3. **No credentials → clear error.** If neither is present, the next turn fails with
+   a message like `ANTHROPIC_API_KEY is required`.
+
+## `/login`
+
+Interactive login for a provider. Stores the key in `~/.mogplex/auth.json` with
+`0600` permissions.
+
+```bash
+mogplex
+> /login anthropic
+```
+
+## `/logout`
+
+Removes the stored key from `~/.mogplex/auth.json`.
+
+Two things to know:
+
+- **If the matching env var is set, the next session still authenticates via the
+  env var.** This is by design — env vars are the source of truth for shell-driven
+  setups.
+- **`/logout` does not force a reload of the current session.** The adapter in
+  memory continues to use whatever key it was constructed with at startup. Start
+  a new session to pick up the change.
+
+## Logging and credential safety
+
+Session logs at `~/.mogplex/logs/<session-id>.jsonl` never contain:
+
+- API keys or OAuth tokens
+- Contents of `~/.mogplex/auth.json`
+
+All data is redacted before it is written to disk.
+
+When `MOGPLEX_DEBUG=1` is set, debug logs also capture stream chunks and tool
+outputs. These may include prompt or tool content, so treat debug logs with the
+same care as your source code.
