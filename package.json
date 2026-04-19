@@ -2,6 +2,7 @@
   "name": "mogplex-docs",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@10.12.4",
   "scripts": {
     "prebuild": "tsx scripts/gen-cli-reference.ts",
     "build": "next build",
