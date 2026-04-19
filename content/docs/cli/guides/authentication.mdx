@@ -1,18 +1,19 @@
 ---
 title: Authentication
-description: How Mogplex resolves provider API keys, and what `/login` and `/logout` do.
+description: How Mogplex resolves stored credentials, when account login is enough, and what `/login` and `/logout` mean in the CLI.
 ---
 
-Mogplex talks to AI providers on your behalf. When a session starts, it resolves your
-credentials in this order.
+Mogplex can run with either direct provider credentials or your Mogplex account.
+When a session starts, it resolves auth in this order.
 
 ## Resolution order
 
-1. **Environment variable first.** If the provider's env var is set in your shell,
+1. **Environment variable first.** If a provider env var is set in your shell,
    Mogplex uses it.
 
    | Provider   | Environment variable             |
    | ---------- | -------------------------------- |
+   | Mogplex    | `MOGPLEX_API_KEY`                |
    | Anthropic  | `ANTHROPIC_API_KEY`              |
    | OpenAI     | `OPENAI_API_KEY`                 |
    | Google     | `GOOGLE_GENERATIVE_AI_API_KEY`   |
@@ -24,19 +25,53 @@ credentials in this order.
    | Vercel     | `VERCEL_API_TOKEN`               |
 
 2. **Fallback to stored credentials.** If the env var is not set, Mogplex reads
-   `~/.mogplex/auth.json`, which is populated by `/login <provider>`.
+   `~/.mogplex/auth.json`.
 
-3. **No credentials → clear error.** If neither is present, the next turn fails with
-   a message like `ANTHROPIC_API_KEY is required`.
+3. **Stored Mogplex account login.** If the only stored credential is your
+   Mogplex browser login, the CLI starts against your account-backed model
+   access and synced catalog.
+
+4. **No credentials → browser login or clear error.** In interactive TTY startup,
+   Mogplex opens browser login automatically. In non-interactive contexts it
+   exits with a clear message telling you to run `mogplex login`.
+
+## Mogplex account login
+
+`mogplex login` opens the webapp login flow and stores a `mogplex` token in
+`~/.mogplex/auth.json`.
+
+That login now does three things for the CLI:
+
+- unlocks your synced model catalog
+- unlocks synced MCP configuration
+- runs prompts through the model access configured for your Mogplex account
+
+If your account does not have model access yet, add an AI Gateway, OpenAI, or
+Anthropic key in **Settings > API Keys**.
 
 ## `/login`
 
-Interactive login for a provider. Stores the key in `~/.mogplex/auth.json` with
-`0600` permissions.
+Use either form:
 
 ```bash
+mogplex login
+# or
+mogplex login mogplex
+```
+
+That opens the browser flow against your Mogplex account.
+
+Inside the TUI, `/login` still works for storing direct provider keys when you
+want the CLI to use a specific provider credential locally.
+
+## Provider keys
+
+Direct provider credentials still work and still take precedence over the
+account login path. This is useful for shell-driven setups and CI.
+
+```bash
+export OPENAI_API_KEY=sk-...
 mogplex
-> /login anthropic
 ```
 
 ## `/logout`
@@ -48,9 +83,8 @@ Two things to know:
 - **If the matching env var is set, the next session still authenticates via the
   env var.** This is by design — env vars are the source of truth for shell-driven
   setups.
-- **`/logout` does not force a reload of the current session.** The adapter in
-  memory continues to use whatever key it was constructed with at startup. Start
-  a new session to pick up the change.
+- **If you log out of Mogplex, synced models and MCP entries disappear on the
+  next startup.**
 
 ## Logging and credential safety
 
