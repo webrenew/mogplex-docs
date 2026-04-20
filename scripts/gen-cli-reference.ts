@@ -257,18 +257,6 @@ const EXTRA_SECTIONS: Readonly<Record<string, string[]>> = {
     "- [Settings](/web/settings) in the web app for shared MCP definitions",
     '- `mogplex exec "/mcp"` for the in-session slash view of configured MCP servers',
   ],
-  resume: [
-    "## Current Implementation Status",
-    "",
-    "The command name is present in the CLI help surface, but the standalone `mogplex resume` path is not wired yet in the current build.",
-    "At the moment, running it can return `Subcommand 'resume' is not yet implemented.`",
-  ],
-  fork: [
-    "## Current Implementation Status",
-    "",
-    "The command name is present in the CLI help surface, but the standalone `mogplex fork` path is not wired yet in the current build.",
-    "At the moment, running it can return `Subcommand 'fork' is not yet implemented.`",
-  ],
 };
 
 function generateMdx(cmd: CommandDoc): string {
