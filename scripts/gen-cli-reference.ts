@@ -36,6 +36,7 @@ interface CommandRegistry {
   names: readonly SubcommandName[];
   hidden: ReadonlySet<SubcommandName>;
   experimental: ReadonlySet<SubcommandName>;
+  implemented: ReadonlySet<SubcommandName>;
   summaries: Readonly<Record<string, string>>;
   aliases: Readonly<Record<string, SubcommandName>>;
 }
@@ -44,10 +45,24 @@ interface CommandRegistry {
 // Parse the CLI source files to extract registry data
 // ---------------------------------------------------------------------------
 
+function extractQuotedSet(content: string, exportName: string): Set<string> {
+  const pattern = new RegExp(
+    `export const ${exportName}[^=]*=\\s*new Set\\(\\[([\\s\\S]*?)\\]\\)`
+  );
+  const match = content.match(pattern);
+  const out = new Set<string>();
+  if (!match?.[1]) return out;
+  for (const m of match[1].matchAll(/"([^"]+)"/g)) {
+    if (m[1]) out.add(m[1]);
+  }
+  return out;
+}
+
 function parseSubcommandsFile(content: string): {
   names: string[];
   hidden: Set<string>;
   experimental: Set<string>;
+  implemented: Set<string>;
   aliases: Record<string, string>;
 } {
   // Extract SUBCOMMAND_NAMES array
@@ -62,29 +77,9 @@ function parseSubcommandsFile(content: string): {
     }
   }
 
-  // Extract HIDDEN_SUBCOMMANDS set
-  const hiddenMatch = content.match(
-    /export const HIDDEN_SUBCOMMANDS[^=]*=\s*new Set\(\[([\s\S]*?)\]\)/
-  );
-  const hidden = new Set<string>();
-  if (hiddenMatch?.[1]) {
-    const matches = hiddenMatch[1].matchAll(/"([^"]+)"/g);
-    for (const m of matches) {
-      if (m[1]) hidden.add(m[1]);
-    }
-  }
-
-  // Extract EXPERIMENTAL_SUBCOMMANDS set
-  const expMatch = content.match(
-    /export const EXPERIMENTAL_SUBCOMMANDS[^=]*=\s*new Set\(\[([\s\S]*?)\]\)/
-  );
-  const experimental = new Set<string>();
-  if (expMatch?.[1]) {
-    const matches = expMatch[1].matchAll(/"([^"]+)"/g);
-    for (const m of matches) {
-      if (m[1]) experimental.add(m[1]);
-    }
-  }
+  const hidden = extractQuotedSet(content, "HIDDEN_SUBCOMMANDS");
+  const experimental = extractQuotedSet(content, "EXPERIMENTAL_SUBCOMMANDS");
+  const implemented = extractQuotedSet(content, "IMPLEMENTED_SUBCOMMANDS");
 
   // Extract SUBCOMMAND_ALIASES
   // Handles both quoted keys ("cloud-tasks") and unquoted keys (e, a)
@@ -105,7 +100,7 @@ function parseSubcommandsFile(content: string): {
     }
   }
 
-  return { names, hidden, experimental, aliases };
+  return { names, hidden, experimental, implemented, aliases };
 }
 
 function parseHelpFile(content: string): Record<string, string> {
@@ -146,10 +141,11 @@ function loadRegistry(): CommandRegistry | null {
   const subcommandsContent = fs.readFileSync(subcommandsPath, "utf-8");
   const helpContent = fs.readFileSync(helpPath, "utf-8");
 
-  const { names, hidden, experimental, aliases } = parseSubcommandsFile(subcommandsContent);
+  const { names, hidden, experimental, implemented, aliases } =
+    parseSubcommandsFile(subcommandsContent);
   const summaries = parseHelpFile(helpContent);
 
-  return { names, hidden, experimental, summaries, aliases };
+  return { names, hidden, experimental, implemented, summaries, aliases };
 }
 
 // ---------------------------------------------------------------------------
@@ -160,10 +156,9 @@ interface CommandDoc {
   name: string;
   summary: string;
   isExperimental: boolean;
+  isImplemented: boolean;
   aliases: string[];
 }
-
-const IMPLEMENTED_SUBCOMMANDS = new Set(["exec", "login", "slash"]);
 
 const EXTRA_SECTIONS: Readonly<Record<string, string[]>> = {
   exec: [
@@ -308,7 +303,10 @@ function generateMdx(cmd: CommandDoc): string {
   lines.push(cmd.summary);
   lines.push("");
 
-  if (!IMPLEMENTED_SUBCOMMANDS.has(cmd.name) && !EXTRA_SECTIONS[cmd.name]) {
+  // "Not yet implemented" notice is driven by the CLI's exported
+  // IMPLEMENTED_SUBCOMMANDS set (packages/cli/src/subcommands.ts), so adding
+  // a dispatcher in the CLI automatically updates the generated docs.
+  if (!cmd.isImplemented && !EXTRA_SECTIONS[cmd.name]) {
     lines.push("## Current Implementation Status");
     lines.push("");
     lines.push(
@@ -436,6 +434,7 @@ structure has changed.
       name,
       summary: registry.summaries[name] ?? "No description available.",
       isExperimental: registry.experimental.has(name),
+      isImplemented: registry.implemented.has(name),
       aliases: aliasesByCommand[name] ?? [],
     };
 
