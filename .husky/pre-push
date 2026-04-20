@@ -1,1 +1,1 @@
-pnpm lint && pnpm exec tsc --noEmit && pnpm build
+pnpm lint && pnpm types:check && pnpm build
