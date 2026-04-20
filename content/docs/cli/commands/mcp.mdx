@@ -15,6 +15,18 @@ mogplex mcp [OPTIONS] [ARGS]
 
 Manage MCP server launchers in config.toml.
 
+## Current Implementation Status
+
+The command name is present in the CLI help surface, but the standalone `mogplex mcp` path is not wired yet in the current build.
+At the moment, running it can return `Subcommand 'mcp' is not yet implemented.`
+
+## Current Alternative
+
+For current MCP visibility, use one of these paths:
+
+- [Settings](/web/settings) in the web app for shared MCP definitions
+- `mogplex exec "/mcp"` for the in-session slash view of configured MCP servers
+
 ## Options
 
 Run `mogplex mcp --help` to see all supported flags.

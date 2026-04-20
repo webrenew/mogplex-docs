@@ -3,29 +3,54 @@ title: Quickstart
 description: Run your first Mogplex task from the terminal with the current CLI surface.
 ---
 
-The fastest path is: install the binary, export a provider key, then start a
-session or run a one-off prompt.
+The fastest path is: install the binary, start `mogplex`, choose how to
+authenticate, and run a task.
 
 ## 1. Install
 
 See [Installation](/cli/installation) for platform-specific commands.
 
-## 2. Set a provider key
+## 2. Start Mogplex
+
+```bash
+mogplex
+```
+
+If you are not authenticated yet and you are in a normal interactive terminal,
+Mogplex prompts you to choose one of these exact startup paths:
+
+- **Sign in with Mogplex** to open the browser flow and reuse your account-backed
+  model access, synced model catalog, and synced MCP definitions
+- **Use an API key** to store a provider key locally for direct CLI use
+
+If you choose **Use an API key**, the current startup picker can store keys for:
+
+- Anthropic
+- OpenAI
+- Google AI
+- Vercel AI Gateway
+- Groq
+- Mistral
+- DeepSeek
+- xAI
+- Cohere
+
+Stored credentials live under `~/.mogplex/auth.json`.
+
+## 3. Alternative: use an environment variable
+
+If you prefer shell-managed credentials, direct provider env vars still work and
+take precedence over stored auth:
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 # or
 export OPENAI_API_KEY=sk-...
-```
-
-Mogplex resolves environment variables first. If you prefer stored credentials,
-see [Authentication](/cli/guides/authentication).
-
-## 3. Start an interactive session
-
-```bash
 mogplex
 ```
+
+That means a shell export can temporarily override whichever provider you
+previously stored through Mogplex login.
 
 Inside a session, the common entry points are:
 
@@ -33,6 +58,14 @@ Inside a session, the common entry points are:
 - `/status` to inspect model, usage, approval mode, and cwd
 - `/model` to switch models
 - `/compact` to summarize and continue with a smaller context window
+
+For the full auth resolution order, see [Authentication](/cli/guides/authentication).
+
+If you want to inspect what Mogplex has already stored locally, run:
+
+```bash
+mogplex login status
+```
 
 ## 4. Run a one-off task
 
@@ -46,6 +79,9 @@ Bare prompts also route to non-interactive exec mode:
 mogplex "summarize this repository"
 ```
 
+Use `mogplex exec` when you want the intent to be explicit in scripts,
+automation, or shell history.
+
 ## 5. Inspect the slash surface
 
 ```bash
@@ -54,3 +90,11 @@ mogplex slash list
 
 That shows the built-in in-session commands plus any project or user commands
 loaded from `.agents/commands/` and `~/.mogplex/commands/`.
+
+From there, the usual next docs are:
+
+- [Authentication](/cli/guides/authentication) for credential precedence and
+  browser sign-in
+- [Exec Mode](/cli/guides/exec-mode) for one-off tasks
+- [Slash Commands](/cli/guides/slash-commands) for project-local command
+  discovery and `/init`

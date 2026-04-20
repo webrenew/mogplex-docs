@@ -1,0 +1,65 @@
+---
+title: Project Workflow
+description: The practical path from GitHub connection to workspace launch and production routing in Mogplex.
+---
+
+This is the cleanest way to approach Mogplex when you are setting up a repo for
+the first time.
+
+## 1. Connect GitHub
+
+Start in [Settings](/web/settings) and connect GitHub.
+
+That gives Mogplex your account identity, but it does not automatically make
+every repo triggerable yet. For triggered work, you also need GitHub App
+coverage.
+
+## 2. Confirm App coverage
+
+Still in [Settings](/web/settings), check the GitHub App coverage section and
+the installation list.
+
+You want to verify:
+
+- the correct account or org is installed
+- the installation lists the repos you care about
+- Mogplex has started syncing covered repos into Projects
+
+If that is not true yet, use the [GitHub App Coverage](/web/guides/github-app-coverage)
+guide before going further.
+
+## 3. Import and organize repos in Projects
+
+Go to [Projects](/web/spaces).
+
+From there you can:
+
+- sync covered repos into the default imported project
+- create additional projects to group repos
+- add sub-project repos for monorepo targets
+- configure repo-specific settings such as sandbox behavior, env sync, and
+  linked Vercel project state
+
+## 4. Open a workspace
+
+From [Projects](/web/spaces), open a workspace session for the repo you want.
+
+If a sandbox is not already running, Mogplex can launch one as part of opening
+the workspace. This is the fastest route into active repo work.
+
+## 5. Choose the routing model
+
+Once the repo is imported, choose the lightest surface that matches the job:
+
+- Use [Triggers](/web/triggers) for one event to one agent
+- Use [Assignments](/web/assignments) for durable repo-to-agent routing such as
+  PR review, CI failure, or cron work
+- Use [Automations](/web/automations) when you need branching, multiple steps,
+  or publish control
+
+## 6. Watch it in Observability
+
+After work starts running, move to [Observability](/web/observability).
+
+That is where you confirm run status, pressure, failures, call details, tool
+usage, and sandbox-linked execution state.

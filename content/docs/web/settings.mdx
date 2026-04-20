@@ -1,18 +1,81 @@
 ---
 title: Settings
-description: Manage connections, provider keys, CLI tokens, models, and synced MCP server definitions.
+description: Manage account connections, provider keys, CLI tokens, models, preferences, and synced MCP definitions.
 ---
 
 Settings is where account- and runtime-level configuration lives in the web app.
 
 ## What lives here
 
-- Account connections such as GitHub, Vercel, and other configured integrations
-- Encrypted provider keys for AI Gateway and supported model providers
-- Model configuration and defaults
-- CLI access tokens for browser-based auth and script access
-- Theme and account preferences
-- A dedicated MCP servers page for synced definitions the CLI can reuse
+- **Account** state for GitHub identity, GitHub App coverage, and optional
+  Personal Vercel linking
+- **Connections** for external REST APIs and MCP servers your agents can use
+- **API Keys** for encrypted provider and AI Gateway keys
+- **CLI Access Tokens** for browser-based CLI sign-in and script access
+- **Preferences** for theme and global defaults
+- **Models** for enabling and choosing the model catalog the product can use
+
+## Account and GitHub coverage
+
+GitHub is the primary account identity for Mogplex.
+
+The page also shows GitHub App coverage, installation metadata, and which repos
+are currently synced under each installation. That is the quickest place to
+confirm whether a repo is merely connected through OAuth or fully covered for
+triggered work.
+
+Personal Vercel is optional. It only matters when you want user-billed
+sandboxes tied to your own Vercel project.
+
+The top of the page is also where Mogplex surfaces the next setup step. In
+practice that usually means one of:
+
+- install or upgrade to the GitHub App
+- sync repositories into Projects
+- link Personal Vercel so a user-billed sandbox can target your own project
+
+## Connections and MCP
+
+Connections cover two categories:
+
+- standard REST API integrations
+- MCP servers, including quick-add presets and custom endpoints
+
+The current quick-add MCP presets include Zapier, Notion, Supabase,
+Browserbase, Sentry, Sanity CMS, and Linear.
+
+From Settings you can:
+
+- add a preset-backed MCP server
+- register a fully custom MCP endpoint or REST connection
+- choose auth mode such as bearer token, API key, OAuth, or basic auth
+- test a connection after setup
+- enable, disable, reconnect, or remove an existing connection
+
+The same MCP definitions can be synced down to the CLI, so this is the cleanest
+place to manage shared servers once instead of configuring every local machine
+by hand.
+
+## Provider keys and CLI tokens
+
+The hosted settings surface distinguishes between provider credentials and CLI
+tokens:
+
+- **API Keys** are encrypted provider keys for AI Gateway, OpenAI, and
+  Anthropic, and the page can verify whether the stored key is valid
+- **CLI Access Tokens** are personal access tokens for Mogplex itself, with a
+  name, optional expiration, last-used metadata, and revoke controls
+
+CLI tokens are shown once at creation time, then managed by prefix afterward.
+
+## Preferences and models
+
+Settings also owns the user-level defaults that affect both the hosted product
+and CLI sync paths:
+
+- theme preference
+- default model selection
+- enabled hosted model catalog under the Models section
 
 ## Why it matters
 

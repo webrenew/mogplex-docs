@@ -1,28 +1,61 @@
 ---
 title: Overview
-description: The Mogplex web app for projects, agents, automations, observability, settings, installations, and the hosted API.
+description: The Mogplex web app for projects, agents, automations, triggers, observability, settings, installations, and the hosted API.
 ---
 
 The web app is the shared control plane for Mogplex.
 
-Use it to sync repositories, shape reusable agents, build GitHub-triggered
-automations, inspect runs and model calls, and manage the settings the CLI can
-reuse.
+Use it to connect GitHub, import repositories, define reusable agents, build
+GitHub-driven workflows, inspect runtime activity, and manage the credentials
+and connections the CLI can reuse.
 
 <Cards>
-  <Card title="Projects" href="/web/projects" />
+  <Card title="Projects" href="/web/spaces" />
   <Card title="Agents" href="/web/agents" />
   <Card title="Automations" href="/web/automations" />
+  <Card title="Triggers" href="/web/triggers" />
+  <Card title="Assignments" href="/web/assignments" />
   <Card title="Observability" href="/web/observability" />
   <Card title="Settings" href="/web/settings" />
   <Card title="Installations" href="/web/installations" />
+  <Card title="Guides" href="/web/guides" />
   <Card title="API" href="/web/api" />
 </Cards>
 
 ## Current surface
 
-- **Projects** imports repos, organizes them into workspaces, and launches sandboxes.
-- **Agents** manages reusable agent definitions plus shared skills, rules, and context.
-- **Automations** is the flow-builder surface for GitHub-triggered work.
-- **Observability** tracks runs, pressure, failures, and model/tool calls.
-- **Settings** manages connections, provider keys, CLI tokens, models, and MCP servers.
+- **Projects** lives at `/spaces`. It is where repository import, project
+  organization, sandbox launch, and workspace opening happen.
+- **Agents** lives under `/agents/*` and manages the reusable agent roster plus
+  shared skills, rules, and context.
+- **Automations** at `/automations` is the canvas builder for multi-step
+  GitHub-triggered workflows.
+- **Triggers** at `/triggers` is the lighter-weight event-to-agent router for
+  direct GitHub webhook handling.
+- **Assignments** at `/assignments` binds repos to agents for repeatable review,
+  cron, and triage work.
+- **Observability** tracks runs, pressure, failures, model calls, tool usage,
+  and sandbox-linked activity.
+- **Settings** manages account connections, provider keys, CLI tokens, models,
+  preferences, and synced MCP definitions.
+
+## Legacy routes
+
+Two older dashboard routes still exist, but they now forward to the current
+surfaces:
+
+- `/flows` redirects to `/automations`
+- `/library` redirects to agent libraries or model settings, depending on tab
+
+## Start with the workflow
+
+If you are setting up Mogplex for a repo for the first time, the fastest path
+through the product is:
+
+1. [Settings](/web/settings) to connect GitHub and confirm App coverage
+2. [Projects](/web/spaces) to sync repos and open a workspace
+3. [Triggers](/web/triggers), [Assignments](/web/assignments), or
+   [Automations](/web/automations) depending on how much routing you need
+4. [Observability](/web/observability) once work is running
+
+For the operational walkthrough, use [Web Guides](/web/guides).

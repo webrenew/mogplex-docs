@@ -15,6 +15,28 @@ mogplex login [OPTIONS] [ARGS]
 
 Authenticate (browser sign-in or API key).
 
+## Current Behavior
+
+The current build supports three top-level login paths:
+
+- `mogplex login` opens the same interactive auth chooser as bare `mogplex`
+- `mogplex login mogplex` routes to the same chooser
+- `mogplex login status` prints a safe summary of stored credentials without revealing secret material
+
+## What It Stores
+
+Browser sign-in stores a Mogplex token in `~/.mogplex/auth.json`.
+API-key login stores the selected provider credential there instead.
+
+## Common Uses
+
+```bash
+mogplex login
+mogplex login status
+```
+
+For the full credential precedence rules, use the [Authentication guide](/cli/guides/authentication).
+
 ## Options
 
 Run `mogplex login --help` to see all supported flags.

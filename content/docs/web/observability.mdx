@@ -1,6 +1,6 @@
 ---
 title: Observability
-description: Inspect automation runs, live calls, failures, and sandbox-linked execution details.
+description: Inspect runs, live calls, failures, pressure, and sandbox-linked execution details.
 ---
 
 Observability is the runtime view for Mogplex work that has already started.
@@ -8,14 +8,28 @@ Observability is the runtime view for Mogplex work that has already started.
 It is designed to let you start with the run, then drill down into pressure,
 failures, model calls, tool usage, and sandbox health.
 
+## Page structure
+
+The current page is organized in this order:
+
+1. summary metrics
+2. live interactive calls
+3. runs
+4. pressure
+5. automation failures
+6. calls
+
+That structure mirrors the intended debugging flow: confirm the broad signal
+first, then narrow down to a specific run or call.
+
 ## What you can inspect
 
 - Summary metrics for the current date range
-- Live interactive calls
-- Automation runs and job queues
+- Live interactive calls that are still in flight
+- Job runs, queue state, and recent run history
 - Pressure events and automation failures
-- Model calls and tool activity
-- Sandbox-linked call details and health views
+- Model calls, tool activity, and call-level drilldown
+- Sandbox-linked call details and sandbox health views
 
 ## Operational actions
 
@@ -23,3 +37,25 @@ From the runs view you can repair, requeue, or cancel supported jobs.
 
 Filters let you narrow by repo, sandbox, selected call, and date range so you
 can move from a broad failure signal to a specific execution.
+
+The current date-range presets in the page include `1h`, `today`, `7d`, and
+`30d`, with filter state shared across the relevant sections.
+
+## Sandbox drilldown
+
+Observability is also the bridge back into sandbox-specific investigation.
+
+When a call is linked to sandbox context, the page can route you into sandbox
+health for the related repo and preview environment instead of leaving you stuck
+at the call row.
+
+## Recommended workflow
+
+1. Start with the summary and runs sections to confirm what is failing.
+2. Check pressure and automation failures to understand why work was deferred or
+   blocked.
+3. Drill into calls to inspect model output, tool usage, and linked sandbox
+   state.
+
+Observability is where [Triggers](/web/triggers), [Assignments](/web/assignments),
+and [Automations](/web/automations) converge once something is already running.

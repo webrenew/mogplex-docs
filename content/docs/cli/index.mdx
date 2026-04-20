@@ -18,8 +18,30 @@ workflows, local MCP configuration, and repo-scoped conventions like
 
 ## Current surface
 
-- `mogplex` launches the interactive terminal UI.
+- `mogplex` launches the interactive terminal UI and, if needed, prompts you to
+  sign in or store an API key before the session starts.
 - `mogplex exec "<prompt>"` runs a single non-interactive task.
 - `mogplex "<prompt>"` also works as a shortcut for a one-off run.
-- `mogplex slash list` shows the in-session slash command surface.
-- `~/.mogplex/config.toml` and project files like `AGENTS.md` shape runtime behavior.
+- `mogplex slash list` shows the discovered slash-command registry for the
+  current environment.
+- `~/.mogplex/config.toml`, `~/.mogplex/auth.json`, and project files like
+  `AGENTS.md` shape runtime behavior.
+
+## What the CLI is good at
+
+- repo-in-place work from your terminal
+- one-off review or edit tasks without opening the browser
+- local slash-command workflows
+- reusing models, MCP definitions, and tokens synced from your Mogplex account
+
+## Start with these workflows
+
+- [Quickstart](/cli/quickstart) for the first run
+- [Exec Mode](/cli/guides/exec-mode) for shell-driven one-off tasks
+- [Slash Commands](/cli/guides/slash-commands) for local control actions and
+  custom command discovery
+- [Authentication](/cli/guides/authentication) for credential precedence and
+  sign-in behavior
+
+If you want shared configuration, repo import, or workflow authoring, start in
+the [web app](/web).

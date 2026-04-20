@@ -1,10 +1,39 @@
 ---
 title: Flows
-description: Flow authoring currently lives in Automations.
+description: The legacy /flows route now redirects to /automations.
 ---
 
-The legacy `Flows` route now resolves to the Automations surface.
+The legacy `/flows` route now redirects to `/automations`.
 
-Use [Automations](/web/automations) to start from a GitHub event, chain agents
-sequentially or in parallel, add notes on the canvas, and publish the workflow
-to a repo.
+Use [Automations](/web/automations) for the current workflow builder.
+
+## Why the route changed
+
+The original flow builder grew into a broader automation surface, so the route
+now reflects the live product language instead of the earlier internal naming.
+
+## What moved with it
+
+Everything that used to belong to the flow-builder path now lives in the
+Automations surface, including:
+
+- GitHub event entrypoints
+- agent steps
+- condition nodes
+- parallel split and join nodes
+- delay nodes
+- notes and workflow description on the canvas
+- draft editing, publish, and activation flow
+- recent automation runs
+- assistant-guided workflow suggestions
+
+## Current mental model
+
+Use [Automations](/web/automations) when one GitHub event should fan into a
+multi-step workflow with branching or staged execution.
+
+Use [Triggers](/web/triggers) when you only need a direct event-to-agent wakeup
+without the automation canvas.
+
+This page stays in place so older bookmarks and links still land on the current
+documentation path.

@@ -15,6 +15,19 @@ mogplex review [OPTIONS] [ARGS]
 
 Non-interactive code review against a base ref.
 
+## Current Implementation Status
+
+The command name is present in the CLI help surface, but the standalone `mogplex review` path is not wired yet in the current build.
+At the moment, running it can return `Subcommand 'review' is not yet implemented.`
+
+## Current Alternative
+
+Use `exec` with an explicit review prompt instead:
+
+```bash
+mogplex exec "review the staged diff for regressions"
+```
+
 ## Options
 
 Run `mogplex review --help` to see all supported flags.

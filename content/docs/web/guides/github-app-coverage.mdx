@@ -1,0 +1,58 @@
+---
+title: GitHub App Coverage
+description: Understand the difference between GitHub OAuth and GitHub App coverage, and verify why a repo is or is not triggerable.
+---
+
+Most confusion in Mogplex setup comes from mixing up two different GitHub
+states:
+
+- **GitHub connected** through OAuth
+- **GitHub App installed** for the account or org that owns the repo
+
+They are related, but they do different jobs.
+
+## OAuth vs App coverage
+
+GitHub OAuth gives Mogplex your user identity and basic account connection.
+
+GitHub App coverage determines which repos Mogplex can treat as triggerable for
+webhook-backed work such as [Triggers](/web/triggers) and
+[Automations](/web/automations).
+
+That means a repo can be visible in [Projects](/web/spaces) but still not be
+usable for triggered routing if the App is not installed for that owner.
+
+## Common symptoms of missing App coverage
+
+- Triggers is empty even though GitHub is connected
+- Automations cannot find the installation or repo you expect
+- A repo appears in Projects, but GitHub-backed routing is unavailable
+- Settings shows GitHub connected, but installation coverage is missing or for
+  the wrong owner
+
+## How to verify coverage
+
+Start in [Settings](/web/settings).
+
+Check the GitHub App coverage and installation area. You want to verify:
+
+- the installation belongs to the correct account or org
+- the repo count and synced repo count look reasonable
+- the repo owner you care about appears under an installation
+
+If installation metadata is available, use the manage link back to GitHub to
+confirm the App is installed where you think it is.
+
+## What to do next
+
+If GitHub is connected but the App is not installed for the repo owner:
+
+1. Install the Mogplex GitHub App for that owner
+2. Return to [Settings](/web/settings) and refresh the installation state
+3. Go back to [Projects](/web/spaces) and sync repos again
+4. Re-check [Triggers](/web/triggers) or [Automations](/web/automations)
+
+## Rule of thumb
+
+If the question is "why can Mogplex see this repo but not route webhook work
+for it?", the answer is usually App coverage, not OAuth.

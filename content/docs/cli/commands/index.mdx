@@ -10,5 +10,36 @@ Each page below covers what the command does and its aliases. For the full flag
 list, run `mogplex <command> --help` — that output is the source of truth and
 reflects whichever CLI version you have installed.
 
+## Start here
+
+The most important entrypoints for day-to-day use are:
+
+- `mogplex` for an interactive session
+- `mogplex exec "<prompt>"` for a one-off task
+- `mogplex login` and `mogplex login status` for stored credentials
+- `mogplex slash list` for the slash-command registry
+
+## Current state of the command surface
+
+The help output currently lists more command names than the CLI has fully wired
+as standalone subcommands.
+
+In the current build, the most established standalone paths are `exec`,
+`login`, and `slash`. Other command pages are still documented here so the
+reference matches the shipped help surface, but some of them are reserved names
+that still return a not-yet-implemented message when invoked directly.
+
+## What this reference is for
+
+Use the command pages when you already know the command you want and need the
+canonical name, aliases, or help entrypoint.
+
 For interactive workflows that happen inside a live session, use
 `mogplex slash list` and the [Quickstart](/cli/quickstart).
+
+For auth behavior and credential precedence, use the
+[Authentication guide](/cli/guides/authentication).
+
+For one-off scripting and slash execution, use the
+[Exec Mode guide](/cli/guides/exec-mode) and
+[Slash Commands guide](/cli/guides/slash-commands).

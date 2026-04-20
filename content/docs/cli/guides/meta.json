@@ -1,4 +1,4 @@
 {
   "title": "Guides",
-  "pages": ["index", "authentication"]
+  "pages": ["index", "authentication", "exec-mode", "slash-commands", "project-commands"]
 }

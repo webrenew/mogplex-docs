@@ -1,0 +1,48 @@
+---
+title: Library
+description: The legacy /library route now forwards to the current agent-library and model surfaces.
+---
+
+The legacy `/library` route still exists in the app, but it no longer owns a
+single standalone surface.
+
+It now forwards to one of these current destinations:
+
+- `/agents/skills` by default
+- `/agents/rules` when the old link asked for the rules tab
+- `/agents/context` when the old link asked for the context tab
+- `/settings#models` when the old link asked for the models tab
+
+Use those pages for the current product behavior.
+
+## Current mapping
+
+If you are cleaning up old bookmarks or internal links, this is the mapping the
+app uses today:
+
+- `/library` -> skills
+- `/library?tab=rules` -> rules
+- `/library?tab=context` -> context
+- `/library?tab=models` -> models in Settings
+
+## Why the route still exists
+
+Older navigation and saved links used `/library` as the entrypoint for shared
+skills, rules, context, and models.
+
+Mogplex now splits that content between the [Agents](/web/agents) area and
+[Settings](/web/settings), but the redirect remains in place so existing links
+do not break.
+
+## How to think about it now
+
+The old Library concept has been split by job:
+
+- use [Agents](/web/agents) for reusable behavior such as skills, rules, and
+  shared context
+- use [Settings](/web/settings) for account-level model configuration and
+  defaults
+
+That split matches how the product works now: agent building lives with the
+agent roster, while model enablement and default selection live with the rest of
+your hosted configuration.

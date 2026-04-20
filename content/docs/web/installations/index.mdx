@@ -1,10 +1,15 @@
 ---
 title: Installations
-description: GitHub installations, repo sync, and the connection between imported repos and automation coverage.
+description: GitHub App installations, repo sync, and the connection between imported repos and automation coverage.
 ---
 
 Installations determine which GitHub repositories Mogplex can see and which
 repos are eligible for app-backed automation features.
+
+There is not a separate top-level app route called `/installations` today. This
+docs page describes the GitHub App installation state surfaced through
+[Settings](/web/settings) and consumed by [Projects](/web/spaces),
+[Triggers](/web/triggers), and [Automations](/web/automations).
 
 ## What an installation unlocks
 
@@ -19,8 +24,28 @@ GitHub OAuth can be enough to connect an account and discover repositories, but
 GitHub App coverage is what unlocks trigger-backed automation and related repo
 actions.
 
+## What the app shows
+
+Inside [Settings](/web/settings), each installation shows:
+
+- the account or org it belongs to
+- the installation scope
+- how many repos GitHub reports under that installation
+- how many repos Mogplex has already synced
+- a direct manage link back to GitHub when metadata is available
+- the synced repos Mogplex currently associates with that installation
+
+If a repo appears in [Projects](/web/spaces) but is still not triggerable, the
+usual cause is missing App coverage for that owner.
+
+If cached installation state is missing, Mogplex can also reconcile the user's
+GitHub installations again and hydrate the metadata from GitHub before
+rendering the Settings view.
+
 ## Where this shows up in the app
 
-- [Projects](/web/projects) shows the imported repos and workspaces
+- [Projects](/web/spaces) shows the imported repos and workspaces
 - [Automations](/web/automations) uses installation-backed repos for GitHub events
 - [Settings](/web/settings) is where account connections and related setup live
+- [Triggers](/web/triggers) only offers installations that are actually available
+  for webhook-backed routing

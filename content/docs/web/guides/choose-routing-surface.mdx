@@ -1,0 +1,67 @@
+---
+title: Choose the Right Routing Surface
+description: Decide when to use Triggers, Assignments, or Automations so the product stays simple instead of overbuilt.
+---
+
+Mogplex has three routing surfaces on purpose:
+
+- [Triggers](/web/triggers)
+- [Assignments](/web/assignments)
+- [Automations](/web/automations)
+
+They overlap a little, but they are not the same tool.
+
+## Use Triggers when the rule is event -> agent
+
+Pick [Triggers](/web/triggers) when one GitHub event should wake one agent with
+minimal ceremony.
+
+Good examples:
+
+- PR opened -> review agent
+- CI failure -> triage agent
+- `@mention` -> default repo assistant
+
+Use Triggers when you want the smallest routing surface that still works.
+
+## Use Assignments when the rule is repo -> agent
+
+Pick [Assignments](/web/assignments) when the repo is the durable unit of
+routing and you want recurring operational behavior attached to that repo.
+
+Good examples:
+
+- one standing PR review agent for a repo
+- a cron refactor or maintenance job
+- a repo-specific issue triage or CI failure policy
+
+Assignments are about durable responsibility, not just webhook entrypoints.
+
+## Use Automations when the rule is workflow -> graph
+
+Pick [Automations](/web/automations) when one event should lead to multiple
+steps, branches, or gated decisions.
+
+Good examples:
+
+- split a PR event into two parallel review agents and join the result
+- run one agent only when a condition on the event payload is true
+- insert a delay before a follow-up step
+- keep a draft workflow separate from the currently published version
+
+If you need branching, publish control, or a workflow that spans multiple
+steps, use Automations.
+
+## Simple decision rule
+
+Use the lightest surface that fits:
+
+1. one event to one agent: **Triggers**
+2. one repo to one repeatable responsibility: **Assignments**
+3. one event to a multi-step graph: **Automations**
+
+## After routing starts
+
+Once work is running, switch to [Observability](/web/observability).
+
+That is the common runtime surface for all three routing models.

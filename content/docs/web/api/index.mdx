@@ -1,27 +1,79 @@
 ---
 title: API
-description: The hosted control-plane API that backs the Mogplex web app.
+description: The hosted control-plane API behind the Mogplex web app.
 ---
 
-The hosted API mirrors the current web app control plane.
+The hosted API is Mogplex's control plane.
 
-It is the surface behind Projects, Agents, Automations, Settings, sandboxes,
-and Observability.
+It is the surface the web app talks to for projects, repos, agents,
+assignments, automations, sandboxes, settings, and runtime inspection.
 
-## Current route groups
+This matters because it is **not** positioned like a versioned public platform
+API yet. Route shape and response details follow the product, so treat it as the
+live application surface behind Mogplex rather than a long-term compatibility
+contract.
 
-- `/api/agents` and `/api/agent-categories`
-- `/api/repos`, `/api/workspaces`, and `/api/connections`
-- `/api/flows`, `/api/triggers`, and `/api/assignments`
-- `/api/sandbox` and `/api/observability`
-- `/api/models`, `/api/settings`, and `/api/mcp-servers`
-- `/api/chat`, `/api/conversations`, `/api/commands`, `/api/skills`, and `/api/memories`
+## Auth model
 
-## How to think about it
+The current auth resolution order is:
 
-Use the web app when you want the full product surface and discovery UX.
-Use the API when you are extending that control plane from internal tools,
-scripts, or adjacent product code.
+1. `Authorization: Bearer mog_...` personal access token
+2. internal Playwright auth headers used in end-to-end testing
+3. browser session auth from the signed-in web app
 
-Browser-based CLI auth approval is handled separately by the Mogplex app's
-`/cli-auth` route, not by the docs site.
+That means:
+
+- the web app normally authenticates with the signed-in browser session
+- the CLI and internal scripts can authenticate with a Mogplex personal access
+  token
+- a route that calls the shared auth helpers can usually serve both browser and
+  CLI callers without a separate auth path
+
+## Route families
+
+Current route groups map closely to product areas:
+
+- **Account and configuration**: `/api/auth/*`, `/api/models`, `/api/settings`
+- **Projects and repos**: `/api/repos`, `/api/workspaces`, `/api/connections`
+- **Agent library**: `/api/agents`, `/api/agent-categories`, `/api/skills`
+- **Routing surfaces**: `/api/flows`, `/api/triggers`, `/api/assignments`
+- **Conversations and agent work**: `/api/chat`, `/api/conversations`,
+  `/api/commands`, `/api/memories`
+- **Runtime and operations**: `/api/sandbox`, `/api/observability/*`
+- **GitHub coverage and sync**: `/api/github/installations`,
+  `/api/github/repos`, and related helpers
+- **MCP configuration**: `/api/mcp-servers`
+
+## Web and CLI crossover
+
+A few routes matter directly to both surfaces:
+
+- `/api/settings` is the shared settings endpoint for user-level preferences
+  such as the default model and theme
+- `/api/mcp-servers` returns the web app shape by default, and
+  `/api/mcp-servers?format=cli` returns the CLI-oriented representation
+- `/api/auth/user` returns the signed-in user's app-aware state, including GitHub
+  coverage and linked-platform capability data the product uses during setup
+
+The browser-based CLI login handoff runs through `/cli-auth`.
+
+That page validates the localhost callback requested by the CLI, asks the user
+for consent inside the signed-in web app, and posts the resulting token back to
+the CLI listener. The normal browser login entrypoint is `/login`.
+
+## Practical guidance
+
+Prefer the web app when you want the full Mogplex workflow and the product's
+setup guidance.
+
+Reach for the hosted API when you are:
+
+- extending Mogplex from internal tooling
+- wiring the CLI to hosted state
+- building adjacent product code that should behave like the web app
+- inspecting the current control-plane surface while implementing or debugging a
+  feature
+
+If you need a stable workflow surface today, document the specific routes you
+depend on in your own integration, because the hosted API is still evolving with
+the product.

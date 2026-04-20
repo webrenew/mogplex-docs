@@ -36,6 +36,7 @@ interface CommandRegistry {
   names: readonly SubcommandName[];
   hidden: ReadonlySet<SubcommandName>;
   experimental: ReadonlySet<SubcommandName>;
+  implemented: ReadonlySet<SubcommandName>;
   summaries: Readonly<Record<string, string>>;
   aliases: Readonly<Record<string, SubcommandName>>;
 }
@@ -44,10 +45,24 @@ interface CommandRegistry {
 // Parse the CLI source files to extract registry data
 // ---------------------------------------------------------------------------
 
+function extractQuotedSet(content: string, exportName: string): Set<string> {
+  const pattern = new RegExp(
+    `export const ${exportName}[^=]*=\\s*new Set\\(\\[([\\s\\S]*?)\\]\\)`
+  );
+  const match = content.match(pattern);
+  const out = new Set<string>();
+  if (!match?.[1]) return out;
+  for (const m of match[1].matchAll(/"([^"]+)"/g)) {
+    if (m[1]) out.add(m[1]);
+  }
+  return out;
+}
+
 function parseSubcommandsFile(content: string): {
   names: string[];
   hidden: Set<string>;
   experimental: Set<string>;
+  implemented: Set<string>;
   aliases: Record<string, string>;
 } {
   // Extract SUBCOMMAND_NAMES array
@@ -62,29 +77,9 @@ function parseSubcommandsFile(content: string): {
     }
   }
 
-  // Extract HIDDEN_SUBCOMMANDS set
-  const hiddenMatch = content.match(
-    /export const HIDDEN_SUBCOMMANDS[^=]*=\s*new Set\(\[([\s\S]*?)\]\)/
-  );
-  const hidden = new Set<string>();
-  if (hiddenMatch?.[1]) {
-    const matches = hiddenMatch[1].matchAll(/"([^"]+)"/g);
-    for (const m of matches) {
-      if (m[1]) hidden.add(m[1]);
-    }
-  }
-
-  // Extract EXPERIMENTAL_SUBCOMMANDS set
-  const expMatch = content.match(
-    /export const EXPERIMENTAL_SUBCOMMANDS[^=]*=\s*new Set\(\[([\s\S]*?)\]\)/
-  );
-  const experimental = new Set<string>();
-  if (expMatch?.[1]) {
-    const matches = expMatch[1].matchAll(/"([^"]+)"/g);
-    for (const m of matches) {
-      if (m[1]) experimental.add(m[1]);
-    }
-  }
+  const hidden = extractQuotedSet(content, "HIDDEN_SUBCOMMANDS");
+  const experimental = extractQuotedSet(content, "EXPERIMENTAL_SUBCOMMANDS");
+  const implemented = extractQuotedSet(content, "IMPLEMENTED_SUBCOMMANDS");
 
   // Extract SUBCOMMAND_ALIASES
   // Handles both quoted keys ("cloud-tasks") and unquoted keys (e, a)
@@ -105,7 +100,7 @@ function parseSubcommandsFile(content: string): {
     }
   }
 
-  return { names, hidden, experimental, aliases };
+  return { names, hidden, experimental, implemented, aliases };
 }
 
 function parseHelpFile(content: string): Record<string, string> {
@@ -146,10 +141,11 @@ function loadRegistry(): CommandRegistry | null {
   const subcommandsContent = fs.readFileSync(subcommandsPath, "utf-8");
   const helpContent = fs.readFileSync(helpPath, "utf-8");
 
-  const { names, hidden, experimental, aliases } = parseSubcommandsFile(subcommandsContent);
+  const { names, hidden, experimental, implemented, aliases } =
+    parseSubcommandsFile(subcommandsContent);
   const summaries = parseHelpFile(helpContent);
 
-  return { names, hidden, experimental, summaries, aliases };
+  return { names, hidden, experimental, implemented, summaries, aliases };
 }
 
 // ---------------------------------------------------------------------------
@@ -160,8 +156,120 @@ interface CommandDoc {
   name: string;
   summary: string;
   isExperimental: boolean;
+  isImplemented: boolean;
   aliases: string[];
 }
+
+const EXTRA_SECTIONS: Readonly<Record<string, string[]>> = {
+  exec: [
+    "## How It Works",
+    "",
+    "`mogplex exec` runs one non-interactive task and exits with the engine's final exit code.",
+    "The prompt is built from the remaining arguments after `exec`.",
+    "",
+    "If the prompt starts with `/`, the CLI routes it through the slash-command registry instead of the normal engine prompt path.",
+    "",
+    "## Common Uses",
+    "",
+    "```bash",
+    'mogplex exec "review the staged diff for regressions"',
+    'mogplex exec "summarize the repo structure and likely entrypoints"',
+    'mogplex exec "/status"',
+    "```",
+    "",
+    "## Related Entry Points",
+    "",
+    "- `mogplex \"<prompt>\"` is a shortcut for a one-off non-interactive run without spelling `exec`.",
+    "- `mogplex` without a prompt launches the interactive terminal UI.",
+    "",
+    "## Output",
+    "",
+    "For automation or scripting, combine `exec` with the global output flags such as `--output json`, `--json`, or `--jsonl`.",
+  ],
+  login: [
+    "## Current Behavior",
+    "",
+    "The current build supports three top-level login paths:",
+    "",
+    "- `mogplex login` opens the same interactive auth chooser as bare `mogplex`",
+    "- `mogplex login mogplex` routes to the same chooser",
+    "- `mogplex login status` prints a safe summary of stored credentials without revealing secret material",
+    "",
+    "## What It Stores",
+    "",
+    "Browser sign-in stores a Mogplex token in `~/.mogplex/auth.json`.",
+    "API-key login stores the selected provider credential there instead.",
+    "",
+    "## Common Uses",
+    "",
+    "```bash",
+    "mogplex login",
+    "mogplex login status",
+    "```",
+    "",
+    "For the full credential precedence rules, use the [Authentication guide](/cli/guides/authentication).",
+  ],
+  slash: [
+    "## Current Behavior",
+    "",
+    "As a standalone subcommand, `mogplex slash` currently supports listing the slash registry.",
+    "If you omit the nested subcommand, it behaves the same as `mogplex slash list`.",
+    "",
+    "## Common Uses",
+    "",
+    "```bash",
+    "mogplex slash list",
+    "mogplex slash list --json",
+    'mogplex exec "/status"',
+    'mogplex exec "/mcp"',
+    "```",
+    "",
+    "## Important Distinction",
+    "",
+    "- Use `mogplex slash list` to inspect the registry from the shell.",
+    "- Use `mogplex exec \"/...\"` to run a slash command non-interactively.",
+    "- Use a live `mogplex` session when you want the normal interactive slash workflow.",
+  ],
+  review: [
+    "## Current Implementation Status",
+    "",
+    "The command name is present in the CLI help surface, but the standalone `mogplex review` path is not wired yet in the current build.",
+    "At the moment, running it can return `Subcommand 'review' is not yet implemented.`",
+    "",
+    "## Current Alternative",
+    "",
+    "Use `exec` with an explicit review prompt instead:",
+    "",
+    "```bash",
+    'mogplex exec "review the staged diff for regressions"',
+    "```",
+  ],
+  mcp: [
+    "## Current Implementation Status",
+    "",
+    "The command name is present in the CLI help surface, but the standalone `mogplex mcp` path is not wired yet in the current build.",
+    "At the moment, running it can return `Subcommand 'mcp' is not yet implemented.`",
+    "",
+    "## Current Alternative",
+    "",
+    "For current MCP visibility, use one of these paths:",
+    "",
+    "- [Settings](/web/settings) in the web app for shared MCP definitions",
+    '- `mogplex exec "/mcp"` for the in-session slash view of configured MCP servers',
+  ],
+  resume: [
+    "## Current Implementation Status",
+    "",
+    "The command name is present in the CLI help surface, but the standalone `mogplex resume` path is not wired yet in the current build.",
+    "At the moment, running it can return `Subcommand 'resume' is not yet implemented.`",
+  ],
+  fork: [
+    "## Current Implementation Status",
+    "",
+    "The command name is present in the CLI help surface, but the standalone `mogplex fork` path is not wired yet in the current build.",
+    "At the moment, running it can return `Subcommand 'fork' is not yet implemented.`",
+  ],
+};
 
 function generateMdx(cmd: CommandDoc): string {
   const lines: string[] = [];
@@ -195,6 +303,21 @@ function generateMdx(cmd: CommandDoc): string {
   lines.push(cmd.summary);
   lines.push("");
 
+  // "Not yet implemented" notice is driven by the CLI's exported
+  // IMPLEMENTED_SUBCOMMANDS set (packages/cli/src/subcommands.ts), so adding
+  // a dispatcher in the CLI automatically updates the generated docs.
+  if (!cmd.isImplemented && !EXTRA_SECTIONS[cmd.name]) {
+    lines.push("## Current Implementation Status");
+    lines.push("");
+    lines.push(
+      `The command name is present in the CLI help surface, but the standalone \`mogplex ${cmd.name}\` path is not wired yet in the current build.`,
+    );
+    lines.push(
+      `At the moment, running it can return \`Subcommand '${cmd.name}' is not yet implemented.\``,
+    );
+    lines.push("");
+  }
+
   // Aliases
   if (cmd.aliases.length > 0) {
     lines.push("## Aliases");
@@ -202,6 +325,12 @@ function generateMdx(cmd: CommandDoc): string {
     for (const alias of cmd.aliases) {
       lines.push(`- \`${alias}\``);
     }
+    lines.push("");
+  }
+
+  const extraSections = EXTRA_SECTIONS[cmd.name];
+  if (extraSections) {
+    lines.push(...extraSections);
     lines.push("");
   }
 
@@ -305,6 +434,7 @@ structure has changed.
       name,
       summary: registry.summaries[name] ?? "No description available.",
       isExperimental: registry.experimental.has(name),
+      isImplemented: registry.implemented.has(name),
       aliases: aliasesByCommand[name] ?? [],
     };
 

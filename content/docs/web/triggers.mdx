@@ -1,0 +1,74 @@
+---
+title: Triggers
+description: Route GitHub webhook events directly to an agent without building a full workflow.
+---
+
+Triggers are the lightweight routing surface for GitHub events.
+
+They are useful when one event should wake one agent, without the extra canvas
+structure of [Automations](/web/automations).
+
+## What you can configure
+
+- A GitHub App installation
+- An event type
+- The agent that should respond
+- Whether the trigger is enabled
+- Whether an `@mention` trigger should be treated as the default for that
+  installation
+
+## Supported events
+
+Current trigger events include:
+
+- `@mention`
+- pull request opened
+- pull request comment
+- issue opened
+- issue comment
+- push
+- CI failure
+
+## What the page actually does
+
+Triggers is installation-scoped rather than repo-scoped.
+
+When you create one, the form asks for:
+
+1. the GitHub App installation to listen on
+2. the event type
+3. the agent to wake up
+
+Existing triggers are then grouped by installation and show live operating
+signals, including:
+
+- enabled or disabled state
+- last run status and timestamp
+- failed, running, pending, suppressed, and deferred counts
+- default status for bare `@mogplex` mentions on mention triggers
+
+The page is designed for fast routing changes, so enable/disable and delete
+controls are in-line.
+
+## Requirements
+
+Triggers only work for repos covered by an installed GitHub App.
+
+GitHub OAuth on its own is not enough. If the Triggers page is empty, check
+[Installations](/web/installations) and confirm the correct account or org has
+the Mogplex GitHub App installed.
+
+The empty state in the product is explicit about this. It will tell you when
+you have synced repos but still do not have any GitHub App installations
+available for webhook-backed routing.
+
+## When to use Triggers
+
+Use Triggers when you want a direct event-to-agent mapping, for example:
+
+- wake a review agent when a pull request opens
+- wake a triage agent when a CI run fails
+- route `@mention` events to a default repo assistant
+
+If you need conditions, parallel branches, delays, or publish control, move up
+to [Automations](/web/automations).

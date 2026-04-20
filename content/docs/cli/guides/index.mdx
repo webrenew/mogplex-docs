@@ -3,6 +3,31 @@ title: Guides
 description: Deep dives into how the Mogplex CLI works.
 ---
 
+Use these pages when you want behavior and decision-making, not just syntax.
+
 <Cards>
-  <Card title="Authentication" href="/cli/guides/authentication" />
+  <Card
+    title="Authentication"
+    href="/cli/guides/authentication"
+    description="Credential precedence, browser sign-in, stored keys, and what `mogplex`, `mogplex login`, `/login`, and `/logout` actually do."
+  />
+  <Card
+    title="Exec Mode"
+    href="/cli/guides/exec-mode"
+    description="Use `mogplex exec` and bare prompt invocation for one-off tasks, scripts, and structured output."
+  />
+  <Card
+    title="Slash Commands"
+    href="/cli/guides/slash-commands"
+    description="Inspect the slash registry, run slash commands from exec mode, and understand project/user command discovery."
+  />
+  <Card
+    title="Project Commands"
+    href="/cli/guides/project-commands"
+    description="Use AGENTS.md, .agents/commands, and /init to make Mogplex repo-aware instead of generic."
+  />
 </Cards>
+
+If you are new to the CLI, start with [Installation](/cli/installation),
+[Quickstart](/cli/quickstart), and then come back here for the deeper
+behavioral details.
