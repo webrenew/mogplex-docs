@@ -7,7 +7,7 @@ Mogplex ships in two surfaces.
 
 Use the CLI when you want local, repo-in-place agent work from your terminal.
 Use the web app when you want the shared control plane for projects, agents,
-automations, observability, and settings.
+automations, triggers, observability, and settings.
 
 <Cards>
   <Card
@@ -18,21 +18,22 @@ automations, observability, and settings.
   <Card
     title="Web app"
     href="/web"
-    description="Projects, agents, automations, observability, settings, installations, and the hosted API."
+    description="Projects, agents, automations, triggers, observability, settings, installations, and the hosted API."
   />
 </Cards>
 
 ## Quickstart
 
-Install the CLI, point it at a provider key, and run your first task.
+Install the CLI and start a first task. If you are not authenticated yet,
+`mogplex` now walks you into browser sign-in or local API-key setup.
 
 ```bash
 curl -fsSL https://www.mogplex.com/install.sh | sh
-export ANTHROPIC_API_KEY=sk-ant-...
-mogplex "summarize this repo"
+mogplex
 ```
 
-`OPENAI_API_KEY` works too if you prefer OpenAI.
+If you prefer a direct provider key, `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`
+work as expected too.
 
 Prefer the hosted experience? Open [Mogplex in the browser](https://www.mogplex.com/login),
-connect GitHub, and start from Projects or Automations.
+connect GitHub, and start from Projects, Triggers, or Automations.

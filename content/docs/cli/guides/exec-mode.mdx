@@ -1,0 +1,68 @@
+---
+title: Exec Mode
+description: Use mogplex exec and bare prompt invocation for one-off, non-interactive tasks.
+---
+
+`mogplex exec` is the non-interactive side of the CLI.
+
+Use it when you want one task, one result, and an exit code you can treat as a
+normal shell command.
+
+## Two equivalent entrypoints
+
+These two forms both run a one-off task:
+
+```bash
+mogplex exec "review the staged diff for regressions"
+mogplex "review the staged diff for regressions"
+```
+
+The explicit `exec` form is usually clearer in scripts. The bare-prompt form is
+faster when typing by hand.
+
+## When to use exec mode
+
+Use exec mode when you want:
+
+- a single prompt and final result
+- shell-friendly behavior and exit codes
+- structured output such as JSON or JSONL
+- a slash command run without opening the TUI
+
+If you want a running session with history, model switching, and repeated back
+and forth, use bare `mogplex` instead.
+
+## Structured output
+
+For automation and wrappers, combine `exec` with output flags:
+
+```bash
+mogplex exec --json "summarize this repository"
+mogplex exec --jsonl "review the staged diff for correctness issues"
+```
+
+The exact output schema is owned by the CLI runtime, so use `mogplex --help`
+and `mogplex exec --help` as the final reference for flag details.
+
+## Slash commands in exec mode
+
+If the prompt starts with `/`, exec mode routes it through the slash-command
+registry instead of the normal prompt path.
+
+Examples:
+
+```bash
+mogplex exec "/status"
+mogplex exec "/mcp"
+mogplex exec "/logs --lines=100"
+```
+
+That is the current way to run many local-management actions from the shell
+without opening a full session.
+
+## Good use cases
+
+- review a diff from CI or a git hook
+- summarize a repo before another tool step
+- inspect slash-command state from a script
+- run one focused task and capture the result

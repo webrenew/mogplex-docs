@@ -19,6 +19,30 @@ Non-interactive run.
 
 - `e`
 
+## How It Works
+
+`mogplex exec` runs one non-interactive task and exits with the engine's final exit code.
+The prompt is built from the remaining arguments after `exec`.
+
+If the prompt starts with `/`, the CLI routes it through the slash-command registry instead of the normal engine prompt path.
+
+## Common Uses
+
+```bash
+mogplex exec "review the staged diff for regressions"
+mogplex exec "summarize the repo structure and likely entrypoints"
+mogplex exec "/status"
+```
+
+## Related Entry Points
+
+- `mogplex "<prompt>"` is a shortcut for a one-off non-interactive run without spelling `exec`.
+- `mogplex` without a prompt launches the interactive terminal UI.
+
+## Output
+
+For automation or scripting, combine `exec` with the global output flags such as `--output json`, `--json`, or `--jsonl`.
+
 ## Options
 
 Run `mogplex exec --help` to see all supported flags.

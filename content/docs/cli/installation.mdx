@@ -33,6 +33,27 @@ iwr -useb https://www.mogplex.com/install.ps1 | iex
   supported yet.
 </Callout>
 
+## What the installer does
+
+The hosted installer downloads the current release archive, extracts the
+`mogplex` binary, and installs it into the Mogplex home bin directory by
+default:
+
+- macOS and Linux: `~/.mogplex/bin/mogplex`
+- Windows: `%USERPROFILE%\\.mogplex\\bin\\mogplex.exe`
+
+After that, it tries to make `mogplex` runnable immediately:
+
+- on macOS and Linux it first tries to link `mogplex` into a writable directory
+  that is already on your `PATH`
+- if that is not possible, it falls back to updating your shell profile or
+  printing the export command you need
+- on Windows it updates the user `PATH` when needed for future PowerShell
+  sessions
+
+If you want to install somewhere else, set `MOGPLEX_INSTALL_DIR` before running
+the installer.
+
 ## Verify
 
 ```bash
@@ -40,12 +61,32 @@ mogplex --version
 ```
 
 If the binary is on your `PATH`, you should see the installed version string.
-The installer prints the default install directory and a `PATH` export snippet
-when it needs one.
+The installer now tries to make `mogplex` available immediately by linking it
+into a writable `PATH` directory or by updating your shell profile.
+
+The installer also ends by printing:
+
+```text
+run: mogplex
+```
+
+That is the intended next step.
+
+If your current shell still does not see it yet, run:
+
+```bash
+rehash
+# or open a fresh login shell
+exec zsh -l
+```
+
+On macOS and Linux, the installer requires `curl` or `wget` for download, plus
+`unzip` on macOS or `tar` on Linux for archive extraction.
 
 ## Upgrade
 
-Re-run the installer. It detects an existing installation and replaces the binary in place.
+Re-run the installer. It detects an existing installation and replaces the
+binary in place.
 
 ## Uninstall
 

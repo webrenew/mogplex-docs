@@ -1,0 +1,76 @@
+---
+title: Projects
+description: The /spaces route for importing repos, organizing projects, launching sandboxes, and opening workspace chat.
+---
+
+In the Mogplex app, the top-bar label is **Projects** and the route is
+`/spaces`.
+
+This is the operational entrypoint for repository-backed work.
+
+## What lives here
+
+- Imported GitHub repositories and their coverage state
+- Named projects that group repos together
+- Repo-level settings, favorites, and visibility
+- Sandbox launch and stop controls
+- Workspace chat launch for a selected repo and sandbox
+- Entry points for monorepo sub-projects, assignments, and cron-style work
+- Search, owner filtering, and hidden-repo management across the repo catalog
+
+## What you can do
+
+- Sync repos from GitHub into the default imported project
+- Create additional projects and create repo entries inside them
+- Add sub-project repos from a monorepo when one repo contains multiple targets
+- Open a workspace session for a repo, with sandbox launch when needed
+- Jump to sandbox management to inspect, stop, or clean up running sandboxes
+- Configure repo-specific behavior such as sandbox settings, env sync, and
+  linked Vercel project state
+- Assign agents or create cron jobs from the repo surface
+
+## Workspace and sandbox behavior
+
+Opening a repo from Projects is not just navigation. The page can:
+
+- open a workspace session directly when a preview sandbox is already running
+- request a sandbox launch first when the repo does not have a live preview
+- bind the workspace session to the launched sandbox once it comes up
+
+That makes Projects the place where repo discovery turns into active work.
+
+## How repos are organized
+
+Projects groups repos by workspace-style sections.
+
+In practice you will usually see:
+
+- your default imported bucket after GitHub sync
+- any additional named projects you create to group repos intentionally
+- fallback handling for repos that exist in Mogplex before their target project
+  metadata is fully loaded
+
+Within the page, you can favorite repos, hide them from the default view, and
+filter by owner when the imported set gets large.
+
+## What to expect
+
+Projects is where discovery and launch happen. If you want to browse repos,
+open one into a workspace, or check whether a repo is covered by the GitHub
+App, start here.
+
+If a repo is visible but not triggerable yet, that usually means GitHub OAuth is
+connected but GitHub App coverage is missing for that repo owner.
+
+If no repos are visible yet, the empty state usually points to one of two next
+steps:
+
+- install or finish the GitHub App so repo sync can run cleanly
+- link Personal Vercel if you want user-billed sandboxes for preview work
+
+## Related surfaces
+
+- Use [Installations](/web/installations) to understand GitHub App coverage
+- Use [Triggers](/web/triggers) for direct event-to-agent routing
+- Use [Automations](/web/automations) for multi-step workflow authoring
+- Use [Observability](/web/observability) after work has started running

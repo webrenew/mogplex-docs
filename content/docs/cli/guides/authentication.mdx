@@ -1,6 +1,6 @@
 ---
 title: Authentication
-description: How Mogplex resolves stored credentials, when account login is enough, and what bare `mogplex`, `/login`, and `/logout` mean in the CLI.
+description: How Mogplex resolves stored credentials, when account login is enough, and what bare `mogplex`, `mogplex login`, `/login`, and `/logout` mean in the CLI.
 ---
 
 Mogplex can run with either direct provider credentials or your Mogplex account.
@@ -41,6 +41,9 @@ When a session starts, it resolves auth in this order.
 Running `mogplex` and choosing **Sign in with Mogplex** opens the webapp login
 flow and stores a `mogplex` token in `~/.mogplex/auth.json`.
 
+The browser flow lands on `/cli-auth`, validates the localhost callback the CLI
+opened, and asks the signed-in user to approve the token handoff.
+
 That login now does three things for the CLI:
 
 - unlocks your synced model catalog
@@ -50,7 +53,7 @@ That login now does three things for the CLI:
 If your account does not have model access yet, add an AI Gateway, OpenAI, or
 Anthropic key in **Settings > API Keys**.
 
-## `/login`
+## `mogplex login` and `/login`
 
 Use `mogplex` as the normal entrypoint:
 
@@ -76,7 +79,11 @@ mogplex
 
 ## `/logout`
 
-Removes the stored key from `~/.mogplex/auth.json`.
+Sign-out is currently exposed through the slash surface, not through a wired
+standalone `mogplex logout` subcommand.
+
+Inside a live session, `/logout` removes the stored credential from
+`~/.mogplex/auth.json`.
 
 Two things to know:
 

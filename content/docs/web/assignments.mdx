@@ -1,0 +1,59 @@
+---
+title: Assignments
+description: Bind repos to agents for repeatable review, cron, and triage jobs.
+---
+
+Assignments are the repo-to-agent routing layer for repeatable work.
+
+Instead of mapping a GitHub webhook to an agent, Assignments bind a specific
+repo to a specific agent and job type.
+
+## What you can assign
+
+Current assignment types include:
+
+- PR review
+- push review
+- issue triage
+- CI failure
+- cron
+- cron refactor
+
+## What the page shows
+
+For each assignment, Mogplex shows the latest operating signal it has:
+
+- last run status and timestamp
+- failed, running, pending, suppressed, and deferred counts
+- latest error message or pressure reason
+- supported repair, cancel, and requeue actions for the latest job
+
+## How creation works
+
+Assignments are created from a three-part mapping:
+
+1. choose the repo
+2. choose the agent
+3. choose the assignment type
+
+One important implementation detail: if you assign a built-in preset agent,
+Mogplex can fork that preset into your account automatically so the assignment
+has a real owned agent record behind it.
+
+## When to use Assignments
+
+Use Assignments when the repo itself is the durable unit of routing and you want
+repeatable operational behavior tied to that repo.
+
+Common cases:
+
+- a standing PR review agent for one repo
+- a scheduled maintenance or refactor job
+- a repo-specific triage agent for issues or CI failures
+
+Assignments also subscribe to live updates, so this page acts as both a routing
+surface and an operational dashboard for recurring repo work.
+
+If the source of truth is a GitHub webhook event across an installation, use
+[Triggers](/web/triggers). If the routing needs branches or multiple steps, use
+[Automations](/web/automations).

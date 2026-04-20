@@ -1,14 +1,23 @@
 ---
 title: Agents
-description: Manage agent definitions plus the shared skills, rules, and context libraries.
+description: Manage the reusable agent roster plus shared skills, rules, and context libraries.
 ---
 
 The Agents area is the reusable behavior layer for Mogplex.
 
+The top-level `/agents` route redirects to `/agents/roster`, and the product
+sub-nav is split into:
+
+- `/agents/roster`
+- `/agents/skills`
+- `/agents/rules`
+- `/agents/context`
+
 ## What lives here
 
-- **Roster** for browsing preset agents, creating custom agents, forking presets,
-  and choosing the model, description, prompt, and category for each agent.
+- **Roster** at `/agents/roster` for browsing built-in agents, creating custom
+  agents, forking presets, and editing the model, prompt, description, and
+  category for each one.
 - **Skills** for reusable skill definitions the agent can load into a task.
 - **Rules** for shared instruction blocks and policy-like guidance.
 - **Context** for reusable context snippets that can be injected into sessions.
@@ -18,8 +27,39 @@ The Agents area is the reusable behavior layer for Mogplex.
 - Keep a stable roster of presets and custom agents
 - Group agents into built-in or custom categories
 - Swap models without rebuilding the rest of the agent definition
-- Build a reusable library of skills, rules, and context that the web app and
-  CLI can reference
+- Reuse the same agent across triggers, assignments, and automations
+- Build a shared library of skills, rules, and context that the web app and CLI
+  can both reference
 
-If you want to route agent work to a repo, start from [Projects](/web/projects)
-or [Automations](/web/automations).
+## What the roster shows
+
+The roster is not just a static list of prompts.
+
+It merges built-in preset agents with your owned agents and forks, then shows
+live operating signals such as:
+
+- running, idle, or error state
+- cycle count
+- last activity
+- recent run and failure summary
+- token usage summary when recent calls exist
+
+That makes the roster useful both for editing definitions and for checking
+whether a reusable agent is actually being exercised in the product.
+
+## Important distinction
+
+The agent definition is the reusable base. Flow nodes inside
+[Automations](/web/automations) can override some behavior, such as model or
+system prompt, without changing the master agent.
+
+Assignments and triggers then reference those reusable agents later. In other
+words:
+
+- define the reusable behavior in Agents
+- bind it to a repo in [Assignments](/web/assignments)
+- bind it to a GitHub event in [Triggers](/web/triggers)
+- orchestrate multiple steps around it in [Automations](/web/automations)
+
+If you want to route agent work to a repo, start from [Projects](/web/spaces),
+[Triggers](/web/triggers), or [Automations](/web/automations).

@@ -1,26 +1,43 @@
 ---
-title: Projects
-description: Import repos, organize them into projects, and launch sandboxed workspaces.
+title: Projects (Legacy Docs Route)
+description: The current dashboard route for Projects is /spaces.
 ---
 
-Projects is the repo control plane for the web app.
+This page exists for older links that still point to the original Projects docs.
 
-It is where imported repositories show up, where additional workspaces can be
-created, and where you launch a sandbox-backed workspace session.
+The current dashboard route is `/spaces`, and the active documentation lives at
+[Projects](/web/spaces).
 
-## What you can do
+## What changed
 
-- Sync repositories from GitHub into your default project
-- Create additional projects and repo entries
-- Detect monorepos and target sub-project roots
-- Launch or reopen a sandbox-backed workspace
-- Open a workspace chat pinned to a specific sandbox
-- Configure per-repo settings, favorites, and visibility
-- Attach agents and cron-style work to repos
-- Open the sandbox management view to stop, inspect, or delete running records
+Mogplex kept the product language around **Projects**, but the route itself now
+lives under `/spaces`.
 
-## Related surfaces
+That means you will still see project-oriented wording in the product while the
+URL path uses the newer route name.
 
-- Use [Installations](/web/installations) to understand GitHub coverage
-- Use [Automations](/web/automations) to build GitHub-triggered flows
-- Use [Observability](/web/observability) to inspect what happened after a run starts
+## What lives on the current page
+
+The `/spaces` surface is the operational hub for repo-backed work:
+
+- import and sync repositories from GitHub
+- group repos into named projects and workspaces
+- search, filter, favorite, hide, and organize repos
+- launch or stop preview sandboxes for a repo
+- open a workspace session from the repo list
+- manage repo settings such as root directory, dev command, env sync mode, and
+  sandbox timeout
+- create repo-scoped assignments and cron-style work from the dashboard
+
+## When to use it
+
+Start from [Projects](/web/spaces) when you are trying to answer one of these
+questions:
+
+- Which repositories are in Mogplex right now?
+- Which project or workspace should this repo belong to?
+- Is preview infrastructure linked and healthy for this repo?
+- Where should I open a workspace session or assign recurring work?
+
+This legacy docs route stays in place so older inbound links keep resolving to
+the correct product area.

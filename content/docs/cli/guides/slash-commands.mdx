@@ -1,0 +1,97 @@
+---
+title: Slash Commands
+description: Understand the built-in slash surface, how discovery works, and how to run slash commands from the shell or inside a session.
+---
+
+Slash commands are the local control surface for the Mogplex CLI.
+
+They cover actions that are more like session control or local tooling than
+normal model prompts.
+
+## Where slash commands work
+
+There are three relevant paths:
+
+1. Inside a live `mogplex` session
+2. From the shell with `mogplex slash list`
+3. From the shell with `mogplex exec "/..."` for one-off execution
+
+Today, `mogplex slash` is mainly a registry-inspection command. Actual slash
+execution from the shell goes through `mogplex exec "/..."`.
+
+## Built-in slash commands
+
+The current built-in surface includes commands such as:
+
+- `/help`
+- `/status`
+- `/model`
+- `/approvals`
+- `/compact`
+- `/clear`
+- `/init`
+- `/review`
+- `/config`
+- `/mcp`
+- `/skills`
+- `/login`
+- `/logout`
+- `/logs`
+- `/sandbox`
+- `/quit`
+
+Use `mogplex slash list` to inspect the exact registry in your environment.
+
+## Discover the registry
+
+```bash
+mogplex slash list
+mogplex slash list --json
+```
+
+The JSON form is the best choice if you want to inspect command metadata or
+build tooling on top of the slash registry.
+
+## Run a slash command non-interactively
+
+```bash
+mogplex exec "/status"
+mogplex exec "/config list"
+mogplex exec "/mcp"
+mogplex exec "/skills list"
+```
+
+This is especially useful for shell-driven checks and scripts.
+
+## Project and user commands
+
+Mogplex also loads slash commands from markdown files in these locations:
+
+- project scope: `.agents/commands/`
+- user scope: `~/.mogplex/commands/`
+
+That lets you keep repo-specific slash commands alongside the codebase and keep
+personal commands in your home directory.
+
+The loader also supports config-driven aliasing, disabling, and extra user
+directories through the `slash_commands` config section.
+
+## High-value built-ins
+
+Some built-ins are particularly useful day to day:
+
+- `/status` for model, usage, approval, and cwd
+- `/compact` when the session is getting heavy
+- `/config` for inspecting or setting config values
+- `/mcp` for checking configured MCP servers
+- `/logs` for recent session errors
+- `/sandbox` for spawn, pause, resume, peek, and kill operations when a sandbox
+  manager is available
+
+## Important distinction
+
+Some names appear in top-level CLI help as future standalone subcommands, but
+the slash equivalents are already usable now.
+
+If you want the feature today and the standalone command page says it is not
+wired yet, check whether the slash surface already exposes it.

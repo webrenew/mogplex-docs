@@ -1,4 +1,16 @@
 {
   "title": "Web App",
-  "pages": ["index", "projects", "agents", "automations", "observability", "settings", "installations", "api"]
+  "pages": [
+    "index",
+    "spaces",
+    "agents",
+    "automations",
+    "triggers",
+    "assignments",
+    "observability",
+    "settings",
+    "installations",
+    "guides",
+    "api"
+  ]
 }

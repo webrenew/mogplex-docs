@@ -1,27 +1,60 @@
 ---
 title: Automations
-description: Build GitHub-triggered automations on the Mogplex canvas.
+description: Build multi-step GitHub-triggered workflows on the Mogplex canvas.
 ---
 
-Automations are the current flow-builder surface in the web app.
+Automations are the main workflow-authoring surface in the web app.
 
 They connect a Mogplex project to GitHub events and let you shape the runtime
 on a node canvas before publishing.
 
 ## What you can do
 
-- Start from a GitHub event
-- Chain agents sequentially or in parallel
-- Add notes and structure directly on the canvas
-- Publish the automation when the flow is ready
-- Inspect runs and failures from [Observability](/web/observability)
+- Start from a GitHub App installation and a triggering event
+- Chain agent nodes sequentially or in parallel
+- Insert conditions, joins, and delays between steps
+- Add notes and workflow description directly on the draft
+- Use the flow assistant to suggest structural changes to the workflow
+- Review recent runs for a selected automation
+- Publish and activate the workflow when it is ready
+
+## Flow model
+
+Each automation starts with an event node and then routes through the canvas.
+
+Current node types include:
+
+- **Agent** nodes for review, edit, or triage work
+- **Condition** nodes for branching on event data
+- **Parallel split** and **Join** nodes for fan-out and fan-in
+- **Delay** nodes for scheduled pauses inside the workflow
+
+Agent-node overrides only change that node inside the current automation. They
+do not mutate the base agent in the agent library.
+
+## Drafting and publish lifecycle
+
+Automations keep a draft graph, autosave as you edit, and expose a separate
+publish step.
+
+Publishing does two things:
+
+- saves the latest workflow version
+- activates webhook routing against the published version
+
+That lets you keep editing a draft without immediately changing live routing.
 
 ## Getting started
 
 1. Connect GitHub and make sure the repo is covered by an installation.
-2. Open the Automations canvas.
-3. Create the event entrypoint and add the agent steps you need.
+2. Open the Automations canvas and create a flow for the installation you want.
+3. Create the event entrypoint and add the agent and control nodes you need.
 4. Publish the automation.
 
-Repo-level routing and older fixed trigger views still exist elsewhere in the
-app, but Automations is the primary authoring surface for new flow work.
+## Use Automations vs Triggers
+
+Use [Triggers](/web/triggers) when one GitHub event should wake one agent with
+minimal setup.
+
+Use Automations when you need branching, parallel work, draft/publish control,
+or a workflow that spans multiple steps.

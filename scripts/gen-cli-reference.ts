@@ -163,6 +163,119 @@ interface CommandDoc {
   aliases: string[];
 }
 
+const IMPLEMENTED_SUBCOMMANDS = new Set(["exec", "login", "slash"]);
+
+const EXTRA_SECTIONS: Readonly<Record<string, string[]>> = {
+  exec: [
+    "## How It Works",
+    "",
+    "`mogplex exec` runs one non-interactive task and exits with the engine's final exit code.",
+    "The prompt is built from the remaining arguments after `exec`.",
+    "",
+    "If the prompt starts with `/`, the CLI routes it through the slash-command registry instead of the normal engine prompt path.",
+    "",
+    "## Common Uses",
+    "",
+    "```bash",
+    'mogplex exec "review the staged diff for regressions"',
+    'mogplex exec "summarize the repo structure and likely entrypoints"',
+    'mogplex exec "/status"',
+    "```",
+    "",
+    "## Related Entry Points",
+    "",
+    "- `mogplex \"<prompt>\"` is a shortcut for a one-off non-interactive run without spelling `exec`.",
+    "- `mogplex` without a prompt launches the interactive terminal UI.",
+    "",
+    "## Output",
+    "",
+    "For automation or scripting, combine `exec` with the global output flags such as `--output json`, `--json`, or `--jsonl`.",
+  ],
+  login: [
+    "## Current Behavior",
+    "",
+    "The current build supports three top-level login paths:",
+    "",
+    "- `mogplex login` opens the same interactive auth chooser as bare `mogplex`",
+    "- `mogplex login mogplex` routes to the same chooser",
+    "- `mogplex login status` prints a safe summary of stored credentials without revealing secret material",
+    "",
+    "## What It Stores",
+    "",
+    "Browser sign-in stores a Mogplex token in `~/.mogplex/auth.json`.",
+    "API-key login stores the selected provider credential there instead.",
+    "",
+    "## Common Uses",
+    "",
+    "```bash",
+    "mogplex login",
+    "mogplex login status",
+    "```",
+    "",
+    "For the full credential precedence rules, use the [Authentication guide](/cli/guides/authentication).",
+  ],
+  slash: [
+    "## Current Behavior",
+    "",
+    "As a standalone subcommand, `mogplex slash` currently supports listing the slash registry.",
+    "If you omit the nested subcommand, it behaves the same as `mogplex slash list`.",
+    "",
+    "## Common Uses",
+    "",
+    "```bash",
+    "mogplex slash list",
+    "mogplex slash list --json",
+    'mogplex exec "/status"',
+    'mogplex exec "/mcp"',
+    "```",
+    "",
+    "## Important Distinction",
+    "",
+    "- Use `mogplex slash list` to inspect the registry from the shell.",
+    "- Use `mogplex exec \"/...\"` to run a slash command non-interactively.",
+    "- Use a live `mogplex` session when you want the normal interactive slash workflow.",
+  ],
+  review: [
+    "## Current Implementation Status",
+    "",
+    "The command name is present in the CLI help surface, but the standalone `mogplex review` path is not wired yet in the current build.",
+    "At the moment, running it can return `Subcommand 'review' is not yet implemented.`",
+    "",
+    "## Current Alternative",
+    "",
+    "Use `exec` with an explicit review prompt instead:",
+    "",
+    "```bash",
+    'mogplex exec "review the staged diff for regressions"',
+    "```",
+  ],
+  mcp: [
+    "## Current Implementation Status",
+    "",
+    "The command name is present in the CLI help surface, but the standalone `mogplex mcp` path is not wired yet in the current build.",
+    "At the moment, running it can return `Subcommand 'mcp' is not yet implemented.`",
+    "",
+    "## Current Alternative",
+    "",
+    "For current MCP visibility, use one of these paths:",
+    "",
+    "- [Settings](/web/settings) in the web app for shared MCP definitions",
+    '- `mogplex exec "/mcp"` for the in-session slash view of configured MCP servers',
+  ],
+  resume: [
+    "## Current Implementation Status",
+    "",
+    "The command name is present in the CLI help surface, but the standalone `mogplex resume` path is not wired yet in the current build.",
+    "At the moment, running it can return `Subcommand 'resume' is not yet implemented.`",
+  ],
+  fork: [
+    "## Current Implementation Status",
+    "",
+    "The command name is present in the CLI help surface, but the standalone `mogplex fork` path is not wired yet in the current build.",
+    "At the moment, running it can return `Subcommand 'fork' is not yet implemented.`",
+  ],
+};
+
 function generateMdx(cmd: CommandDoc): string {
   const lines: string[] = [];
 
@@ -195,6 +308,18 @@ function generateMdx(cmd: CommandDoc): string {
   lines.push(cmd.summary);
   lines.push("");
 
+  if (!IMPLEMENTED_SUBCOMMANDS.has(cmd.name) && !EXTRA_SECTIONS[cmd.name]) {
+    lines.push("## Current Implementation Status");
+    lines.push("");
+    lines.push(
+      `The command name is present in the CLI help surface, but the standalone \`mogplex ${cmd.name}\` path is not wired yet in the current build.`,
+    );
+    lines.push(
+      `At the moment, running it can return \`Subcommand '${cmd.name}' is not yet implemented.\``,
+    );
+    lines.push("");
+  }
+
   // Aliases
   if (cmd.aliases.length > 0) {
     lines.push("## Aliases");
@@ -202,6 +327,12 @@ function generateMdx(cmd: CommandDoc): string {
     for (const alias of cmd.aliases) {
       lines.push(`- \`${alias}\``);
     }
+    lines.push("");
+  }
+
+  const extraSections = EXTRA_SECTIONS[cmd.name];
+  if (extraSections) {
+    lines.push(...extraSections);
     lines.push("");
   }
 
