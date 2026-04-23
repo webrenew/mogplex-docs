@@ -1,10 +1,10 @@
 ---
 title: Library
-description: Older links to /library now resolve to the current Agents and Settings surfaces.
+description: Older links to /library now resolve to the current Agents and Settings surfaces, which split skills, rules, context, and models by job.
 ---
 
-The legacy `/library` route still exists in the app, but it no longer owns a
-single standalone surface.
+The legacy `/library` route still exists in the app, but it no longer owns one
+standalone surface.
 
 It now forwards to one of these current destinations:
 
@@ -34,15 +34,86 @@ Mogplex now splits that content between the [Agents](/web/agents) area and
 [Settings](/web/settings), but the redirect remains in place so existing links
 do not break.
 
+## What the old Library concept became
+
+The old Library idea has been split by responsibility.
+
+### Skills
+
+Use [Agents](/web/agents) -> Skills for reusable behavior packs.
+
+The current skills surface includes:
+
+- a **skills.sh** registry browser
+- a **Vercel Docs** importer for turning docs pages into local runbook-style
+  skills
+- a **Local** skills area for the skills you already have installed or created
+
+Local skills are currently grouped by type:
+
+- runbook
+- tool
+- prompt
+- workflow
+
+### Rules
+
+Use [Agents](/web/agents) -> Rules for global rule files that constrain or
+guide agent behavior.
+
+This surface is file-oriented:
+
+- create markdown rule files
+- open and edit existing ones
+- delete stale ones
+
+Think of Rules as account-level instructions you want multiple agents to share.
+
+### Context
+
+Use [Agents](/web/agents) -> Context for memory and reusable context records.
+
+The current context surface is organized into four lanes:
+
+- **Session** for the active working set
+- **Semantic** for durable facts and preferences
+- **Episodic** for timeline events and milestones
+- **Procedural** for workflows and runbooks
+
+You can search, add, delete, compact, and checkpoint memories there, and the
+surface scopes to the current repo or workspace session when that context is
+available.
+
+### Models
+
+Use [Settings](/web/settings) -> Models for account-level model availability
+and defaults.
+
+That is where you:
+
+- enable or disable models
+- choose the default model for new agents and new automation nodes
+
+That default is only the starting point. Existing agent overrides and
+automation-node overrides still win over the account default.
+
 ## How to think about it now
 
 The old Library concept has been split by job:
 
 - use [Agents](/web/agents) for reusable behavior such as skills, rules, and
   shared context
-- use [Settings](/web/settings) for account-level model configuration and
-  defaults
+- use [Settings](/web/settings) for account-level model enablement and default
+  selection
 
-That split matches how the product works now: agent building lives with the
-agent roster, while model enablement and default selection live with the rest of
-your hosted configuration.
+That split matches how the product works now: agent-building artifacts live
+with the roster, while model selection lives with the rest of your hosted
+configuration.
+
+## Rule of thumb
+
+If the thing you are editing changes what agents know or how they behave, it
+belongs under [Agents](/web/agents).
+
+If it changes which models are available or what new agents default to, it
+belongs under [Settings](/web/settings).

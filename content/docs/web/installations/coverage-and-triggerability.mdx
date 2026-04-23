@@ -1,6 +1,6 @@
 ---
 title: Coverage and Triggerability
-description: Learn why GitHub OAuth is not the same as GitHub App coverage, and how that affects whether a repo can actually receive automated work.
+description: Learn why GitHub OAuth is not the same as GitHub App coverage, how Mogplex labels connection state, and what makes a repo actually trigger-ready.
 ---
 
 Most setup confusion in Mogplex comes from mixing up three different states:
@@ -27,10 +27,10 @@ and still not be eligible for [Triggers](/web/triggers) or
 [Automations](/web/automations) if the GitHub App is not installed for the
 owner that controls that repo.
 
-## What “triggerable” actually means
+## What "triggerable" actually means
 
 Operationally, a repo becomes triggerable when Mogplex can associate it with a
-GitHub App installation id.
+real GitHub App installation id.
 
 That installation id is the bridge between:
 
@@ -38,23 +38,66 @@ That installation id is the bridge between:
 - synced repos in Mogplex
 - installation-scoped routing surfaces
 
-Without that bridge, Mogplex can see the repo but cannot safely route app-backed
-automation into it.
+Without that bridge, Mogplex can see the repo but cannot safely route
+App-backed automation into it.
+
+## Two different state layers
+
+Mogplex exposes both a user-level GitHub state and a repo-level coverage state.
+
+### User-level GitHub state
+
+The account connection can show up in states like:
+
+| State | Meaning |
+| --- | --- |
+| `OAuth only` | GitHub is connected, but routing still needs App coverage |
+| `Install pending` | The App install was started, but GitHub still needs to finish it |
+| `App installed` | Coverage exists, but no covered repos are synced into Projects yet |
+| `Ready` | App coverage is active and covered repos are already synced |
+
+These are account signals, not repo signals.
+
+### Repo-level coverage state
+
+Each repo effectively falls into one of these buckets:
+
+| Repo label | Meaning |
+| --- | --- |
+| `Trigger-ready` | The repo has a `github_installation_id` and can participate in App-backed routing |
+| `Synced only` | The repo is visible in Projects, but has no App coverage yet |
+| `Not covered` | The App is installed somewhere for the user, but not for this repo's owner or scope |
+
+This is the state that matters when the question is "will this route wake up?"
 
 ## What the installations surface exposes
 
 The installations data shown in [Settings](/web/settings) exists to answer a
 very practical question:
 
-“Which GitHub owner scopes are actually available for app-backed automation?”
+"Which GitHub owner scopes are actually available for App-backed automation?"
 
 Each installation surfaces:
 
 - account or org login
-- scope kind such as user or org
-- repo counts from GitHub vs synced into Mogplex
-- a GitHub manage link when metadata is available
+- scope label such as `Org`, `User`, or `Account`
+- synced repo count for the installation
+- a GitHub manage link when the metadata is complete enough to build one
 - the repos Mogplex currently associates with that installation
+
+If installation metadata is incomplete, Mogplex will try to refresh it from
+GitHub before presenting the final view.
+
+## Reconciliation can fill in missing installation state
+
+Mogplex does not only rely on the user manually refreshing setup pages.
+
+If the app has GitHub App config and knows your GitHub username, the hosted
+surfaces can attempt to reconcile installation state when the current install
+list is still empty.
+
+That is why these pages can sometimes "heal" after an install finishes in
+GitHub even if you did not manually resync every step yourself.
 
 ## Typical failure symptoms
 
@@ -63,14 +106,26 @@ When coverage is missing or wrong, users usually see one of these:
 - Triggers is empty
 - Automations cannot find the installation they expect
 - a repo shows up in Projects but cannot participate in webhook routing
-- Settings says GitHub is connected but installation coverage is absent or for
-  the wrong owner
+- Settings says GitHub is connected, but the status is still `OAuth only`
+- Settings shows an App installation, but the repo you care about is still
+  `Synced only` or `Not covered`
 
 ## Mental model
 
 Use this rule:
 
-- OAuth answers “who are you?”
-- installation coverage answers “which owners and repos can Mogplex automate?”
+- OAuth answers "who are you?"
+- installation coverage answers "which owners and repos can Mogplex automate?"
 
 If the question is about routing, coverage is the thing that matters.
+
+## Good troubleshooting order
+
+1. Check [Settings](/web/settings) and read the current GitHub status label
+2. Confirm the expected owner or org appears in [Installations](/web/installations)
+3. Check whether the repo is actually `Trigger-ready`, not just visible in
+   [Projects](/web/spaces)
+4. If the App install recently changed, let Mogplex reconcile or rerun repo
+   sync
+5. Retry the exact GitHub event you expect, then confirm it in
+   [Observability](/web/observability)

@@ -1,6 +1,6 @@
 ---
 title: Roster and Slugs
-description: Understand the reusable agent roster, what fields matter operationally, and how slugs drive targeted mention routing.
+description: Understand the reusable agent roster, how presets and customizations behave, and why slugs matter for GitHub mention routing.
 ---
 
 The roster is where Mogplex stores reusable agent definitions.
@@ -8,27 +8,89 @@ The roster is where Mogplex stores reusable agent definitions.
 Those definitions are then referenced by [Triggers](/web/triggers),
 [Assignments](/web/assignments), and [Automations](/web/automations).
 
-## What makes an agent reusable
+Think of the roster as the durable identity layer for agents, not just a place
+to keep prompt snippets.
 
-An agent definition is the stable base, not a one-off run configuration.
+## What actually lives in the roster
 
-The fields that matter most operationally are:
+The current roster mixes a few different kinds of agent entries:
+
+- **Default** preset agents that ship with Mogplex
+- **Customized** forks of those presets
+- fully **Custom** agents you create yourself
+
+That distinction matters because the editor treats them differently:
+
+- preset agents are reusable defaults
+- presets can be customized without mutating the shipped version
+- custom and customized agents can be edited or deleted directly
+
+In practice, this gives you a safe path:
+
+1. start from a preset if one is close
+2. fork it when you need your own version
+3. keep the fork as the repo or team-specific identity you actually route to
+
+## What fields matter operationally
+
+The fields that matter most in the current editor are:
 
 - **Name** for humans scanning the roster
-- **Model** for capability, latency, and cost behavior
-- **System prompt** for core behavior
-- **Description** for selecting the right agent later
-- **Category** for keeping the roster navigable
+- **Description** for selection and search
+- **Category** for grouping and navigation
+- **Model** for capability, cost, and latency behavior
+- **System prompt** for the durable behavior contract
 - **Slug** for targeted GitHub mention routing
 
-Flow-node overrides can still change model or prompt inside one automation, but
-that does not rewrite the underlying roster entry.
+Slug is mostly routing metadata rather than the main thing you manage in the
+roster editor day to day, but it still matters when GitHub mentions need to
+resolve to a specific agent.
+
+Two validation details are worth knowing:
+
+- category is required when creating or saving an agent
+- the editor only lets you pick from enabled models, even though older agents
+  can still carry legacy model ids
+
+## Presets, customizations, and legacy models
+
+The roster UI exposes a few badges that reflect real product state:
+
+- **Default** means a preset with no fork yet
+- **Has customization** means a preset already has a forked version
+- **Custom** means a user-created agent
+- **Customized** means a fork of a preset
+- **Needs category** means the agent no longer maps cleanly to a current
+  category
+- **Legacy model** means the agent still points at a hidden or stale model id
+
+Legacy models are especially important operationally.
+
+Mogplex can still load an older agent that references a hidden model, but the
+editor treats that as something you should replace rather than keep building on.
+
+## Categories are not cosmetic
+
+Categories are part of how the roster stays usable once you have more than a
+few agents.
+
+The roster supports:
+
+- built-in categories such as Next.js, Performance, API, Security, Frontend,
+  and PR Review
+- custom categories you create yourself
+- search across names and descriptions
+- a **Needs Category** bucket for custom agents that no longer map to a current
+  category
+
+Deleting a custom category does not delete the agents using it. Those agents
+fall back into **Needs Category** so you can reassign them cleanly.
 
 ## Where slugs matter
 
 If you only remember one thing, remember this:
 
-GitHub mention routing uses the agent slug, not the agent display name.
+GitHub mention routing uses the agent slug, not the display name.
 
 That means:
 
@@ -47,10 +109,11 @@ Slugs matter in both routing surfaces, but not in exactly the same way.
 
 ### Triggers
 
-For mention [Triggers](/web/triggers), Mogplex can backfill a missing slug from
-the agent name when you bind the trigger.
+For mention [Triggers](/web/triggers), Mogplex will backfill a missing slug
+from the agent name when you bind the trigger.
 
-That means trigger-based targeted mention routing is a little more forgiving.
+That makes trigger-based targeted mention routing a little more forgiving than
+it looks at first glance.
 
 ### Automations
 
@@ -65,17 +128,17 @@ In practice:
 
 - mention automations should use entry agents with clear slugs
 - downstream agents do not control mention matching
-- default mention flows are safer than targeted flows when the roster is still
-  messy
+- default mention automations are safer than targeted ones when your roster is
+  still being cleaned up
 
-## Good slug hygiene
+## Slug hygiene
 
 A good slug is:
 
 - short
 - lowercase
 - easy to predict
-- tied to the job, not a temporary project name
+- tied to the job, not a temporary initiative
 
 Prefer:
 
@@ -86,13 +149,13 @@ Prefer:
 
 Avoid:
 
-- long sentence-like slugs
-- ambiguous slugs like `agent-2`
-- slugs that change every time the prompt changes
+- sentence-like slugs
+- unstable slugs tied to one sprint or experiment
+- ambiguous names like `agent-2`
 
 ## Base agent vs flow override
 
-This is another common confusion point.
+This is the other common confusion point.
 
 The roster entry is the reusable identity.
 
@@ -109,6 +172,8 @@ base agent the rest of the product sees.
 ## Rule of thumb
 
 Use the roster to define stable reusable identities.
+
+Use categories to keep those identities navigable.
 
 Use slugs when you want humans to be able to call those identities directly
 from GitHub.
