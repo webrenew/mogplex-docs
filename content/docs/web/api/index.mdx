@@ -13,6 +13,27 @@ platform API yet. Route shape and response details follow the product, so treat
 it as the live application surface behind Mogplex rather than a long-term
 compatibility contract.
 
+## Read this section in order
+
+- [Authentication](/web/api/authentication) for which callers PAT auth can
+  represent and where session-only auth still applies
+- [Working Requests](/web/api/working-requests) for concrete `curl` examples
+  that are already useful on day one
+- [Route Families](/web/api/route-families) for the broader control-plane map
+
+## Start with safe first requests
+
+If you only want the most useful first calls, start here:
+
+- `GET /api/auth/user` to verify setup state, GitHub readiness, and platform
+  access
+- `GET /api/settings` to inspect shared defaults like theme and default model
+- `GET /api/github/installations` to confirm real GitHub App coverage
+- `GET /api/mcp-servers?format=cli` to export the CLI-ready MCP view
+- `GET /api/observability/stats` to inspect runtime health and cost summary
+
+See [Working Requests](/web/api/working-requests) for full examples.
+
 ## How to read this API correctly
 
 Read the hosted API in this order:
@@ -23,13 +44,6 @@ Read the hosted API in this order:
 
 If you start by assuming a clean public REST contract, you will overestimate how
 stable the route shape is meant to be.
-
-## In this section
-
-- [Authentication](/web/api/authentication) for how browser sessions, personal
-  access tokens, and internal test headers are resolved today
-- [Route Families](/web/api/route-families) for how the current `/api/*`
-  surface maps onto product areas
 
 ## The API is product-first
 
