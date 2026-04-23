@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: Manage the reusable agent roster plus shared skills, rules, and context libraries.
+description: Manage reusable agents, presets, forks, categories, slugs, and the supporting skills, rules, and context libraries.
 ---
 
 The Agents area is the reusable behavior layer for Mogplex.
@@ -15,56 +15,58 @@ sub-nav is split into:
 
 ## What lives here
 
-- **Roster** at `/agents/roster` for browsing built-in agents, creating custom
-  agents, forking presets, and editing the model, prompt, description, and
-  category for each one.
-- **Skills** for reusable skill definitions the agent can load into a task.
-- **Rules** for shared instruction blocks and policy-like guidance.
-- **Context** for reusable context snippets that can be injected into sessions.
+- **Roster** for built-in agents, custom agents, preset forks, model selection,
+  categories, and prompt editing
+- **Skills** for reusable workflow or capability packages
+- **Rules** for shared instruction blocks and policy constraints
+- **Context** for reusable memory and background knowledge
 
-## What you can do
+This area defines the reusable ingredients. Other surfaces bind those agents to
+repos, events, or workflow graphs later.
 
-- Keep a stable roster of presets and custom agents
-- Group agents into built-in or custom categories
-- Swap models without rebuilding the rest of the agent definition
-- Reuse the same agent across triggers, assignments, and automations
-- Use stable agent slugs for targeted GitHub mention routing
-- Build a shared library of skills, rules, and context that the web app and CLI
-  can both reference
-
-## In this section
-
-- [Roster and Slugs](/web/agents/roster-and-slugs) for how reusable agents are
-  defined, where slugs matter, and how mention routing really works
-- [Skills, Rules, and Context](/web/agents/skills-rules-context) for the shared
-  libraries that shape agent behavior across the product
-
-## What the roster shows
+## What the roster actually does
 
 The roster is not just a static list of prompts.
 
-It merges built-in preset agents with your owned agents and forks, then shows
-live operating signals such as:
+It merges:
 
-- running, idle, or error state
-- cycle count
-- last activity
-- recent run and failure summary
-- token usage summary when recent calls exist
+- built-in preset agents
+- your owned custom agents
+- forks of presets you have customized
 
-That makes the roster useful both for editing definitions and for checking
-whether a reusable agent is actually being exercised in the product.
+From there you can:
 
-## Slugs and Mention Routing
+- create a new custom agent
+- fork a preset and customize it without mutating the original preset
+- edit name, description, model, category, and system prompt
+- search across the roster by name or description
+- group agents into built-in or custom categories
+- create and delete custom categories
+- replace agents pinned to hidden legacy models with visible models from your
+  enabled catalog
+
+## Categories and model availability
+
+Two product behaviors are easy to miss:
+
+- Categories are validated. Custom agents can be forced into a real category,
+  and deleting a category moves those agents into a "needs category" state.
+- Model choice is constrained by your enabled model catalog. An agent can still
+  exist on a hidden legacy model, but future edits should generally move it to a
+  visible model.
+
+That means the roster is both an authoring surface and a hygiene surface for
+long-lived agents.
+
+## Slugs and mention routing
 
 For GitHub mentions, Mogplex routes against the agent slug, not the display
 name.
 
 That means:
 
-- `@mogplex` uses whichever mention trigger or automation is marked as the
-  default
-- `@mogplex/<slug>` targets a specific mention route by slug
+- `@mogplex` uses whichever mention route is marked default
+- `@mogplex/<slug>` targets a specific agent route by slug
 
 Examples:
 
@@ -72,23 +74,38 @@ Examples:
 - `@mogplex/frontend-review`
 - `@mogplex/ci-fixer`
 
-The slug is the important handle when you wire mention-based
+The slug is the durable handle when you wire mention-based
 [Triggers](/web/triggers) or mention-entry [Automations](/web/automations).
-Keep it short, lowercase, and easy to predict from the agent's job.
+Keep it short, lowercase, and predictable from the job the agent does.
 
-## Important distinction
+## How Agents relates to the rest of the product
 
-The agent definition is the reusable base. Flow nodes inside
-[Automations](/web/automations) can override some behavior, such as model or
-system prompt, without changing the master agent.
+Think of the reusable agent definition as the base layer:
 
-Assignments and triggers then reference those reusable agents later. In other
-words:
-
-- define the reusable behavior in Agents
+- define the reusable behavior in **Agents**
 - bind it to a repo in [Assignments](/web/assignments)
-- bind it to a GitHub event in [Triggers](/web/triggers)
+- bind it to GitHub events in [Triggers](/web/triggers)
 - orchestrate multiple steps around it in [Automations](/web/automations)
 
-If you want to route agent work to a repo, start from [Projects](/web/spaces),
-[Triggers](/web/triggers), or [Automations](/web/automations).
+Flow nodes inside Automations can still override parts of the reusable
+definition, such as model choice, role, step count, or timeout, without
+rewriting the master agent.
+
+## In this section
+
+- [Roster and Slugs](/web/agents/roster-and-slugs) for agent identity, presets,
+  forks, and mention handles
+- [Skills, Rules, and Context](/web/agents/skills-rules-context) for the shared
+  libraries that shape agent behavior
+
+## When to start here
+
+Start in Agents when:
+
+- you need a reusable agent before wiring routing
+- you want to fork a preset instead of building from scratch
+- mention routing needs a predictable slug
+- several repos or automations should share the same core behavior
+
+If you already know the repo and just need to attach recurring work, start from
+[Projects](/web/spaces) or [Assignments](/web/assignments) instead.

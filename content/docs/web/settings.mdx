@@ -1,123 +1,185 @@
 ---
 title: Settings
-description: Manage GitHub identity, App coverage, connections, provider keys, CLI tokens, model access, and synced configuration.
+description: Manage GitHub identity, App coverage, Personal Vercel, connections, provider keys, CLI tokens, models, and shared preferences.
 ---
 
-Settings is where account- and runtime-level configuration lives in the web app.
+Settings is the account-level control plane for Mogplex.
 
-If something about your Mogplex account, credentials, model catalog, or shared
-tooling looks wrong, this is the first place to inspect.
+If something about your identity, repo coverage, model access, shared tools, or
+CLI sync looks wrong, this is the first page to inspect.
 
 ## Set these up first
 
-For a new account, do these in order:
+For a new account, the most reliable order is:
 
-1. Connect GitHub.
-2. Confirm GitHub App coverage for the correct personal account or org.
-3. Add the provider key or gateway key that gives your hosted account model
-   access.
-4. Add shared Connections or MCP servers only after the account basics are
-   working.
-5. Create CLI access tokens only if you need CLI or script authentication as
-   Mogplex itself.
+1. connect GitHub
+2. install the Mogplex GitHub App for the personal account or orgs that own the
+   repos you want to use
+3. add model access through AI Gateway, OpenAI, or Anthropic keys if platform AI
+   is not already enabled for your account
+4. link Personal Vercel only if you want user-billed sandboxes
+5. add shared connections or MCP servers after the account basics are working
+6. generate CLI access tokens only when the CLI or scripts need to
+   authenticate as Mogplex itself
 
 ## What lives here
 
-- **Account** state for GitHub identity, GitHub App coverage, and optional
-  Personal Vercel linking
-- **Connections** for external REST APIs and MCP servers your agents can use
-- **API Keys** for encrypted provider and AI Gateway keys
-- **CLI Access Tokens** for browser-based CLI sign-in and script access
-- **Preferences** for theme and global defaults
-- **Models** for enabling and choosing the model catalog the product can use
+Settings currently groups together:
 
-## Account, GitHub, and App coverage
+- **Account** state for GitHub identity, GitHub App coverage, and Personal
+  Vercel linkage
+- **Connections** for REST APIs and MCP servers your agents can use
+- **API Keys** for encrypted hosted model-provider credentials
+- **CLI Access Tokens** for CLI and script authentication
+- **Preferences** for theme and default model
+- **Models** for the hosted model catalog your account can actually use
 
-GitHub is the primary account identity for Mogplex.
+## Account section
 
-The Account area also shows GitHub App coverage, installation metadata, and the
-repos currently synced under each installation. This is the fastest way to
-answer a very common setup question:
+The top of Settings is intentionally operational, not decorative.
 
-**Is this repo merely visible through OAuth, or is it fully covered for
-triggered work?**
+It shows:
 
-Personal Vercel is optional. It only matters when you want user-billed
-sandboxes tied to your own Vercel project.
+- current GitHub connection mode and status
+- GitHub App coverage and synced repo counts
+- the next recommended setup step, such as connecting GitHub, finishing App
+  install, or syncing repos into Projects
+- Personal Vercel state for user-billed sandbox flows
 
-The top of Settings is also where Mogplex surfaces the next setup step. In
-practice that usually means one of these:
+Two distinctions matter here:
 
-- install or upgrade to the GitHub App
-- sync repositories into Projects
-- link Personal Vercel so a user-billed sandbox can target your own project
+- **GitHub OAuth** is about account identity and repo discovery
+- **GitHub App coverage** is what makes repos triggerable for reviews,
+  automations, and webhook-backed routing
 
-## Connections and MCP
+If a repo shows up in [Projects](/web/spaces) but still cannot participate in
+[Triggers](/web/triggers) or automation, the usual cause is missing App
+coverage for that owner.
 
-Connections cover two categories:
+## Personal Vercel
 
-- standard REST API integrations
-- MCP servers, including quick-add presets and custom endpoints
+Personal Vercel is optional.
 
-The current quick-add MCP presets include Zapier, Notion, Supabase,
-Browserbase, Sentry, Sanity CMS, and Linear.
+Link it only when you want to choose your own billing project for sandbox work.
+If your account does not have platform sandbox billing available, this section
+is also where Mogplex tells you that Personal Vercel is required before sandbox
+launch can succeed.
 
-From Settings you can:
+## GitHub App coverage details
 
-- add a preset-backed MCP server
-- register a fully custom MCP endpoint or REST connection
-- choose auth mode such as bearer token, API key, OAuth, or basic auth
-- test a connection after setup
-- enable, disable, reconnect, or remove an existing connection
+The GitHub App coverage block shows more than a binary yes/no.
 
-The same MCP definitions can be synced down to the CLI, so this is the cleanest
-place to manage shared servers once instead of configuring every local machine
-by hand.
+For each installation, Mogplex can show:
 
-## API Keys vs CLI Access Tokens
+- the account or org name
+- the installation scope
+- how many repos Mogplex has associated with that installation
+- a GitHub manage link when one can be derived
+- the list of synced repos under that installation
 
-The hosted settings surface distinguishes between provider credentials and CLI
-tokens:
+That makes Settings the fastest answer to:
 
-- **API Keys** are encrypted provider keys for AI Gateway, OpenAI, and
-  Anthropic, and the page can verify whether the stored key is valid
-- **CLI Access Tokens** are personal access tokens for Mogplex itself, with a
-  name, optional expiration, last-used metadata, and revoke controls
+**Can Mogplex merely see this repo, or is it actually covered for App-backed
+work?**
 
-Use **API Keys** when the hosted product needs model access.
-Use **CLI Access Tokens** when the Mogplex CLI or other Mogplex-aware tooling
-needs to authenticate as you.
+## Connections
 
-CLI tokens are shown once at creation time, then managed by prefix afterward.
+Connections are where you register the non-model systems agents can call.
 
-## Preferences and models
+Mogplex supports two connection categories:
 
-Settings also owns the user-level defaults that affect both the hosted product
-and CLI sync paths:
+- **REST API** connections
+- **MCP Server** connections
+
+The page supports:
+
+- quick-add MCP presets
+- fully custom REST or MCP endpoints
+- auth modes including none, bearer token, API key, basic auth, and OAuth
+- testing a connection after setup
+- enable, disable, reconnect, or remove actions
+
+### Current MCP quick-add presets
+
+The built-in MCP presets currently include:
+
+- Zapier
+- Notion
+- Supabase
+- Browserbase
+- Sentry
+- Sanity CMS
+- Linear
+
+Some presets use direct credentials, while others use an OAuth flow. Settings
+surfaces the connection health state and last-tested metadata so you can fix the
+integration before debugging agent prompts.
+
+## API Keys
+
+The **API Keys** section stores encrypted hosted credentials for:
+
+- AI Gateway
+- OpenAI
+- Anthropic
+
+These keys are for hosted Mogplex execution, not for local shell env vars.
+
+The page can verify whether a stored key is valid, show when it was added, and
+delete it if needed. If platform AI is not enabled for the account, this
+section is where Mogplex pushes you to bring your own provider key.
+
+## CLI Access Tokens
+
+**CLI Access Tokens** are separate from provider API keys.
+
+Use them when the CLI or another Mogplex-aware script needs to authenticate as
+you against Mogplex itself.
+
+The section supports:
+
+- naming each token
+- optional expiration windows
+- one-time token display at creation
+- copy-on-create flow
+- last-used metadata
+- revocation
+
+If you only need model access for hosted runs, use **API Keys** instead.
+
+## Preferences and Models
+
+Settings also owns the user-level defaults that affect hosted behavior and sync
+paths:
 
 - theme preference
-- default model selection
-- enabled hosted model catalog under the Models section
+- default model
+- enabled hosted model catalog
 
-If an agent cannot use the model you expect, check the Models section before you
-edit the agent. Model availability and model choice are different concerns.
+This is a common source of confusion:
+
+- **Models section** controls what models are available to the account
+- **Agent settings** choose which available model a specific agent should use
+
+If an agent cannot select the model you expect, check **Models** before you
+edit the agent itself.
 
 ## Common failure modes
 
 - **Triggers page is empty**: GitHub OAuth may be connected, but App coverage is
   missing for the repo owner.
-- **The CLI signed in, but no synced models or MCP entries appear**: the stored
-  Mogplex account is present, but the hosted account may still lack model access
-  or shared connections.
-- **A connection exists but agent calls still fail**: test the connection in
-  Settings before debugging agent prompts.
-- **A sandbox asks for Personal Vercel**: that setup is optional overall, but
-  required for user-billed sandbox flows.
+- **The CLI signs in but no shared models or MCP entries appear**: the Mogplex
+  account exists, but the hosted account may still lack model access or shared
+  connection setup.
+- **A connection exists but agent calls still fail**: test the connection here
+  before debugging prompts or routing.
+- **Sandbox launch asks for Personal Vercel**: that setup is optional overall,
+  but required for user-billed sandbox flows.
 
 ## Why Settings matters
 
 The web app and CLI share parts of this control plane.
 
-Settings is the place to wire the hosted side once, then reuse those choices
-from local workflows when the CLI syncs model catalogs, tokens, or MCP server
-definitions.
+The cleanest Mogplex setup is to wire shared account state here once, then let
+the CLI reuse that state for synced models, shared MCP configuration, and
+account-backed login.

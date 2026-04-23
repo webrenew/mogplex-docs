@@ -1,58 +1,93 @@
 ---
 title: Overview
-description: GitHub App installations, repo sync, and the connection between imported repos and automation coverage.
+description: Understand GitHub App installations, how Mogplex maps repos to them, and why installation coverage is different from simple repo visibility.
 ---
 
-Installations determine which GitHub repositories Mogplex can see and which
-repos are eligible for app-backed automation features.
+Installations are the GitHub App coverage layer behind Mogplex repo automation.
 
-There is not a separate top-level app route called `/installations` today. This
-docs page describes the GitHub App installation state surfaced through
+There is not a separate top-level `/installations` dashboard route today. This
+docs section describes the GitHub App installation state surfaced in
 [Settings](/web/settings) and consumed by [Projects](/web/spaces),
 [Triggers](/web/triggers), and [Automations](/web/automations).
+
+## Why installations matter
+
+An installation answers two different questions:
+
+1. which account or org has granted the Mogplex GitHub App access
+2. which repos are therefore eligible for App-backed behavior
+
+That second point is the important one. A repo can be visible through OAuth and
+still not be triggerable.
+
+## OAuth vs installation coverage
+
+Keep this distinction explicit:
+
+- **GitHub OAuth** gives Mogplex an authenticated user identity and supports
+  repo discovery
+- **GitHub App installation** gives Mogplex webhook-backed coverage for the
+  installed account or org
+
+That is why a repo can appear in [Projects](/web/spaces) yet still fail to
+participate in [Triggers](/web/triggers) or installation-backed automations.
+
+## What an installation unlocks
+
+When the right installation exists, Mogplex can:
+
+- attach synced repos to the correct GitHub account scope
+- mark repos as eligible for App-backed routing
+- use installation-backed webhook events for triggers and automations
+- generate a GitHub manage link back to the installation when metadata is known
+
+## What Settings shows
+
+Inside [Settings](/web/settings), each installation can show:
+
+- the account or org name
+- whether the scope is personal or org
+- the synced repos Mogplex currently associates with that installation
+- how many repos are mapped to it
+- a direct manage link back to GitHub
+
+This is the fastest way to answer a common setup problem:
+
+**Do I have the right App installed on the right owner, or am I only seeing
+repos through OAuth?**
+
+## How Mogplex keeps installation state fresh
+
+The installations API is a little self-healing.
+
+If Mogplex has GitHub App config and your GitHub username, but there are no
+stored installations yet, it can reconcile against GitHub again and hydrate the
+local installation records before returning the Settings view.
+
+It can also refresh incomplete installation metadata, such as missing account
+login or target type, and then derive:
+
+- a scope label like `Org` or `User`
+- the GitHub manage URL for that installation
+
+That is why the Settings page can often recover from stale installation records
+without asking you to reconnect everything manually.
 
 ## In this section
 
 - [Coverage and Triggerability](/web/installations/coverage-and-triggerability)
-  for the setup model behind “GitHub connected but not triggerable”
-- [Repo Sync and Rebinding](/web/installations/repo-sync-and-rebinding) for how
-  repos are attached to installations and how stale routing state is repaired
+  explains the “repo is visible but not triggerable” setup model
+- [Repo Sync and Rebinding](/web/installations/repo-sync-and-rebinding)
+  explains how repos are attached to installations and how stale bindings get
+  repaired
 
-## What an installation unlocks
+## Where installations show up in the product
 
-- Import repositories into the default project
-- Keep repository metadata in sync with GitHub
-- Mark repos as eligible for trigger- and automation-driven work
-- Attach GitHub-backed automation coverage to the right repos
+- [Settings](/web/settings) is the main inspection surface
+- [Projects](/web/spaces) shows the repos that were imported or synced
+- [Triggers](/web/triggers) only offers installations that are actually
+  available for webhook-backed routing
+- [Automations](/web/automations) depends on installation-backed GitHub events
 
-## Important distinction
-
-GitHub OAuth can be enough to connect an account and discover repositories, but
-GitHub App coverage is what unlocks trigger-backed automation and related repo
-actions.
-
-## What the app shows
-
-Inside [Settings](/web/settings), each installation shows:
-
-- the account or org it belongs to
-- the installation scope
-- how many repos GitHub reports under that installation
-- how many repos Mogplex has already synced
-- a direct manage link back to GitHub when metadata is available
-- the synced repos Mogplex currently associates with that installation
-
-If a repo appears in [Projects](/web/spaces) but is still not triggerable, the
-usual cause is missing App coverage for that owner.
-
-If cached installation state is missing, Mogplex can also reconcile the user's
-GitHub installations again and hydrate the metadata from GitHub before
-rendering the Settings view.
-
-## Where this shows up in the app
-
-- [Projects](/web/spaces) shows the imported repos and workspaces
-- [Automations](/web/automations) uses installation-backed repos for GitHub events
-- [Settings](/web/settings) is where account connections and related setup live
-- [Triggers](/web/triggers) only offers installations that are actually available
-  for webhook-backed routing
+If routing or review behavior looks wrong, check installation coverage before
+you debug the agent or automation itself.
