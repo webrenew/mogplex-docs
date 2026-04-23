@@ -1,0 +1,92 @@
+---
+title: Skills, Rules, and Context
+description: Learn how Mogplex separates reusable skills, rules, and context so agents stay composable instead of bloated.
+---
+
+Mogplex splits shared agent building blocks into three different libraries on
+purpose:
+
+- skills
+- rules
+- context
+
+They sound similar, but they are not interchangeable.
+
+## Skills
+
+Skills are reusable capability packages.
+
+Use them when an agent should know **how to do a class of work**, such as:
+
+- working with a specific framework
+- following a specialist workflow
+- using a repeatable investigation pattern
+
+In the product, the Skills area also connects to the `skills.sh` registry, so
+the library is both a local catalog and a discovery surface.
+
+## Rules
+
+Rules are shared instruction blocks and policy constraints.
+
+Use them when an agent should consistently respect **how it is allowed to
+operate**, such as:
+
+- coding standards
+- repo guardrails
+- deployment restrictions
+- behavioral policies
+
+Rules are the right place for “always” guidance that should survive across many
+different tasks.
+
+## Context
+
+Context is reusable reference material.
+
+Use it when an agent needs **background knowledge** repeatedly, such as:
+
+- architecture notes
+- team conventions
+- domain terminology
+- system boundaries
+
+Context should explain the world the agent is working in. It should not also be
+the workflow and it should not also be the policy.
+
+## How to split responsibility
+
+Use this decision rule:
+
+- if it teaches a repeatable workflow or specialty: **skill**
+- if it constrains behavior or policy: **rule**
+- if it explains the system or domain: **context**
+
+When those are separated cleanly, agent prompts stay smaller, more reusable,
+and easier to maintain.
+
+## Why this matters in practice
+
+Without this split, teams tend to create one giant agent prompt that mixes:
+
+- capabilities
+- policies
+- architecture notes
+- temporary instructions
+
+That works briefly and then becomes impossible to reason about.
+
+Mogplex is better when the roster entry stays readable and the supporting
+libraries hold the reusable detail.
+
+## A good composition pattern
+
+For a strong reusable agent:
+
+1. define the core identity in the roster
+2. attach shared rules for non-negotiable behavior
+3. add skills for specialist workflows
+4. include context only when the task really needs background
+
+That gives you a stable agent without turning every task into a prompt surgery
+exercise.

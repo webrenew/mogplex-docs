@@ -1,0 +1,76 @@
+---
+title: Coverage and Triggerability
+description: Learn why GitHub OAuth is not the same as GitHub App coverage, and how that affects whether a repo can actually receive automated work.
+---
+
+Most setup confusion in Mogplex comes from mixing up three different states:
+
+- GitHub account connected
+- repo visible in Mogplex
+- repo triggerable for webhook-backed work
+
+Those are related, but they are not the same thing.
+
+## OAuth is not enough
+
+GitHub OAuth can be enough to connect an account and discover repositories.
+
+But webhook-backed routing depends on GitHub App coverage.
+
+That means a repo can still:
+
+- appear in [Projects](/web/spaces)
+- belong to the right user
+- even be synced already
+
+and still not be eligible for [Triggers](/web/triggers) or
+[Automations](/web/automations) if the GitHub App is not installed for the
+owner that controls that repo.
+
+## What “triggerable” actually means
+
+Operationally, a repo becomes triggerable when Mogplex can associate it with a
+GitHub App installation id.
+
+That installation id is the bridge between:
+
+- GitHub webhook events
+- synced repos in Mogplex
+- installation-scoped routing surfaces
+
+Without that bridge, Mogplex can see the repo but cannot safely route app-backed
+automation into it.
+
+## What the installations surface exposes
+
+The installations data shown in [Settings](/web/settings) exists to answer a
+very practical question:
+
+“Which GitHub owner scopes are actually available for app-backed automation?”
+
+Each installation surfaces:
+
+- account or org login
+- scope kind such as user or org
+- repo counts from GitHub vs synced into Mogplex
+- a GitHub manage link when metadata is available
+- the repos Mogplex currently associates with that installation
+
+## Typical failure symptoms
+
+When coverage is missing or wrong, users usually see one of these:
+
+- Triggers is empty
+- Automations cannot find the installation they expect
+- a repo shows up in Projects but cannot participate in webhook routing
+- Settings says GitHub is connected but installation coverage is absent or for
+  the wrong owner
+
+## Mental model
+
+Use this rule:
+
+- OAuth answers “who are you?”
+- installation coverage answers “which owners and repos can Mogplex automate?”
+
+If the question is about routing, coverage is the thing that matters.

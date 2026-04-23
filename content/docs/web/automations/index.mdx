@@ -1,38 +1,110 @@
 ---
-title: Automations
-description: Build multi-step GitHub-triggered workflows on the Mogplex canvas.
+title: Overview
+description: Build multi-step GitHub-triggered workflows with explicit agent roles, mention routing, and publish control.
 ---
 
-Automations are the main workflow-authoring surface in the web app.
+Automations are the workflow graph surface in the web app.
 
-They connect a Mogplex project to GitHub events and let you shape the runtime
-on a node canvas before publishing.
+Use them when one GitHub event should lead to multiple steps, branches, or
+publish-controlled behavior instead of a simple one-event-to-one-agent route.
 
-## What you can do
+## In this section
 
-- Start from a GitHub App installation and a triggering event
-- Chain agent nodes sequentially or in parallel
-- Insert conditions, joins, and delays between steps
-- Add notes and workflow description directly on the draft
-- Use the flow assistant to suggest structural changes to the workflow
-- Review recent runs for a selected automation
-- Publish and activate the workflow when it is ready
+- [Agent Roles](/web/automations/agent-roles) for the exact difference between
+  `triage`, `review`, and `edit`
+- [Publishing and Routing](/web/automations/publishing-and-routing) for draft
+  vs published behavior, activation, and the webhook routing model
 
-## Flow model
+## Mental model
 
-Each automation starts with an event node and then routes through the canvas.
+Each automation is installation-scoped and starts from exactly one GitHub event
+on the start node.
+
+From there the graph fans out through the canvas.
 
 Current node types include:
 
-- **Agent** nodes for review, edit, or triage work
-- **Condition** nodes for branching on event data
+- **Agent** nodes for `review`, `edit`, or `triage` work
+- **Condition** nodes for true/false branching on event data
 - **Parallel split** and **Join** nodes for fan-out and fan-in
-- **Delay** nodes for scheduled pauses inside the workflow
+- **Delay** nodes for scheduled waits inside the workflow
 
-Agent-node overrides only change that node inside the current automation. They
-do not mutate the base agent in the agent library.
+Two implementation details matter in practice:
 
-## Drafting and publish lifecycle
+- Agent-node overrides only change that node inside the current automation.
+  They do not mutate the base agent in [Agents](/web/agents).
+- For `@mention` automations, Mogplex routes targeted mentions against the
+  **entry agent slug**. That means the slug on an agent node connected directly
+  to the start node, not a later downstream node.
+
+## Pick the Right Agent Role
+
+The role on an agent node changes how Mogplex expects that node to behave.
+
+| Role | Use it when | Best entry events | Special behavior |
+| --- | --- | --- | --- |
+| `triage` | The agent should read the event or thread, classify it, answer, label, or decide what happens next | `mention`, `issue_opened`, `issue_comment` | Best for conversational or operational response work. No review autofix behavior. |
+| `review` | The agent should inspect code changes and report findings | `pr_opened`, `pr_comment`, `push`, `ci_failure` | Can emit structured review findings. This is the only role that exposes auto-fix in the flow editor. |
+| `edit` | The graph has already decided to mutate code and this node should apply the change | Follow-up step after `review` or a condition branch | Use it as an explicit mutation step instead of overloading a reviewer. |
+
+Mogplex also picks a default role when you insert a new agent node:
+
+- `triage` for `mention`, `issue_opened`, and `issue_comment`
+- `review` for `pr_opened`, `pr_comment`, `push`, and `ci_failure`
+
+## Triage vs Review
+
+This is the most common point of confusion.
+
+Use `triage` when the agent should understand context first and respond in the
+language of the thread or event. Typical cases:
+
+- a GitHub mention asking for help on a PR thread
+- a new issue that needs labeling, reproduction guidance, or next steps
+- an issue comment that should wake a repo assistant and continue the
+  conversation
+
+Use `review` when the agent should inspect changed code and produce findings
+about correctness, security, performance, or regressions. Typical cases:
+
+- a PR opens and you want structured code review output
+- a push lands on the default branch and you want a branch-level review
+- a CI failure should trigger code-oriented analysis before a fix step
+
+Use `edit` when you want the graph to apply changes only after an earlier node
+has already decided that code should be mutated.
+
+## Mention Routing
+
+Mention-driven automations use exact GitHub comment syntax.
+
+- `@mogplex` creates a bare `mention` event
+- `@mogplex/<agent-slug>` creates a targeted `mention` event
+
+Example:
+
+```text
+@mogplex/triage summarize this issue and suggest the next step.
+```
+
+Important rules:
+
+- Bare `@mogplex` only routes to mention automations whose start node is marked
+  **Default mention target**.
+- Targeted mentions only route to mention automations whose entry agent slug
+  matches the text after `/`.
+- The slash matters. `@mogplex triage` is just a bare mention plus text, not a
+  targeted mention.
+- PR or issue comments without `@mogplex` use the `pr_comment` or
+  `issue_comment` event types instead of `mention`.
+
+For predictable routing, keep one default mention automation per installation
+and make the entry agent slug obvious.
+
+For the exact mention rules across Triggers and Automations, see
+[GitHub Mention Routing](/web/guides/github-mention-routing).
+
+## Drafting and Publish Lifecycle
 
 Automations keep a draft graph, autosave as you edit, and expose a separate
 publish step.
@@ -42,19 +114,28 @@ Publishing does two things:
 - saves the latest workflow version
 - activates webhook routing against the published version
 
-That lets you keep editing a draft without immediately changing live routing.
+That lets you keep changing a draft without immediately changing live routing.
 
-## Getting started
+## Good Starter Patterns
 
-1. Connect GitHub and make sure the repo is covered by an installation.
+- `pr_opened` -> `review` -> condition -> `edit` or end
+- `issue_opened` -> `triage` -> condition -> parallel follow-up agents
+- `mention` -> `triage` -> delay -> follow-up response
+
+## Getting Started
+
+1. Connect GitHub and make sure the repo owner is covered by a GitHub App
+   installation.
 2. Open the Automations canvas and create a flow for the installation you want.
-3. Create the event entrypoint and add the agent and control nodes you need.
-4. Publish the automation.
+3. Pick the start event first, then choose the role for each entry agent.
+4. If the start event is `@mention`, decide whether this should be the default
+   mention target or a slug-targeted route.
+5. Publish the automation when the draft is ready.
 
 ## Use Automations vs Triggers
 
 Use [Triggers](/web/triggers) when one GitHub event should wake one agent with
 minimal setup.
 
-Use Automations when you need branching, parallel work, draft/publish control,
-or a workflow that spans multiple steps.
+Use Automations when you need branching, parallel work, delays, draft/publish
+separation, or a workflow that spans multiple steps.

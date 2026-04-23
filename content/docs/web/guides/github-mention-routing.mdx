@@ -1,0 +1,126 @@
+---
+title: GitHub Mention Routing
+description: Understand bare vs targeted mentions, agent slugs, and how mention routing behaves in Triggers and Automations.
+---
+
+If you want Mogplex to wake a specific agent from GitHub, the mention syntax
+has to be exact.
+
+## Two different mention forms
+
+Mogplex recognizes two forms:
+
+- `@mogplex`
+- `@mogplex/<agent-slug>`
+
+They do different things.
+
+## Bare vs Targeted Mentions
+
+### `@mogplex`
+
+This is a bare mention.
+
+It only routes to mention handlers marked as the default target for that
+installation:
+
+- a mention [Trigger](/web/triggers) marked default
+- a mention [Automation](/web/automations) whose start node is marked
+  **Default mention target**
+
+### `@mogplex/<agent-slug>`
+
+This is a targeted mention.
+
+It routes by agent slug instead of by the default flag.
+
+Example:
+
+```text
+@mogplex/triage summarize this issue and suggest the next action.
+```
+
+If the slug is `triage`, that targeted mention is what wakes the matching
+trigger or mention-entry automation.
+
+## The Slash Matters
+
+These are not equivalent:
+
+- `@mogplex/triage`
+- `@mogplex triage`
+
+Only the first one is a targeted mention.
+
+The second one is a bare `@mogplex` mention followed by normal text.
+
+## Where Mentions Are Recognized
+
+Mention routing comes from GitHub comments:
+
+- issue comments
+- PR conversation comments
+- PR review comments
+- commit comments
+
+That means a mention in an issue title, issue body, or PR description is not
+the same routing event as a GitHub comment mention.
+
+## Using Mentions with Triggers
+
+Use [Triggers](/web/triggers) when one mention should wake one agent.
+
+The pattern is:
+
+1. Create a trigger with the `@mention` event.
+2. Choose the agent that should answer.
+3. Mark it default if you want bare `@mogplex` mentions to hit it.
+
+Use a targeted mention when you want to skip the default and call a specific
+agent directly:
+
+```text
+@mogplex/triage please classify this bug and suggest the next step.
+```
+
+## Using Mentions with Automations
+
+Use [Automations](/web/automations) when one mention should kick off a graph.
+
+The pattern is:
+
+1. Set the start node event to `@mention`.
+2. Connect the start node directly to the entry agent node.
+3. Mark the start node default if bare `@mogplex` should wake this flow.
+4. Use the entry agent slug for targeted mentions.
+
+Important detail:
+
+Targeted mention routing checks the slug on an **entry agent**, meaning an
+agent connected directly to the start node. Downstream agents do not control
+mention matching.
+
+## Calling a Triage Agent
+
+If your mention-entry agent slug is `triage`, call it like this:
+
+```text
+@mogplex/triage read the full thread, summarize the problem, and suggest next steps.
+```
+
+Use bare `@mogplex` only when that triage route is the default mention target.
+
+## Common Mistakes
+
+- Marking a mention route as default and then expecting `@mogplex/<slug>` to be
+  optional. It is not.
+- Using the display name instead of the slug.
+- Targeting a downstream automation node instead of the entry agent.
+- Expecting PR or issue comments without `@mogplex` to use the `mention`
+  event. Those become `pr_comment` or `issue_comment` events instead.
+
+## Rule of Thumb
+
+Use `@mogplex` for the one default assistant.
+
+Use `@mogplex/<agent-slug>` when you want to wake a specific agent on purpose.

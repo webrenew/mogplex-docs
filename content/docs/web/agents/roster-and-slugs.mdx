@@ -1,0 +1,114 @@
+---
+title: Roster and Slugs
+description: Understand the reusable agent roster, what fields matter operationally, and how slugs drive targeted mention routing.
+---
+
+The roster is where Mogplex stores reusable agent definitions.
+
+Those definitions are then referenced by [Triggers](/web/triggers),
+[Assignments](/web/assignments), and [Automations](/web/automations).
+
+## What makes an agent reusable
+
+An agent definition is the stable base, not a one-off run configuration.
+
+The fields that matter most operationally are:
+
+- **Name** for humans scanning the roster
+- **Model** for capability, latency, and cost behavior
+- **System prompt** for core behavior
+- **Description** for selecting the right agent later
+- **Category** for keeping the roster navigable
+- **Slug** for targeted GitHub mention routing
+
+Flow-node overrides can still change model or prompt inside one automation, but
+that does not rewrite the underlying roster entry.
+
+## Where slugs matter
+
+If you only remember one thing, remember this:
+
+GitHub mention routing uses the agent slug, not the agent display name.
+
+That means:
+
+- `@mogplex` targets the default mention route
+- `@mogplex/<slug>` targets a specific route by slug
+
+Examples:
+
+- `@mogplex/triage`
+- `@mogplex/frontend-review`
+- `@mogplex/ci-fixer`
+
+## Triggers vs Automations
+
+Slugs matter in both routing surfaces, but not in exactly the same way.
+
+### Triggers
+
+For mention [Triggers](/web/triggers), Mogplex can backfill a missing slug from
+the agent name when you bind the trigger.
+
+That means trigger-based targeted mention routing is a little more forgiving.
+
+### Automations
+
+For mention-entry [Automations](/web/automations), Mogplex routes targeted
+mentions against the slug on an **entry agent** connected directly to the start
+node.
+
+If that entry agent has no slug, targeted mention routing has nothing stable to
+match against.
+
+In practice:
+
+- mention automations should use entry agents with clear slugs
+- downstream agents do not control mention matching
+- default mention flows are safer than targeted flows when the roster is still
+  messy
+
+## Good slug hygiene
+
+A good slug is:
+
+- short
+- lowercase
+- easy to predict
+- tied to the job, not a temporary project name
+
+Prefer:
+
+- `triage`
+- `security-review`
+- `bundle-size`
+- `release-manager`
+
+Avoid:
+
+- long sentence-like slugs
+- ambiguous slugs like `agent-2`
+- slugs that change every time the prompt changes
+
+## Base agent vs flow override
+
+This is another common confusion point.
+
+The roster entry is the reusable identity.
+
+An automation node can still override:
+
+- model
+- system prompt
+- timeout
+- max steps
+
+That override changes the behavior of that node only. It does not mutate the
+base agent the rest of the product sees.
+
+## Rule of thumb
+
+Use the roster to define stable reusable identities.
+
+Use slugs when you want humans to be able to call those identities directly
+from GitHub.

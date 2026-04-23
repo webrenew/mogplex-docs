@@ -1,4 +1,4 @@
 {
   "title": "Automations",
-  "pages": ["index"]
+  "pages": ["index", "agent-roles", "publishing-and-routing"]
 }

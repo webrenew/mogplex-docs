@@ -1,0 +1,102 @@
+---
+title: Route Families
+description: See how the hosted Mogplex API is organized by product area and which route groups matter most in practice.
+---
+
+The hosted API is easiest to understand when you read it as a control plane,
+not as a generic public REST surface.
+
+Most route groups map directly to a product area.
+
+## Account and configuration
+
+Representative routes:
+
+- `/api/auth/*`
+- `/api/settings`
+- `/api/models`
+
+These routes answer questions like:
+
+- who is the current user?
+- what providers and models are available?
+- what setup state does the product need to render correctly?
+
+## Projects and repos
+
+Representative routes:
+
+- `/api/repos`
+- `/api/workspaces`
+- `/api/github/installations`
+
+These routes manage the imported repo graph the rest of Mogplex builds on.
+
+If a routing or sandbox workflow feels wrong, these are often the underlying
+state surfaces to inspect first.
+
+## Agents and reusable libraries
+
+Representative routes:
+
+- `/api/agents`
+- `/api/agent-categories`
+- `/api/skills`
+- `/api/mcp-servers`
+
+This is the reusable behavior layer behind the roster, categories, skills, and
+MCP integration surfaces.
+
+## Routing surfaces
+
+Representative routes:
+
+- `/api/triggers`
+- `/api/assignments`
+- `/api/flows`
+
+These are the control-plane surfaces for durable routing rules.
+
+They matter because Mogplex treats event routing, repo responsibility, and
+multi-step workflows as three different product models, not one overloaded
+object.
+
+## Conversations and agent work
+
+Representative routes:
+
+- `/api/chat`
+- `/api/commands`
+- `/api/memories`
+
+These routes support interactive work once the user is already inside the
+workspace or CLI session.
+
+## Runtime and operations
+
+Representative routes:
+
+- `/api/sandbox/*`
+- `/api/observability/*`
+
+This is the runtime surface for sandboxes, calls, runs, failures, and
+operational repair actions.
+
+If the routing surface answers “what should run?”, these routes answer “what is
+running, and why is it healthy or unhealthy?”
+
+## Product-first, not platform-first
+
+This is the key architectural point:
+
+the Mogplex API is still organized around product behavior, not around a stable
+versioned public contract.
+
+So if you build on it directly:
+
+- depend on specific routes intentionally
+- document the exact payloads you rely on
+- expect the product model to remain the source of truth
+
+That mindset is much safer than assuming the entire `/api/*` tree is already a
+long-term public platform.

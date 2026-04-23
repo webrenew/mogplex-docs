@@ -1,0 +1,106 @@
+---
+title: Publishing and Routing
+description: Understand how draft graphs, published versions, activation, and webhook routing actually work in Automations.
+---
+
+Automations are not live-edit graphs.
+
+Mogplex keeps a draft version you can keep changing, and a published version
+that webhook routing actually uses.
+
+## Draft vs published
+
+Each automation stores:
+
+- a draft graph you are actively editing
+- a published version id that points at the live graph
+
+Webhook routing does not read the draft. It routes against the published
+version.
+
+That separation is why the surface can support real editing without changing
+production behavior on every drag or prompt tweak.
+
+## What publish does
+
+When you publish an automation, Mogplex:
+
+1. validates the draft graph
+2. creates a new immutable `flow_version`
+3. points `published_version_id` at that version
+4. marks the flow `active`
+
+That means the current product behavior is effectively “publish and activate,”
+not “publish silently and maybe activate later.”
+
+If a flow is already active, publishing replaces the live routing target with
+the newest published version.
+
+## What must be true before publish
+
+A publish can fail if the draft is not valid.
+
+The important checks are:
+
+- the graph is structurally valid
+- agent ids in the graph belong to the current user
+- the flow can be coerced into a valid start-to-end automation graph
+
+This is intentional. Mogplex treats live routing as a controlled surface, not a
+best-effort sketchpad.
+
+## Activation
+
+An automation can also be toggled between `active` and `inactive`.
+
+But a flow cannot be activated unless it already has a published version.
+
+So the lifecycle is:
+
+1. edit draft
+2. publish
+3. run live
+4. optionally deactivate without discarding the published version
+
+## Installation-scoped routing
+
+Automations are installation-scoped.
+
+That means the GitHub App installation is part of the routing key. A flow only
+receives events for the installation it is attached to.
+
+This is why installation coverage matters so much in setup: a perfect graph
+still will not run if the GitHub App installation is wrong or missing.
+
+## Event matching
+
+For normal events, matching is straightforward:
+
+- the webhook event becomes a Mogplex trigger event
+- Mogplex checks the published flow's start node event
+- matching flows are enqueued
+
+For `mention` events there is an extra rule:
+
+- bare `@mogplex` only matches published mention flows marked default
+- `@mogplex/<agent-slug>` only matches published mention flows whose entry
+  agent slug matches the targeted slug
+
+The published version is the source of truth here too.
+
+## Operational implication
+
+If you edit a mention flow in draft but do not publish it, GitHub is still
+routing against the older published version.
+
+That is the right behavior for production safety, but it is easy to forget
+during testing.
+
+## Recommended workflow
+
+1. build the graph in draft
+2. verify the start event and entry agents first
+3. publish once the routing shape is intentional
+4. test with the exact GitHub event you expect
+5. use [Observability](/web/observability) to confirm the published graph is
+   the one actually receiving events
