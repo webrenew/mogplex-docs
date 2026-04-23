@@ -1,6 +1,6 @@
 ---
 title: Choose the Right Routing Surface
-description: Decide when to use Triggers, Assignments, or Automations so the product stays simple instead of overbuilt.
+description: Decide between Triggers, Assignments, and Automations using the actual source of truth, scope, and prerequisite state.
 ---
 
 Mogplex has three routing surfaces on purpose:
@@ -10,6 +10,28 @@ Mogplex has three routing surfaces on purpose:
 - [Automations](/web/automations)
 
 They overlap a little, but they are not the same tool.
+
+## Before you choose anything
+
+Answer these questions first:
+
+1. is the source of truth a GitHub App installation event, one repo, or a
+   workflow graph?
+2. does the repo owner already have GitHub App coverage, or is it only synced
+   through OAuth?
+3. do you need draft and publish control, or should the route be live as soon
+   as it is created?
+4. is this standing responsibility for one repo, or policy for an installation?
+
+If those answers are fuzzy, the route choice will feel fuzzy too.
+
+## Fast decision table
+
+| Surface | Source of truth | Scope | Requires | Best fit | It is the wrong tool when |
+| --- | --- | --- | --- | --- | --- |
+| [Triggers](/web/triggers) | One GitHub event | Installation-scoped | GitHub App coverage on the installation | One event should wake one agent with minimal ceremony | You need branching, publish control, or repo-owned standing work |
+| [Assignments](/web/assignments) | One repo and one standing responsibility | Repo-scoped | The repo is imported and you know which agent should own the work | Durable PR review, push review, issue triage, CI failure, or cron work for one repo | The rule should apply at the installation event layer or needs a workflow graph |
+| [Automations](/web/automations) | One GitHub event that becomes a graph | Installation-scoped | GitHub App coverage plus a published workflow | Branching, delays, parallel steps, conditional logic, and draft vs published behavior | One event simply needs one agent |
 
 ## Use Triggers when the rule is event -> agent
 
@@ -24,6 +46,15 @@ Good examples:
 
 Use Triggers when you want the smallest routing surface that still works.
 
+Two prerequisite details matter:
+
+- Triggers are installation-scoped, so GitHub App coverage is required.
+- Seeing a repo in [Projects](/web/spaces) is not enough if that repo is only
+  synced through OAuth.
+
+If the trigger form has no usable installations, stop and fix App coverage
+before debugging the agent.
+
 ## Use Assignments when the rule is repo -> agent
 
 Pick [Assignments](/web/assignments) when the repo is the durable unit of
@@ -36,6 +67,16 @@ Good examples:
 - a repo-specific issue triage or CI failure policy
 
 Assignments are about durable responsibility, not just webhook entrypoints.
+
+Two scope details matter:
+
+- Assignments are repo-scoped, not installation-scoped.
+- If you choose a built-in preset agent, Mogplex resolves it to an owned agent
+  for the assignment, reusing an existing fork when one exists or creating a
+  fork automatically.
+
+That is why Assignments is the right surface when you want one repo to own a
+standing contract instead of one installation to own an event rule.
 
 ## Use Automations when the rule is workflow -> graph
 
@@ -52,6 +93,12 @@ Good examples:
 If you need branching, publish control, or a workflow that spans multiple
 steps, use Automations.
 
+The setup nuance is the same as Triggers: Automations are installation-scoped
+and need GitHub App coverage, not just synced repos.
+
+The operating nuance is different: the draft graph is not the live route until
+you publish it.
+
 ## Simple decision rule
 
 Use the lightest surface that fits:
@@ -59,6 +106,18 @@ Use the lightest surface that fits:
 1. one event to one agent: **Triggers**
 2. one repo to one repeatable responsibility: **Assignments**
 3. one event to a multi-step graph: **Automations**
+
+## What people usually get wrong
+
+- A repo appearing in [Projects](/web/spaces) does not guarantee it can back a
+  Trigger or Automation. App coverage still has to exist.
+- If the durable unit is the repo, not the installation, the route usually
+  belongs in [Assignments](/web/assignments), even if the event is “PR opened”
+  or “CI failure”.
+- If you need draft editing and publish control, you are already in
+  [Automations](/web/automations), not Triggers.
+- If the route can be explained as one event to one agent, Automations is
+  usually overbuilt.
 
 ## After routing starts
 

@@ -1,0 +1,262 @@
+---
+title: Working Requests
+description: Start with safe, representative API calls for setup state, settings, GitHub coverage, MCP export, flows, and observability.
+---
+
+Use this page when you need a real first request against hosted Mogplex, not
+just a description of the route tree.
+
+These examples are intentionally biased toward routes that are already useful in
+scripts, internal tooling, or debugging.
+
+## Before you start
+
+Authenticate with a Mogplex personal access token:
+
+```bash
+export MOGPLEX_BASE_URL="https://www.mogplex.com"
+export MOGPLEX_TOKEN="mog_..."
+```
+
+Then reuse the same header everywhere:
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  "$MOGPLEX_BASE_URL/api/auth/user"
+```
+
+These examples assume PAT auth. If you are trying to manage browser-only
+account credentials such as token-management routes, read
+[Authentication](/web/api/authentication) first because some endpoints
+intentionally require a real session.
+
+## 1. Check setup state with `GET /api/auth/user`
+
+This is the best first call when you need to know whether the account is
+actually ready.
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  "$MOGPLEX_BASE_URL/api/auth/user"
+```
+
+Representative response:
+
+```json
+{
+  "user": {
+    "id": "profile_123",
+    "email": "you@example.com",
+    "github_username": "octocat",
+    "github_state": "app_installed_with_synced_repos",
+    "github_installation_count": 2,
+    "github_covered_repo_count": 8,
+    "platform_access": {
+      "allowPlatformAi": true,
+      "allowPlatformSandbox": false
+    },
+    "vercel": {
+      "platformState": "ready",
+      "personalState": "linked",
+      "linkedProjectState": "repo",
+      "statusLabel": "Platform ready"
+    }
+  }
+}
+```
+
+Use this call to answer:
+
+- is the caller authenticated?
+- is GitHub only OAuth-connected, install-pending, or fully App-covered?
+- does the account have platform AI or sandbox access?
+- is Personal Vercel linked and already attached to a repo or project?
+
+## 2. Read or update shared defaults with `/api/settings`
+
+Read the current defaults:
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  "$MOGPLEX_BASE_URL/api/settings"
+```
+
+Representative response:
+
+```json
+{
+  "default_model": "your-enabled-model-id",
+  "theme": "dark"
+}
+```
+
+Update one field at a time with `PATCH`:
+
+```bash
+curl -sS \
+  -X PATCH \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"theme":"light"}' \
+  "$MOGPLEX_BASE_URL/api/settings"
+```
+
+Representative success response:
+
+```json
+{
+  "ok": true
+}
+```
+
+Two practical details matter:
+
+- invalid or unavailable default models return a `400`
+- token-management routes under `/api/settings/*` are more sensitive than the
+  main settings route, so do not assume every settings endpoint has the same
+  auth policy
+
+## 3. Inspect GitHub App coverage with `GET /api/github/installations`
+
+This is the first call to make when the browser can see repos but Triggers or
+Automations still look empty.
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  "$MOGPLEX_BASE_URL/api/github/installations"
+```
+
+Representative response excerpt:
+
+```json
+[
+  {
+    "installation_id": 123456,
+    "account_login": "acme",
+    "scope_label": "Org",
+    "repository_count": 12,
+    "repositories": [
+      { "id": "repo_1", "full_name": "acme/api" },
+      { "id": "repo_2", "full_name": "acme/web" }
+    ],
+    "manage_url": "https://github.com/organizations/acme/settings/installations/123456"
+  }
+]
+```
+
+This is the route that tells you whether Mogplex has actual installation-backed
+coverage, not just OAuth visibility.
+
+## 4. Export CLI-ready MCP config with `GET /api/mcp-servers?format=cli`
+
+This route is intentionally shared between the hosted control plane and the
+CLI.
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  "$MOGPLEX_BASE_URL/api/mcp-servers?format=cli"
+```
+
+Representative response excerpt:
+
+```json
+[
+  {
+    "name": "sentry",
+    "enabled": true,
+    "config": {
+      "url": "https://mcp.sentry.dev",
+      "http_headers": {
+        "Authorization": "Bearer ..."
+      }
+    }
+  }
+]
+```
+
+Two important behaviors to know:
+
+- custom MCP servers win on name collision
+- enabled MCP connections can also appear here, merged into the CLI-shaped
+  response
+
+## 5. Create a workflow shell with `POST /api/flows`
+
+Use this when you need a new automation shell for a GitHub App installation.
+
+```bash
+curl -sS \
+  -X POST \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"installation_id":123456,"name":"PR review graph"}' \
+  "$MOGPLEX_BASE_URL/api/flows"
+```
+
+Practical rules:
+
+- `installation_id` is required
+- the route returns `201` with the created flow object on success
+- invalid or inaccessible installation ids return a typed flow-service error
+  instead of a generic success shape
+
+If you only need one event to wake one agent, stop and use
+[Triggers](/web/triggers) instead of scripting flows directly.
+
+## 6. Pull runtime summary with `GET /api/observability/stats`
+
+This is the best first call when you need a compressed “is the system healthy?”
+read without loading every event row.
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  "$MOGPLEX_BASE_URL/api/observability/stats"
+```
+
+Representative response excerpt:
+
+```json
+{
+  "summary": {
+    "total_calls": 248,
+    "success_rate": 97.2,
+    "cost_today_estimate": 3.48,
+    "sandbox_active": 1,
+    "job_runs_pending": 2,
+    "job_runs_failed_24h": 1,
+    "suppressed_24h": 0,
+    "limit_denied_24h": 3
+  },
+  "by_model": [
+    { "model": "your-enabled-model-id", "count": 190, "tokens": 1820342 }
+  ],
+  "by_type": [
+    { "type": "chat", "count": 220 }
+  ]
+}
+```
+
+This route is useful when you want summary cost, pressure, success rate,
+sandbox activity, and model mix before drilling into detailed calls or jobs.
+
+## A good first-day API sequence
+
+If you are starting cold, use this order:
+
+1. `GET /api/auth/user` to verify caller readiness
+2. `GET /api/settings` to read shared defaults
+3. `GET /api/github/installations` to confirm App coverage
+4. `GET /api/mcp-servers?format=cli` if the CLI should mirror hosted tools
+5. `GET /api/observability/stats` once work is actually running
+
+## Read next
+
+- [Authentication](/web/api/authentication) for auth-path rules and session-only
+  nuance
+- [Route Families](/web/api/route-families) for the broader control-plane map

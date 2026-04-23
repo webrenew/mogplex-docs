@@ -1,0 +1,136 @@
+---
+title: Connection Scope and Overrides
+description: Understand when a connection should be global, project-scoped, or explicitly excluded for one repo.
+---
+
+Connections in Mogplex are not just account-wide settings.
+
+They resolve at two levels:
+
+- **Global** connections are available everywhere by default.
+- **Project** connections only exist for one repo.
+
+On top of that, a repo can explicitly **exclude** a global connection without
+deleting it for the rest of the account.
+
+That split is what lets one repo use a tightly scoped toolset without forcing
+the same choice on every other repo you work on.
+
+## The model in one table
+
+| Scope | Where you usually create it | What it applies to | Best fit |
+| --- | --- | --- | --- |
+| Global | [Settings](/web/settings) or the general Connections pane | Every repo unless one repo excludes it | Shared integrations you want almost everywhere |
+| Project (`This Project` in the UI) | The Connections pane while a repo is active | One repo only | Repo-specific tools, credentials, or experimental integrations |
+| Exclusion override | The Connections pane while a repo is active | Removes one global connection from one repo | Preventing a shared connection from appearing in the wrong repo |
+
+## Where each connection surface lives
+
+Use [Settings](/web/settings) when you want to:
+
+- connect a provider for the first time
+- run the initial health check
+- manage account-wide REST or MCP defaults
+- reconnect OAuth-backed integrations
+
+Use the repo-aware Connections pane inside a workspace when you want to:
+
+- add a connection only for the active repo
+- see the resolved connection set for that repo
+- exclude one global connection from that repo
+- confirm the repo-specific MCP count after overrides are applied
+
+The practical rule is:
+
+configure the integration in Settings first when you are onboarding it, then
+switch to the repo context only if one project should behave differently.
+
+## How resolution works inside a repo
+
+When Mogplex resolves runnable connections for a repo, it effectively applies
+this sequence:
+
+1. start with enabled global connections
+2. remove any global connections this repo has explicitly excluded
+3. add enabled project-scoped connections that belong to the repo
+
+That resolved set is what the active repo can actually use.
+
+This matters most for MCP servers. The MCP limit is enforced against the
+**resolved runnable set for that repo**, not just the raw account-wide list.
+
+So if one repo is already dense with project MCPs, excluding a noisy global MCP
+can be the difference between a clean tool surface and an overstuffed one.
+
+## Choose Global vs Project on purpose
+
+Choose **Global** when:
+
+- the same integration should be available to most repos
+- the credential or base URL is shared account-wide
+- you want one place to reconnect or disable the integration
+
+Choose **Project** when:
+
+- only one repo should see that tool
+- one repo needs different credentials or a different endpoint
+- you are testing a tool without exposing it everywhere
+- the connection only makes sense for one codebase or environment
+
+Use an **exclusion override** when:
+
+- the connection is still useful globally
+- one repo should not see it
+- you do not want to fork or duplicate the connection just to remove it from
+  one place
+
+## Common examples
+
+### One shared MCP for most repos
+
+If you use one Sentry or Linear connection almost everywhere, keep it global.
+
+Then only exclude it in the repo where it would be distracting, wrong, or
+unsafe.
+
+### One repo talks to a different environment
+
+If one repo must call a staging-only REST API or a different MCP endpoint,
+create that connection as **Project** scope from the active repo context.
+
+That keeps the alternate credential or base URL from leaking into unrelated
+repos.
+
+### One repo should not inherit a noisy shared tool
+
+If you have a global MCP connection but a particular repo should stay lean,
+exclude the global connection there instead of deleting it everywhere.
+
+## Healthy operating sequence
+
+1. Add or reconnect the integration in [Settings](/web/settings).
+2. Test it there until the connection itself is healthy.
+3. Open the target repo workspace.
+4. Decide whether the repo should inherit the global connection, exclude it, or
+   add a repo-only one.
+5. Re-check the repo-scoped connection list before debugging prompts or routing.
+
+That order matters because connection-health problems and scope problems are not
+the same bug.
+
+## What usually confuses people
+
+- A connection can be healthy in Settings and still be intentionally absent in
+  one repo because that repo excluded it.
+- A project-scoped connection is not broken if it does not appear in other
+  repos. That is the point.
+- Seeing a global connection in the account list does not mean it is part of
+  the resolved runnable set for every repo.
+
+## Read next
+
+- [Settings](/web/settings) for the account-level connections surface
+- [Project Workflow](/web/guides/project-workflow) for the order of GitHub,
+  Projects, sandboxes, and repo setup
+- [Working Requests](/web/api/working-requests) if you need to inspect the
+  underlying control-plane routes

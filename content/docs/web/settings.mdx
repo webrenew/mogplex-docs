@@ -145,6 +145,20 @@ The operational rule here is simple:
 configure and test the integration in Settings first, then debug agent prompts
 or routing only after the connection itself is known-good.
 
+Settings is also only part of the story.
+
+When you are inside an active repo workspace, Mogplex can resolve connections
+with repo context:
+
+- **Global** connections stay available everywhere by default
+- **This Project** connections only exist for one repo
+- one repo can explicitly exclude a global connection without deleting it
+  account-wide
+
+Use Settings to onboard and validate the integration itself. Use the repo
+context when one codebase needs a different tool surface. For the exact model,
+see [Connection Scope and Overrides](/web/guides/connection-scope-and-overrides).
+
 ### Current MCP quick-add presets
 
 The built-in MCP presets currently include:

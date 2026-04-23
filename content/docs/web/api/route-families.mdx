@@ -8,6 +8,9 @@ not as a generic public REST surface.
 
 Most route groups map directly to a product area.
 
+If you want copy-paste examples first, go to
+[Working Requests](/web/api/working-requests) and then come back here.
+
 ## Identity and setup
 
 Representative routes:
@@ -24,6 +27,11 @@ These routes answer questions like:
 - who is the current user in Mogplex terms?
 - what GitHub/App/Vercel setup state should the UI show?
 - what provider keys, CLI tokens, defaults, and models are available?
+
+Good first calls in this family:
+
+- `GET /api/auth/user` for overall readiness
+- `GET /api/settings` for shared user defaults
 
 This family matters because setup state is first-class in the product. The UI
 does not just assume the account is ready.
@@ -42,6 +50,11 @@ Representative routes:
 - `/api/github/pulls`
 
 These routes manage the imported repo graph the rest of Mogplex builds on.
+
+Good first calls in this family:
+
+- `GET /api/github/installations` when webhook-backed routing looks empty
+- `GET /api/repos` when Projects state itself looks wrong
 
 If routing, repo visibility, monorepo structure, or sandbox ownership feels
 wrong, this is often the state layer to inspect first.
@@ -72,6 +85,11 @@ This is the reusable behavior layer behind:
 - connection health
 - rules, skills, and shared context libraries
 
+Good first calls in this family:
+
+- `GET /api/mcp-servers?format=cli` when the CLI should mirror hosted MCP state
+- `GET /api/connections` when tool access feels configured wrong
+
 If the product feels "configured wrong" rather than "running wrong", this is
 often the route family involved.
 
@@ -93,6 +111,11 @@ These routes back the three durable routing models in Mogplex:
 They matter because Mogplex treats event routing, repo responsibility, and
 workflow orchestration as different product models instead of one overloaded
 object.
+
+Good first calls in this family:
+
+- `GET /api/flows` to list existing automations
+- `POST /api/flows` to create a new automation shell for one installation
 
 ## Conversations, memory, and live agent work
 
@@ -131,6 +154,11 @@ If the routing surface answers "what should run?", these routes answer:
 - how much did it cost?
 - what tool calls happened?
 
+Good first calls in this family:
+
+- `GET /api/observability/stats` for compressed health and cost signals
+- `GET /api/sandbox/[id]` when you already know the sandbox you need to inspect
+
 ## System plumbing and internal operations
 
 Representative routes:
@@ -152,6 +180,9 @@ This family includes:
 - internal processing routes
 - test helpers
 - migration and maintenance paths
+
+You usually do not start in this family unless you are debugging Mogplex
+itself.
 
 ## A useful mental model
 
