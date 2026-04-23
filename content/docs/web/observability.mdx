@@ -5,13 +5,22 @@ description: Inspect Mogplex run health, pressure, sandbox time, model-call acti
 
 Observability is the runtime view for Mogplex work that has already started.
 
-Today the page has two layers:
+This is where you answer questions like:
 
-- summary cards for run health, pressure, sandbox time, tokens, and cost
-- an activity table for model-call-level inspection
+- did the work actually run?
+- is the system under pressure, stuck, or failing?
+- which model call or tool call caused the problem?
+- is cost coming from the CLI, hosted work, or automation?
 
-That split matters. The summary cards tell you whether the system is healthy at
-a glance; the activity table is where you inspect concrete calls.
+## The page has two jobs
+
+Observability is easiest to use when you treat it as two layers:
+
+- **summary cards** tell you whether the overall system looks healthy
+- **Activity** tells you what happened on individual calls
+
+Read the cards first when you want the shape of the problem.
+Open Activity rows when you want the actual story.
 
 ## What the summary cards show
 
@@ -43,8 +52,8 @@ The summary area combines three kinds of signal.
 - call success rate
 - total sandbox time plus active and total sandbox counts
 
-This means Observability can surface automation and sandbox health even before
-you open a single detailed call row.
+That means Observability can tell you whether the problem is broad, isolated,
+expensive, or stuck before you inspect a single detailed row.
 
 ## What the Activity table shows
 
@@ -78,8 +87,8 @@ The surface badge is derived from the call record:
 - **Cloud** means it ran outside a job-backed automation
 - **Automation** means it is attached to a job run
 
-That makes the table useful when you are asking whether spend or failures are
-coming from local CLI work, hosted work, or automation.
+That split is the quickest way to answer whether failures or spend are coming
+from local work, hosted work, or automation.
 
 ## Expand a row when you need the real story
 
@@ -88,8 +97,8 @@ can include:
 
 - a GitHub deep link when the source metadata maps back to a PR, issue, or
   related event
-- sandbox billing information, linked Vercel project/team, sandbox record ID,
-  preview URL, and runtime ID
+- sandbox billing information, linked Vercel project or team, sandbox record
+  ID, preview URL, and runtime ID
 - a shortcut to open sandbox health directly
 - runtime command ID when the call came from the CLI path
 - the error string, if the call failed
@@ -97,9 +106,9 @@ can include:
 - tool calls with captured inputs and outputs
 - raw metadata for deeper inspection
 
-This is the part of the app that answers questions like "what tool did the
-agent call?", "which sandbox did this run touch?", and "what GitHub object did
-this call come from?"
+This is the part of the app that answers questions like “what tool did the
+agent call?”, “which sandbox did this run touch?”, and “what GitHub object did
+this call come from?”
 
 ## Practical workflows
 
@@ -114,10 +123,10 @@ this call come from?"
 
 1. Read the summary cards first to confirm whether this is broad or isolated.
 2. Filter Activity by surface or status.
-3. Sort through the highest-cost or highest-token calls and inspect tool usage
-   in expanded rows.
+3. Inspect the most expensive or highest-token calls and look at tool usage in
+   expanded rows.
 
-### A trigger or assignment seems quiet
+### A trigger, assignment, or automation seems quiet
 
 1. Check whether the summary cards show runs, stale pending work, suppression,
    or start failures.
@@ -125,5 +134,15 @@ this call come from?"
    [Triggers](/web/triggers), [Assignments](/web/assignments), or
    [Automations](/web/automations).
 
-Observability becomes most useful once work has queued or started. Source
-surfaces still own creation, enable/disable, and routing edits.
+## What Observability does not own
+
+Observability is for inspection after work has queued or started.
+
+Creation, enable or disable state, and routing changes still belong to the
+source surfaces:
+
+- [Projects](/web/spaces)
+- [Triggers](/web/triggers)
+- [Assignments](/web/assignments)
+- [Automations](/web/automations)
+- [Sandboxes](/web/sandboxes)

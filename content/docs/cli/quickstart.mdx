@@ -3,6 +3,8 @@ title: Quickstart
 description: Install the CLI, choose an auth path, run a first task, and confirm the current Mogplex CLI surface is working.
 ---
 
+This page is for the fastest credible proof that the CLI is working.
+
 The shortest useful loop is:
 
 1. install the binary
@@ -45,6 +47,13 @@ Stored credentials live under `~/.mogplex/auth.json`.
 Success at this step means the CLI reaches the prompt and does not bounce you
 back out with an auth error.
 
+The practical choice is:
+
+- choose **Sign in with Mogplex** when you want the CLI to inherit hosted state
+  from the web app
+- choose **Use an API key** when this machine should behave independently of the
+  hosted account
+
 ## 3. Alternative: use an environment variable
 
 If you prefer shell-managed credentials, direct provider env vars still work and
@@ -59,6 +68,10 @@ mogplex
 
 That means a shell export can temporarily override whichever provider you
 previously stored through Mogplex login.
+
+This is useful for CI, short-lived shells, or temporary provider switches, but
+it also explains why a shell can behave differently from what
+`mogplex login status` seems to imply.
 
 Inside a session, the common entry points are:
 
@@ -75,7 +88,7 @@ If you want to inspect what Mogplex has already stored locally, run:
 mogplex login status
 ```
 
-## 4. Run one interactive or one-off task
+## 4. Run one real task
 
 If you want a live session, stay inside `mogplex` and ask for work directly.
 
@@ -101,7 +114,7 @@ mogplex exec "summarize this repository and point out the likely entrypoints"
 ```
 
 If that works, you know auth, model access, and the non-interactive path are
-all functioning.
+all alive.
 
 ## 5. Inspect the slash surface
 
@@ -118,6 +131,11 @@ it, go through exec mode:
 ```bash
 mogplex exec "/status"
 ```
+
+That is the right split:
+
+- `mogplex slash list` to discover what exists
+- `mogplex exec "/..."` to execute a slash command non-interactively
 
 ## 6. Make Mogplex repo-aware
 
@@ -141,7 +159,13 @@ By this point, a healthy setup looks like:
 - `mogplex slash list` shows the commands you expect
 - repo-local instructions affect behavior once you add them
 
-## Common first-run problems
+If you cannot say yes to those, the problem is usually one of three things:
+
+- auth source confusion between env vars and stored login
+- missing provider or hosted model access
+- missing repo-local files such as `AGENTS.md` or `.agents/commands/`
+
+## Common first-run issues
 
 - `mogplex` opens, but you do not have usable models: if you used account login,
   check [Web Settings](/web/settings) and add an API key or gateway key there.
@@ -150,10 +174,12 @@ By this point, a healthy setup looks like:
 - `mogplex exec` works, but a slash command is missing: confirm it appears in
   `mogplex slash list` first.
 
-From there, the usual next docs are:
+From there, the best next docs are:
 
 - [Authentication](/cli/guides/authentication) for credential precedence and
   browser sign-in
 - [Exec Mode](/cli/guides/exec-mode) for one-off tasks
 - [Slash Commands](/cli/guides/slash-commands) for project-local command
   discovery and `/init`
+- [Project Commands](/cli/guides/project-commands) for repo-local instruction
+  files and command packs

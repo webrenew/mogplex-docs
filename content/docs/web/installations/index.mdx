@@ -10,6 +10,19 @@ docs section describes the GitHub App installation state surfaced in
 [Settings](/web/settings) and consumed by [Projects](/web/spaces),
 [Triggers](/web/triggers), and [Automations](/web/automations).
 
+## The distinction to keep explicit
+
+For most setup problems, there are three states a repo can be in:
+
+1. **not visible at all**
+2. **visible through GitHub OAuth**
+3. **covered by a Mogplex GitHub App installation**
+
+Only the third state is fully eligible for App-backed routing and automation.
+
+That is why Installations deserves its own docs section even though the product
+does not currently expose it as a standalone top-level dashboard page.
+
 ## Why installations matter
 
 An installation answers two different questions:
@@ -32,14 +45,16 @@ Keep this distinction explicit:
 That is why a repo can appear in [Projects](/web/spaces) yet still fail to
 participate in [Triggers](/web/triggers) or installation-backed automations.
 
-## What an installation unlocks
+## What “covered” unlocks in practice
 
-When the right installation exists, Mogplex can:
+When the right installation exists, Mogplex can do more than just list repos.
 
-- attach synced repos to the correct GitHub account scope
-- mark repos as eligible for App-backed routing
-- use installation-backed webhook events for triggers and automations
-- generate a GitHub manage link back to the installation when metadata is known
+It can:
+
+- receive webhook events for the installed owner
+- offer that installation as a routing target in [Triggers](/web/triggers)
+- treat repos under that owner as eligible for App-backed workflows
+- reconnect synced repos to the correct owner and installation metadata
 
 ## What the app surfaces show
 
@@ -51,7 +66,7 @@ Inside [Settings](/web/settings), each installation can show:
 - how many repos are mapped to it
 - a direct manage link back to GitHub
 
-This is the fastest way to answer a common setup problem:
+This is the fastest way to answer the real operator question:
 
 **Do I have the right App installed on the right owner, or am I only seeing
 repos through OAuth?**
@@ -73,7 +88,7 @@ login or target type, and then derive:
 That is why the Settings page can often recover from stale installation records
 without asking you to reconnect everything manually.
 
-## Common setup pattern
+## The most reliable workflow
 
 1. Connect GitHub in [Settings](/web/settings).
 2. Confirm the expected personal account or org appears in the installation
@@ -84,6 +99,15 @@ without asking you to reconnect everything manually.
 
 If you skip step 2, you can spend time debugging a routing problem that is
 really just missing GitHub App coverage.
+
+## Common symptoms of missing coverage
+
+- the repo appears in [Projects](/web/spaces), but [Triggers](/web/triggers)
+  offers no useful installations
+- mention or PR-triggered work never fires even though the repo is visible
+- webhook-backed automation looks empty or unavailable for the owner you need
+- the app appears connected, but Mogplex still behaves as if the repo is
+  “outside” the GitHub App boundary
 
 ## In this section
 

@@ -10,6 +10,10 @@ Instead of listening to a GitHub App installation broadly like
 and a specific work type. That makes the repo, not the installation, the
 durable unit of routing.
 
+Think of an assignment as a standing contract:
+
+**for this repo, run this kind of work with this agent.**
+
 ## Use Assignments when
 
 - one repo should always have the same review or triage behavior
@@ -20,6 +24,19 @@ durable unit of routing.
 If the source of truth is a GitHub event across an installation, use
 [Triggers](/web/triggers). If the routing needs branching, joins, delays, or
 multiple steps, use [Automations](/web/automations).
+
+## Why Assignments exists
+
+Assignments is the middle ground between lightweight triggers and full
+workflow graphs.
+
+It keeps durable repo-owned work close to the repo itself:
+
+- standing PR review
+- push review
+- issue triage
+- CI failure response
+- scheduled maintenance or refactor work
 
 ## Supported assignment types
 
@@ -46,6 +63,9 @@ Every assignment is a three-part mapping:
 If you choose a built-in preset agent, Mogplex resolves it to an owned agent
 before saving the assignment. It reuses your existing fork of that preset when
 one already exists, or creates a fork in your account automatically.
+
+That behavior is why assignment creation can appear to “materialize” a custom
+agent even though you started from a preset.
 
 ## What the page shows after creation
 
@@ -74,6 +94,14 @@ the first place to see whether that work is healthy.
    supports it.
 5. Move into [Observability](/web/observability) when you need call-level,
    tool-level, or sandbox-linked detail.
+
+## What healthy assignment operations look like
+
+- the repo and assignment type still match the work you actually want
+- the agent is durable and owned, not an accidental temporary experiment
+- the row shows recent status clearly enough that you do not need to open deeper
+  runtime views for every check
+- repairs or requeues are the exception, not the default operating mode
 
 ## Good fits
 
