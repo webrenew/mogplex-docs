@@ -1,13 +1,13 @@
 ---
 title: Overview
-description: The Mogplex web app for projects, agents, automations, triggers, observability, settings, installations, and the hosted API.
+description: Use the Mogplex web app to connect GitHub, import repos, author agents, choose routing, and operate the hosted control plane.
 ---
 
 The web app is the shared control plane for Mogplex.
 
-Use it to connect GitHub, import repositories, define reusable agents, build
-GitHub-driven workflows, inspect runtime activity, and manage the credentials
-and connections the CLI can reuse.
+This is where you connect GitHub, import repositories, define reusable agents,
+choose how GitHub events should route, inspect runtime activity, and manage the
+hosted credentials and connections the CLI can reuse.
 
 <Cards>
   <Card title="Projects" href="/web/spaces" />
@@ -22,7 +22,7 @@ and connections the CLI can reuse.
   <Card title="API" href="/web/api" />
 </Cards>
 
-## Current surface
+## Surface map
 
 - **Projects** lives at `/spaces`. It is where repository import, project
   organization, sandbox launch, and workspace opening happen.
@@ -36,8 +36,35 @@ and connections the CLI can reuse.
   cron, and triage work.
 - **Observability** tracks runs, pressure, failures, model calls, tool usage,
   and sandbox-linked activity.
-- **Settings** manages account connections, provider keys, CLI tokens, models,
-  preferences, and synced MCP definitions.
+- **Settings** manages GitHub identity, App coverage, connections, provider
+  keys, CLI tokens, models, preferences, and synced MCP definitions.
+
+## Start in this order
+
+For a new account or a new repo, the most reliable path through the product is:
+
+1. [Settings](/web/settings) to connect GitHub and confirm your account can use
+   the product.
+2. [Installations](/web/installations) to verify GitHub App coverage for the
+   correct user or org.
+3. [Projects](/web/spaces) to sync repos, organize them, and open a workspace.
+4. [Agents](/web/agents) to create or fork the agents you actually want to run.
+5. [Triggers](/web/triggers), [Assignments](/web/assignments), or
+   [Automations](/web/automations) depending on how much routing logic you
+   need.
+6. [Observability](/web/observability) to inspect runs, pressure, and failures
+   after work starts.
+
+## Choose the right routing surface
+
+- Use **Triggers** when the rule is simply `one GitHub event -> one agent`.
+- Use **Assignments** when the repo is the durable unit of routing and you want
+  standing work such as PR review, issue triage, CI failure response, or cron.
+- Use **Automations** when you need multiple steps, branching, delays,
+  publishable drafts, or explicit mention-entry workflows.
+
+If the choice is not obvious yet, read
+[Choose the Right Routing Surface](/web/guides/choose-routing-surface).
 
 ## Legacy routes
 
@@ -47,15 +74,22 @@ surfaces:
 - `/flows` redirects to `/automations`
 - `/library` redirects to agent libraries or model settings, depending on tab
 
-## Start with the workflow
+The product language still says **Projects** even though the route is
+`/spaces`. The docs use the current UI label and call out the route where it
+matters.
 
-If you are setting up Mogplex for a repo for the first time, the fastest path
-through the product is:
+## Common first-run questions
 
-1. [Settings](/web/settings) to connect GitHub and confirm App coverage
-2. [Projects](/web/spaces) to sync repos and open a workspace
-3. [Triggers](/web/triggers), [Assignments](/web/assignments), or
-   [Automations](/web/automations) depending on how much routing you need
-4. [Observability](/web/observability) once work is running
+- **Why is Triggers empty?** Usually because GitHub OAuth is connected but the
+  Mogplex GitHub App is not installed for the owner that holds the repo. Check
+  [Installations](/web/installations).
+- **Why can I see repos but not launch the kind of work I want?** Repo sync and
+  webhook coverage are separate concerns. Projects can show synced repos before
+  they are fully triggerable.
+- **Where do I set up models and external tools?** Use
+  [Settings](/web/settings). Agent behavior belongs in [Agents](/web/agents).
+- **Where do I start for mention-driven workflows?** Use
+  [Triggers](/web/triggers) for a direct mention route, or
+  [Automations](/web/automations) if the mention should fan into a workflow.
 
-For the operational walkthrough, use [Web Guides](/web/guides).
+For the operational walkthroughs, use [Web Guides](/web/guides).

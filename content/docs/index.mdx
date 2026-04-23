@@ -1,13 +1,16 @@
 ---
 title: Get started
-description: Choose the CLI or web app and start with the Mogplex surface that matches the work.
+description: Start with the right Mogplex surface, follow the first-day setup path, and get to a working repo quickly.
 ---
 
-Mogplex ships in two surfaces.
+Mogplex has two surfaces that work together:
 
-Use the CLI when you want local, repo-in-place agent work from your terminal.
-Use the web app when you want the shared control plane for projects, agents,
-automations, triggers, observability, and settings.
+- the **web app** is the shared control plane for repos, agents, routing,
+  credentials, and observability
+- the **CLI** is the local runtime for repo-in-place work from your terminal
+
+You do not need to learn the whole product at once. The important first
+decision is where the work starts.
 
 <Cards>
   <Card
@@ -22,18 +25,62 @@ automations, triggers, observability, and settings.
   />
 </Cards>
 
-## Quickstart
+## Start in the right surface
 
-Install the CLI and start a first task. If you are not authenticated yet,
-`mogplex` now walks you into browser sign-in or local API-key setup.
+- Start in **Web App** when you need to connect GitHub, import repositories,
+  author agents, configure triggers or automations, or inspect runs across your
+  team.
+- Start in **CLI** when you already have a repo locally and want Mogplex to
+  review, edit, summarize, or operate on it from the terminal.
+- Use **both** when you want hosted account setup and shared configuration from
+  the web app, but day-to-day execution in the CLI.
+
+## First-day path
+
+If you want the shortest path to a working Mogplex setup, use this order:
+
+1. Open the [web app](/web) and connect GitHub in [Settings](/web/settings).
+2. Verify GitHub App coverage in [Installations](/web/installations), then sync
+   repos in [Projects](/web/spaces).
+3. Define or inspect your reusable agents in [Agents](/web/agents).
+4. Choose a routing surface:
+   - [Triggers](/web/triggers) for `one event -> one agent`
+   - [Assignments](/web/assignments) for repo-bound standing work
+   - [Automations](/web/automations) for multi-step workflows
+5. Install the [CLI](/cli) and run a first local task in the repo.
+6. Use [Observability](/web/observability) once work is live.
+
+## Fastest possible first run
+
+If you only want to prove the product is working end to end, install the CLI
+and start a session. If you are not authenticated yet, `mogplex` walks you into
+browser sign-in or local API-key setup.
 
 ```bash
 curl -fsSL https://www.mogplex.com/install.sh | sh
 mogplex
 ```
 
-If you prefer a direct provider key, `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`
-work as expected too.
+Success looks like this:
 
-Prefer the hosted experience? Open [Mogplex in the browser](https://www.mogplex.com/login),
-connect GitHub, and start from Projects, Triggers, or Automations.
+- `mogplex` opens an interactive session
+- you can authenticate with either your Mogplex account or a provider key
+- `mogplex exec "summarize this repository"` returns a normal one-off result
+
+If you prefer shell-managed credentials, direct provider env vars still work:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+# or
+export OPENAI_API_KEY=sk-...
+mogplex
+```
+
+## What to read next
+
+- New to the hosted product: start with [Web App Overview](/web)
+- New to the terminal flow: start with [CLI Overview](/cli)
+- Trying to wire GitHub mentions correctly:
+  [GitHub Mention Routing](/web/guides/github-mention-routing)
+- Trying to choose the right routing surface:
+  [Choose the Right Routing Surface](/web/guides/choose-routing-surface)

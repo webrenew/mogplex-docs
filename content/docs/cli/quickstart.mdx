@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-description: Run your first Mogplex task from the terminal with the current CLI surface.
+description: Install the CLI, choose an auth path, run a first task, and confirm the current Mogplex CLI surface is working.
 ---
 
 The fastest path is: install the binary, start `mogplex`, choose how to
@@ -36,6 +36,9 @@ If you choose **Use an API key**, the current startup picker can store keys for:
 - Cohere
 
 Stored credentials live under `~/.mogplex/auth.json`.
+
+Success at this step means the CLI reaches the prompt and does not bounce you
+back out with an auth error.
 
 ## 3. Alternative: use an environment variable
 
@@ -82,6 +85,15 @@ mogplex "summarize this repository"
 Use `mogplex exec` when you want the intent to be explicit in scripts,
 automation, or shell history.
 
+A good first success check is a repo-local prompt such as:
+
+```bash
+mogplex exec "summarize this repository and point out the likely entrypoints"
+```
+
+If that works, you know auth, model access, and the non-interactive path are
+all functioning.
+
 ## 5. Inspect the slash surface
 
 ```bash
@@ -90,6 +102,25 @@ mogplex slash list
 
 That shows the built-in in-session commands plus any project or user commands
 loaded from `.agents/commands/` and `~/.mogplex/commands/`.
+
+## 6. Make Mogplex repo-aware
+
+Inside a repo, the next upgrade is to add repo-local instructions and commands:
+
+- `AGENTS.md` for stable repo guidance
+- `.agents/commands/` for repo-scoped slash commands
+- `/init` inside a live session to scaffold the basics quickly
+
+See [Project Commands](/cli/guides/project-commands) for the full pattern.
+
+## Common first-run problems
+
+- `mogplex` opens, but you do not have usable models: if you used account login,
+  check [Web Settings](/web/settings) and add an API key or gateway key there.
+- `mogplex login status` shows stored auth, but the current shell behaves
+  differently: an env var is probably overriding stored credentials.
+- `mogplex exec` works, but a slash command is missing: confirm it appears in
+  `mogplex slash list` first.
 
 From there, the usual next docs are:
 

@@ -1,6 +1,6 @@
 ---
 title: Authentication
-description: How Mogplex resolves stored credentials, when account login is enough, and what bare `mogplex`, `mogplex login`, `/login`, and `/logout` mean in the CLI.
+description: Understand Mogplex auth precedence, browser sign-in, stored provider keys, and what `mogplex login`, `/login`, and `/logout` do.
 ---
 
 Mogplex can run with either direct provider credentials or your Mogplex account.
@@ -35,6 +35,20 @@ When a session starts, it resolves auth in this order.
    bare `mogplex` prompts you to either sign in with Mogplex or store a provider
    API key. In non-interactive contexts it exits with a clear message telling
    you to run `mogplex`.
+
+## What "account login" really means
+
+Browser login is not the same thing as storing a direct provider key locally.
+
+When you log in with your Mogplex account, the CLI reuses the hosted account's:
+
+- model access
+- synced model catalog
+- synced MCP configuration
+- Mogplex-managed authentication path
+
+That is the cleanest setup when you want the web app and CLI to share
+configuration.
 
 ## Mogplex account login
 
@@ -77,6 +91,9 @@ export OPENAI_API_KEY=sk-...
 mogplex
 ```
 
+This is the preferred pattern for CI, ephemeral shells, and environments where
+you do not want credentials written to `~/.mogplex/auth.json`.
+
 ## `/logout`
 
 Sign-out is currently exposed through the slash surface, not through a wired
@@ -88,10 +105,21 @@ Inside a live session, `/logout` removes the stored credential from
 Two things to know:
 
 - **If the matching env var is set, the next session still authenticates via the
-  env var.** This is by design — env vars are the source of truth for shell-driven
+  env var.** This is by design. Env vars are the source of truth for shell-driven
   setups.
 - **If you log out of Mogplex, synced models and MCP entries disappear on the
   next startup.**
+
+## Common outcomes and what they mean
+
+- `mogplex login status` shows only a Mogplex credential: the CLI is in
+  account-backed mode.
+- `mogplex login status` shows a provider credential and the session uses that
+  provider: direct provider auth is active.
+- the CLI behaves differently than `login status` suggests: check env vars first
+  because they outrank stored credentials.
+- account login succeeds but prompts fail: the hosted account probably still
+  lacks usable model access in [Web Settings](/web/settings).
 
 ## Logging and credential safety
 

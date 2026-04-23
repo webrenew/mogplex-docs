@@ -1,6 +1,6 @@
 ---
 title: Exec Mode
-description: Use mogplex exec and bare prompt invocation for one-off, non-interactive tasks.
+description: Use `mogplex exec` and bare prompt invocation for one-off, non-interactive tasks, scripts, and shell wrappers.
 ---
 
 `mogplex exec` is the non-interactive side of the CLI.
@@ -31,6 +31,13 @@ Use exec mode when you want:
 
 If you want a running session with history, model switching, and repeated back
 and forth, use bare `mogplex` instead.
+
+## Good defaults
+
+- prefer `mogplex exec "..."` in scripts and automation
+- use bare `mogplex "..."` when you are typing by hand and want speed
+- keep prompts explicit and task-shaped instead of trying to emulate a whole
+  conversation in one shell call
 
 ## Structured output
 
@@ -66,3 +73,11 @@ without opening a full session.
 - summarize a repo before another tool step
 - inspect slash-command state from a script
 - run one focused task and capture the result
+
+## Common mistakes
+
+- using exec mode for work that really needs iterative back and forth
+- assuming a top-level command exists when the slash equivalent is the real
+  supported path today
+- skipping `--json` or `--jsonl` when another tool is supposed to consume the
+  output

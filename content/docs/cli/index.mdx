@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: The Mogplex CLI for interactive sessions, one-off exec runs, slash commands, and local configuration.
+description: Use the Mogplex CLI for interactive terminal sessions, one-off exec runs, slash commands, and repo-local instructions.
 ---
 
 The Mogplex CLI (`mogplex`) is the local runtime for Mogplex.
@@ -16,32 +16,63 @@ workflows, local MCP configuration, and repo-scoped conventions like
   <Card title="Guides" href="/cli/guides" />
 </Cards>
 
-## Current surface
+## CLI mental model
 
-- `mogplex` launches the interactive terminal UI and, if needed, prompts you to
-  sign in or store an API key before the session starts.
-- `mogplex exec "<prompt>"` runs a single non-interactive task.
-- `mogplex "<prompt>"` also works as a shortcut for a one-off run.
-- `mogplex slash list` shows the discovered slash-command registry for the
+- `mogplex` launches the interactive session. Use this when you want back and
+  forth, slash commands, model switching, and a persistent local workflow.
+- `mogplex exec "<prompt>"` runs one non-interactive task and exits. Use this
+  for scripts, wrappers, and quick one-off work.
+- `mogplex "<prompt>"` is a shorthand for a one-off non-interactive run.
+- `mogplex slash list` shows the slash-command registry available in the
   current environment.
-- `~/.mogplex/config.toml`, `~/.mogplex/auth.json`, and project files like
-  `AGENTS.md` shape runtime behavior.
+- `AGENTS.md`, `.agents/commands/`, `~/.mogplex/config.toml`, and
+  `~/.mogplex/auth.json` shape how the CLI behaves.
 
-## What the CLI is good at
+## What the CLI is best at
 
 - repo-in-place work from your terminal
 - one-off review or edit tasks without opening the browser
 - local slash-command workflows
 - reusing models, MCP definitions, and tokens synced from your Mogplex account
 
-## Start with these workflows
+## First-run path
 
-- [Quickstart](/cli/quickstart) for the first run
-- [Exec Mode](/cli/guides/exec-mode) for shell-driven one-off tasks
-- [Slash Commands](/cli/guides/slash-commands) for local control actions and
-  custom command discovery
-- [Authentication](/cli/guides/authentication) for credential precedence and
-  sign-in behavior
+1. Install the binary with [Installation](/cli/installation).
+2. Run `mogplex`.
+3. Authenticate either through your Mogplex account or a direct provider key.
+4. Run a first task in the repo.
+5. Inspect the slash registry with `mogplex slash list`.
+
+If you want shared configuration from the hosted product, connect the account in
+the [web app](/web/settings) first so the CLI can reuse synced models and MCP
+definitions.
+
+## Files that matter
+
+- `~/.mogplex/auth.json` stores browser login or provider credentials.
+- `~/.mogplex/config.toml` stores CLI configuration and profiles.
+- `AGENTS.md` teaches Mogplex how to work inside a specific repo.
+- `.agents/commands/` adds repo-scoped slash commands.
+- `~/.mogplex/commands/` adds user-scoped slash commands across repos.
+
+## Use the CLI and web app together
+
+The cleanest setup is usually:
+
+1. configure GitHub, models, API keys, and shared MCP servers in the
+   [web app](/web/settings)
+2. do local repo work in the CLI
+3. inspect hosted runs and cost in [Observability](/web/observability)
+
+That split keeps shared account state in one place and local execution in the
+tool that is best at working inside a repo.
 
 If you want shared configuration, repo import, or workflow authoring, start in
 the [web app](/web).
+
+## Read next
+
+- [Quickstart](/cli/quickstart) for the first working session
+- [Authentication](/cli/guides/authentication) for credential precedence
+- [Exec Mode](/cli/guides/exec-mode) for one-off tasks and scripts
+- [Slash Commands](/cli/guides/slash-commands) for the local control surface

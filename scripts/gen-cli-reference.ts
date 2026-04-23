@@ -160,6 +160,11 @@ interface CommandDoc {
   aliases: string[];
 }
 
+interface RelatedDoc {
+  label: string;
+  href: string;
+}
+
 const EXTRA_SECTIONS: Readonly<Record<string, string[]>> = {
   exec: [
     "## How It Works",
@@ -230,34 +235,133 @@ const EXTRA_SECTIONS: Readonly<Record<string, string[]>> = {
     "- Use `mogplex exec \"/...\"` to run a slash command non-interactively.",
     "- Use a live `mogplex` session when you want the normal interactive slash workflow.",
   ],
+};
+
+const COMMAND_USE_TODAY: Readonly<Record<string, string[]>> = {
   review: [
-    "## Current Implementation Status",
-    "",
-    "The command name is present in the CLI help surface, but the standalone `mogplex review` path is not wired yet in the current build.",
-    "At the moment, running it can return `Subcommand 'review' is not yet implemented.`",
-    "",
-    "## Current Alternative",
-    "",
-    "Use `exec` with an explicit review prompt instead:",
-    "",
-    "```bash",
-    'mogplex exec "review the staged diff for regressions"',
-    "```",
+    'Use `mogplex exec "review the staged diff for regressions"` for one-off code review.',
+  ],
+  logout: [
+    "Use `/logout` inside a live session to remove the stored credential.",
+    "Run `mogplex login status` afterward if you want to confirm what is still stored.",
   ],
   mcp: [
-    "## Current Implementation Status",
-    "",
-    "The command name is present in the CLI help surface, but the standalone `mogplex mcp` path is not wired yet in the current build.",
-    "At the moment, running it can return `Subcommand 'mcp' is not yet implemented.`",
-    "",
-    "## Current Alternative",
-    "",
-    "For current MCP visibility, use one of these paths:",
-    "",
-    "- [Settings](/web/settings) in the web app for shared MCP definitions",
-    '- `mogplex exec "/mcp"` for the in-session slash view of configured MCP servers',
+    'Use `mogplex exec "/mcp"` or `/mcp` inside a session to inspect configured MCP servers.',
+    "Manage shared MCP definitions in [Settings](/web/settings).",
+  ],
+  "mcp-server": [
+    "Use [Settings](/web/settings) for shared MCP configuration.",
+    'Use `mogplex exec "/mcp"` for the current local inspection path.',
+  ],
+  plugin: [
+    "Treat this as a reserved command name for now.",
+    "The production-safe customization paths today are repo instructions, slash commands, and the hosted settings surfaces.",
+  ],
+  app: [
+    "The CLI and web app are the production surfaces today.",
+    "Ignore this command unless a release note explicitly tells you to use it.",
+  ],
+  "app-server": [
+    "This is an experimental help-surface entry.",
+    "Do not build automation around it yet.",
+  ],
+  completion: [
+    "Shell completion generation is not yet a stable standalone workflow in the current build.",
+    "Use `mogplex --help` as the current source of truth for available commands and flags.",
+  ],
+  sandbox: [
+    "Use `/sandbox` inside a live session.",
+    'If you need a shell entrypoint, try `mogplex exec "/sandbox ..."` in environments where the slash command is available.',
+  ],
+  debug: [
+    "Use `/logs`, `/status`, and [Observability](/web/observability) for current debugging workflows.",
+  ],
+  apply: [
+    "Use an interactive `mogplex` session and inspect or apply changes from the active workflow directly.",
+  ],
+  resume: [
+    "Use the interactive session and existing session history today.",
+    "Do not script against `mogplex resume` yet.",
+  ],
+  fork: [
+    "Use a new `mogplex` session or the existing interactive workflow today.",
+    "Do not script against `mogplex fork` yet.",
+  ],
+  cloud: [
+    "Use the [web app](/web) and [Observability](/web/observability) for hosted activity today.",
+  ],
+  "exec-server": [
+    "Treat this as an experimental help-surface entry unless a release note explicitly tells you to use it.",
+  ],
+  features: [
+    "Use the global `--feature KEY[=VAL]` flag on supported commands instead of relying on a standalone `mogplex features` workflow.",
   ],
 };
+
+const COMMAND_RELATED_DOCS: Readonly<Record<string, RelatedDoc[]>> = {
+  exec: [
+    { label: "Exec Mode", href: "/cli/guides/exec-mode" },
+    { label: "Quickstart", href: "/cli/quickstart" },
+  ],
+  review: [{ label: "Exec Mode", href: "/cli/guides/exec-mode" }],
+  login: [
+    { label: "Authentication", href: "/cli/guides/authentication" },
+    { label: "Quickstart", href: "/cli/quickstart" },
+  ],
+  logout: [
+    { label: "Authentication", href: "/cli/guides/authentication" },
+    { label: "Slash Commands", href: "/cli/guides/slash-commands" },
+  ],
+  mcp: [
+    { label: "Slash Commands", href: "/cli/guides/slash-commands" },
+    { label: "Web Settings", href: "/web/settings" },
+  ],
+  "mcp-server": [{ label: "Web Settings", href: "/web/settings" }],
+  sandbox: [{ label: "Slash Commands", href: "/cli/guides/slash-commands" }],
+  debug: [
+    { label: "Slash Commands", href: "/cli/guides/slash-commands" },
+    { label: "Observability", href: "/web/observability" },
+  ],
+  cloud: [
+    { label: "Web App Overview", href: "/web" },
+    { label: "Observability", href: "/web/observability" },
+  ],
+  slash: [
+    { label: "Slash Commands", href: "/cli/guides/slash-commands" },
+    { label: "Quickstart", href: "/cli/quickstart" },
+  ],
+};
+
+function getStatusText(cmd: CommandDoc): string {
+  if (cmd.isImplemented && cmd.isExperimental) {
+    return "Implemented experimental standalone command.";
+  }
+  if (cmd.isImplemented) {
+    return "Implemented standalone command.";
+  }
+  if (cmd.isExperimental) {
+    return "Help-surface-only experimental command name.";
+  }
+  return "Help-surface-only reserved command name.";
+}
+
+function getFallbackWorkarounds(cmd: CommandDoc): string[] {
+  const specific = COMMAND_USE_TODAY[cmd.name];
+  if (specific && specific.length > 0) {
+    return specific;
+  }
+  return [
+    "If you need this capability today, prefer a fully implemented path such as `mogplex exec`, `mogplex login`, `mogplex slash list`, or an in-session slash command.",
+    "Treat this page as documentation for the name the binary advertises, not as a guarantee that the standalone path is production-ready yet.",
+  ];
+}
+
+function getRelatedDocs(cmd: CommandDoc): RelatedDoc[] {
+  return [
+    ...(COMMAND_RELATED_DOCS[cmd.name] ?? []),
+    { label: "All commands", href: "/cli/commands" },
+  ];
+}
 
 function generateMdx(cmd: CommandDoc): string {
   const lines: string[] = [];
@@ -277,6 +381,12 @@ function generateMdx(cmd: CommandDoc): string {
     lines.push("");
   }
 
+  // Status
+  lines.push("## Status");
+  lines.push("");
+  lines.push(getStatusText(cmd));
+  lines.push("");
+
   // Synopsis
   lines.push("## Synopsis");
   lines.push("");
@@ -294,7 +404,7 @@ function generateMdx(cmd: CommandDoc): string {
   // "Not yet implemented" notice is driven by the CLI's exported
   // IMPLEMENTED_SUBCOMMANDS set (packages/cli/src/subcommands.ts), so adding
   // a dispatcher in the CLI automatically updates the generated docs.
-  if (!cmd.isImplemented && !EXTRA_SECTIONS[cmd.name]) {
+  if (!cmd.isImplemented) {
     lines.push("## Current Implementation Status");
     lines.push("");
     lines.push(
@@ -302,6 +412,23 @@ function generateMdx(cmd: CommandDoc): string {
     );
     lines.push(
       `At the moment, running it can return \`Subcommand '${cmd.name}' is not yet implemented.\``,
+    );
+    lines.push("");
+
+    lines.push("## What To Use Today");
+    lines.push("");
+    for (const item of getFallbackWorkarounds(cmd)) {
+      lines.push(`- ${item}`);
+    }
+    lines.push("");
+
+    lines.push("## Why This Page Exists");
+    lines.push("");
+    lines.push(
+      "The docs intentionally track the names exposed by `mogplex --help`, even when a standalone command is still reserved or partial.",
+    );
+    lines.push(
+      "That makes it clear which names are already part of the public help surface and which ones are not yet production-ready entrypoints.",
     );
     lines.push("");
   }
@@ -332,7 +459,9 @@ function generateMdx(cmd: CommandDoc): string {
   // See also
   lines.push("## See also");
   lines.push("");
-  lines.push("- [All commands](/cli/commands)");
+  for (const related of getRelatedDocs(cmd)) {
+    lines.push(`- [${related.label}](${related.href})`);
+  }
   lines.push("");
 
   return lines.join("\n");

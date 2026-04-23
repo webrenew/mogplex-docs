@@ -1,61 +1,79 @@
 ---
 title: Observability
-description: Inspect runs, live calls, failures, pressure, and sandbox-linked execution details.
+description: Inspect model activity, runs, pressure, automation failures, and sandbox-linked execution details across CLI, cloud, and automation.
 ---
 
 Observability is the runtime view for Mogplex work that has already started.
 
-It is designed to let you start with the run, then drill down into pressure,
-failures, model calls, tool usage, and sandbox health.
+The full page is designed to answer two operator questions quickly:
 
-## Page structure
+1. what is happening right now across CLI, cloud, and automation
+2. where do I go next to debug the specific bad thing
 
-The current page is organized in this order:
+## What the page shows
 
-1. summary metrics
-2. live interactive calls
-3. runs
-4. pressure
-5. automation failures
-6. calls
+- **Summary** for total calls, tokens, cost, and top-level health signals
+- **Activity** for model calls across CLI, cloud, and automation
+- **Runs** for job-level execution across triggers, assignments, and flows
+- **Pressure** for suppressed, deferred, and failed dispatch starts
+- **Automation Failures** for timeout, auth, provider, and configuration
+  failures
+- **Sandbox-linked drilldown** from call rows when execution touched a sandbox
 
-That structure mirrors the intended debugging flow: confirm the broad signal
-first, then narrow down to a specific run or call.
+This is the page where the product converges after something begins running.
 
-## What you can inspect
+## The debugging flow Mogplex expects
 
-- Summary metrics for the current date range
-- Live interactive calls that are still in flight
-- Job runs, queue state, and recent run history
-- Pressure events and automation failures
-- Model calls, tool activity, and call-level drilldown
-- Sandbox-linked call details and sandbox health views
+Start broad and narrow only when the signal demands it:
 
-## Operational actions
+1. Look at **Summary** to confirm whether this is isolated or systemic.
+2. Use **Runs** when you care about a job or workflow outcome.
+3. Use **Pressure** when work is not starting or is being intentionally held.
+4. Use **Automation Failures** when the job did start but the system itself
+   failed around it.
+5. Use **Activity** when you need the model-level detail: tokens, cost, tool
+   usage, latency, or the exact call record.
 
-From the runs view you can repair, requeue, or cancel supported jobs.
+## Filters and drilldown
 
-Filters let you narrow by repo, sandbox, selected call, and date range so you
-can move from a broad failure signal to a specific execution.
+- Filter by surface, status, repo, sandbox, or date range.
+- Expand a call row to inspect the stored prompt/response context, tool calls,
+  and sandbox metadata.
+- Open sandbox health directly from a call when sandbox context is available.
+- Repair, requeue, or cancel supported jobs from the runs surface.
 
-The current date-range presets in the page include `1h`, `today`, `7d`, and
-`30d`, with filter state shared across the relevant sections.
+The date-range presets currently include `1h`, `today`, `7d`, and `30d`.
 
-## Sandbox drilldown
+## Practical workflows
 
-Observability is also the bridge back into sandbox-specific investigation.
+### A trigger or assignment did not run
 
-When a call is linked to sandbox context, the page can route you into sandbox
-health for the related repo and preview environment instead of leaving you stuck
-at the call row.
+1. Check **Runs** for the expected repo, source, and agent.
+2. If there is no run, check **Pressure** for suppression or deferral.
+3. If the route still looks idle, go back to the source surface:
+   [Triggers](/web/triggers), [Assignments](/web/assignments), or
+   [Automations](/web/automations).
 
-## Recommended workflow
+### A run happened but the result looked wrong
 
-1. Start with the summary and runs sections to confirm what is failing.
-2. Check pressure and automation failures to understand why work was deferred or
-   blocked.
-3. Drill into calls to inspect model output, tool usage, and linked sandbox
-   state.
+1. Find the job in **Runs**.
+2. Expand into its latest call trail through **Activity**.
+3. Inspect model choice, tokens, tool calls, and linked repo or sandbox
+   context.
+
+### Sandbox work looks unhealthy
+
+1. Find the relevant call in **Activity**.
+2. Open the sandbox-linked detail.
+3. Jump into sandbox health instead of debugging the AI call in isolation.
+
+## Read the signals correctly
+
+- **Pressure** is about dispatch and scheduling behavior.
+- **Automation Failures** is about concrete system failures such as timeouts,
+  auth issues, and provider errors.
+- **Activity** is about the model work itself.
+- **Runs** is the best answer to "did the job happen, and what was its state?"
 
 Observability is where [Triggers](/web/triggers), [Assignments](/web/assignments),
 and [Automations](/web/automations) converge once something is already running.

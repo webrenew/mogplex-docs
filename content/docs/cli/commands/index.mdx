@@ -1,13 +1,13 @@
 ---
 title: Commands
-description: Reference for every `mogplex` subcommand.
+description: Reference for the Mogplex CLI command surface, including which standalone commands are fully wired today.
 ---
 
 Pick a command from the sidebar, or run `mogplex --help` in your terminal to see
 the full list.
 
 Each page below covers what the command does and its aliases. For the full flag
-list, run `mogplex <command> --help` — that output is the source of truth and
+list, run `mogplex <command> --help`. That output is the source of truth and
 reflects whichever CLI version you have installed.
 
 ## Start here
@@ -24,10 +24,19 @@ The most important entrypoints for day-to-day use are:
 The help output currently lists more command names than the CLI has fully wired
 as standalone subcommands.
 
-In the current build, the most established standalone paths are `exec`,
-`login`, and `slash`. Other command pages are still documented here so the
-reference matches the shipped help surface, but some of them are reserved names
-that still return a not-yet-implemented message when invoked directly.
+In the current build, the most established standalone paths are:
+
+- `exec`
+- `login`
+- `slash`
+
+Other command pages are still documented here so the reference matches the
+shipped help surface. Some of those names are real reserved command names that
+still return a not-yet-implemented message when invoked directly.
+
+That is intentional documentation, not drift. The reference is showing you the
+surface the binary advertises today, plus whether a given standalone command is
+ready for production use.
 
 ## What this reference is for
 

@@ -1,6 +1,6 @@
 ---
 title: Project Commands
-description: Use AGENTS.md, .agents/commands, and /init to make Mogplex behave like part of the repository instead of a generic terminal tool.
+description: Use `AGENTS.md`, `.agents/commands/`, and `/init` to make Mogplex behave like part of the repository instead of a generic terminal tool.
 ---
 
 The CLI gets much more useful when the repository teaches it how to work.
@@ -12,7 +12,8 @@ Two local files matter most:
 
 ## AGENTS.md
 
-`AGENTS.md` is the repo-local instruction layer.
+`AGENTS.md` is the repo-local instruction layer. It is the place for stable
+truths about how work should happen in this codebase.
 
 Use it for stable information that should travel with the codebase, such as:
 
@@ -24,6 +25,9 @@ Use it for stable information that should travel with the codebase, such as:
 
 This is the fastest way to make Mogplex stop acting generic when it enters a
 repo.
+
+Keep `AGENTS.md` durable. If the guidance changes every hour, it probably does
+not belong there.
 
 ## Project slash commands
 
@@ -61,6 +65,15 @@ Today it is designed to:
 That makes `/init` the fastest way to turn an unprepared repo into one with
 basic Mogplex conventions.
 
+## Recommended structure
+
+- put long-lived repo rules in `AGENTS.md`
+- put repeatable prompt workflows in `.agents/commands/`
+- keep personal shortcuts in `~/.mogplex/commands/`
+
+That separation keeps sharable repo behavior inside the repo and personal
+preferences outside it.
+
 ## How this fits with slash discovery
 
 The loader merges:
@@ -72,13 +85,9 @@ The loader merges:
 It can also apply config-driven aliases, disabled commands, and extra user
 directories through the `slash_commands` config section.
 
-## Recommended pattern
+## Anti-patterns
 
-For a healthy repo setup:
-
-1. keep durable repo instructions in `AGENTS.md`
-2. keep repeatable repo workflows in `.agents/commands/`
-3. keep personal helpers in `~/.mogplex/commands/`
-
-That separation keeps project behavior sharable without turning your personal
-setup into a repo requirement.
+- putting volatile task notes in `AGENTS.md`
+- storing personal-only commands in the repo
+- using slash command files when a normal shell script would be clearer
+- creating a repo command that duplicates a built-in name without good reason

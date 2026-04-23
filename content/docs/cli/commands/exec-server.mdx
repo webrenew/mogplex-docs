@@ -7,6 +7,10 @@ description: Run the standalone exec server (experimental).
 
 > **Experimental**: This command is experimental and may change.
 
+## Status
+
+Help-surface-only experimental command name.
+
 ## Synopsis
 
 ```bash
@@ -21,6 +25,15 @@ Run the standalone exec server (experimental).
 
 The command name is present in the CLI help surface, but the standalone `mogplex exec-server` path is not wired yet in the current build.
 At the moment, running it can return `Subcommand 'exec-server' is not yet implemented.`
+
+## What To Use Today
+
+- Treat this as an experimental help-surface entry unless a release note explicitly tells you to use it.
+
+## Why This Page Exists
+
+The docs intentionally track the names exposed by `mogplex --help`, even when a standalone command is still reserved or partial.
+That makes it clear which names are already part of the public help surface and which ones are not yet production-ready entrypoints.
 
 ## Options
 

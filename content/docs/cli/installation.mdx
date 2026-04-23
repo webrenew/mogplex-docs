@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Install the Mogplex CLI on macOS, Linux, or Windows.
+description: Install the Mogplex CLI on macOS, Linux, or Windows and verify that it is runnable in your shell.
 ---
 
 import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
@@ -54,15 +54,15 @@ After that, it tries to make `mogplex` runnable immediately:
 If you want to install somewhere else, set `MOGPLEX_INSTALL_DIR` before running
 the installer.
 
-## Verify
+## Verify the install
 
 ```bash
 mogplex --version
 ```
 
 If the binary is on your `PATH`, you should see the installed version string.
-The installer now tries to make `mogplex` available immediately by linking it
-into a writable `PATH` directory or by updating your shell profile.
+The installer tries to make `mogplex` available immediately by linking it into
+a writable `PATH` directory or by updating your shell profile.
 
 The installer also ends by printing:
 
@@ -70,7 +70,8 @@ The installer also ends by printing:
 run: mogplex
 ```
 
-That is the intended next step.
+That is the intended next step. A successful install is not just "the script
+finished"; it is "the current shell can run `mogplex`."
 
 If your current shell still does not see it yet, run:
 
@@ -83,10 +84,33 @@ exec zsh -l
 On macOS and Linux, the installer requires `curl` or `wget` for download, plus
 `unzip` on macOS or `tar` on Linux for archive extraction.
 
+## First run after install
+
+```bash
+mogplex
+```
+
+If you are not authenticated yet, Mogplex prompts you to either:
+
+- sign in with your Mogplex account in the browser
+- store a direct provider API key locally
+
+For the full first-run flow, continue with [Quickstart](/cli/quickstart).
+
 ## Upgrade
 
 Re-run the installer. It detects an existing installation and replaces the
 binary in place.
+
+## Troubleshooting
+
+- `mogplex: command not found`: the install succeeded but your current shell has
+  not picked up the updated `PATH` yet.
+- Browser login works, but the CLI still has no model access: check the hosted
+  account in [Web Settings](/web/settings) and confirm the account has a usable
+  provider key or gateway key.
+- You want a shell-managed setup instead: skip stored provider login and use
+  env vars such as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`.
 
 ## Uninstall
 
