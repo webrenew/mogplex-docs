@@ -47,8 +47,8 @@ html > body[data-scroll-locked] {
 
 @media (min-width: 768px) {
   #nd-docs-layout {
-    /* Fumadocs switches from drawer to full sidebar at 768px. */
-    --fd-sidebar-width: 270px;
+    /* Fumadocs switches from drawer to full sidebar at 768px; cap the docs sidebar at 270px without forcing that width on narrower desktop viewports. */
+    --fd-sidebar-width: min(270px, 32vw);
   }
 
   /* Fumadocs still mounts the collapsed-panel shell on desktop; keep it hidden. */

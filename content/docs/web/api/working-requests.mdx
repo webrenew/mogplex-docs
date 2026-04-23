@@ -119,6 +119,10 @@ Two practical details matter:
   main settings route, so do not assume every settings endpoint has the same
   auth policy
 
+If you need the full model catalog or per-user enabled model set, switch to
+[Models](/web/api/models). `/api/settings` only covers the selected
+`default_model`, not the broader model list.
+
 ## 3. Inspect GitHub App coverage with `GET /api/github/installations`
 
 This is the first call to make when the browser can see repos but Triggers or
@@ -251,12 +255,14 @@ If you are starting cold, use this order:
 
 1. `GET /api/auth/user` to verify caller readiness
 2. `GET /api/settings` to read shared defaults
-3. `GET /api/github/installations` to confirm App coverage
-4. `GET /api/mcp-servers?format=cli` if the CLI should mirror hosted tools
-5. `GET /api/observability/stats` once work is actually running
+3. `GET /api/models` if model availability or default resolution is part of the setup question
+4. `GET /api/github/installations` to confirm App coverage
+5. `GET /api/mcp-servers?format=cli` if the CLI should mirror hosted tools
+6. `GET /api/observability/stats` once work is actually running
 
 ## Read next
 
 - [Authentication](/web/api/authentication) for auth-path rules and session-only
   nuance
+- [Models](/web/api/models) for the standalone model route and preference writes
 - [Route Families](/web/api/route-families) for the broader control-plane map
