@@ -1,14 +1,14 @@
 ---
-title: Commands
-description: Reference for the Mogplex CLI command surface, including which standalone commands are fully wired today.
+title: Overview
+description: Reference for the Mogplex CLI command surface, with implemented standalone commands promoted and reserved names summarized separately.
 ---
 
 Pick a command from the sidebar, or run `mogplex --help` in your terminal to see
 the full list.
 
-Each page below covers what the command does and its aliases. For the full flag
-list, run `mogplex <command> --help`. That output is the source of truth and
-reflects whichever CLI version you have installed.
+Use the sidebar for the production-ready standalone commands. For the full flag
+list of any command name, run `mogplex <command> --help`. That output is the
+source of truth and reflects whichever CLI version you have installed.
 
 ## Start here
 
@@ -30,13 +30,10 @@ In the current build, the most established standalone paths are:
 - `login`
 - `slash`
 
-Other command pages are still documented here so the reference matches the
-shipped help surface. Some of those names are real reserved command names that
-still return a not-yet-implemented message when invoked directly.
-
-That is intentional documentation, not drift. The reference is showing you the
-surface the binary advertises today, plus whether a given standalone command is
-ready for production use.
+The additional names that still appear in `mogplex --help` but are not yet
+real standalone entrypoints are summarized on
+[Reserved Names](/cli/commands/reserved-names) instead of being treated as
+first-class command pages in the main nav.
 
 ## What this reference is for
 
