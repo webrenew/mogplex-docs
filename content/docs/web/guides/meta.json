@@ -1,4 +1,4 @@
 {
   "title": "Guides",
-  "pages": ["index", "project-workflow", "github-app-coverage", "choose-routing-surface"]
+  "pages": ["index", "project-workflow", "github-app-coverage", "choose-routing-surface", "github-mention-routing"]
 }

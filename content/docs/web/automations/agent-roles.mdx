@@ -1,0 +1,86 @@
+---
+title: Agent Roles
+description: Choose the right automation node role for review, edit, and triage work.
+---
+
+Every automation agent node has a role.
+
+That role is not cosmetic. It changes the operating expectation for the node
+and helps the flow editor default to the right behavior.
+
+## The three roles
+
+| Role | What it should do | Best starting events | What it should not be |
+| --- | --- | --- | --- |
+| `triage` | Read the event or thread, classify it, respond, or decide what happens next | `mention`, `issue_opened`, `issue_comment` | A code-review surrogate |
+| `review` | Inspect changes and produce findings about correctness, security, regressions, or risk | `pr_opened`, `pr_comment`, `push`, `ci_failure` | A generic discussion bot |
+| `edit` | Apply code changes after an earlier step already decided that mutation should happen | Follow-up node after `review` or a decision branch | A first-pass analyzer |
+
+## Use `triage` for response and routing
+
+`triage` is the right role when the agent should understand context before it
+acts.
+
+Typical cases:
+
+- a GitHub mention asks for help on an issue or PR thread
+- a new issue should be classified and given next steps
+- an issue comment should wake a repo assistant and continue the conversation
+
+Think of `triage` as “understand the event, then steer.”
+
+## Use `review` for findings
+
+`review` is the right role when the agent should inspect code or diffs and
+report what is wrong or risky.
+
+Typical cases:
+
+- a PR opens and should get structured review findings
+- a push hits the default branch and should be reviewed
+- a CI failure should trigger code-oriented analysis
+
+This is also the only role that exposes auto-fix behavior in the current flow
+editor.
+
+## Use `edit` for explicit mutation
+
+`edit` is the role you use after the graph has already decided to change code.
+
+That usually means:
+
+- a `review` node found material issues
+- a condition node determined a fix path should run
+- you want the mutation step to stay explicit and isolated
+
+This keeps analysis and mutation separate, which makes the graph easier to
+debug and safer to reason about.
+
+## Default role mapping
+
+When you add a new agent node, Mogplex chooses a default role based on the
+start event:
+
+- `triage` for `mention`, `issue_opened`, and `issue_comment`
+- `review` for `pr_opened`, `pr_comment`, `push`, and `ci_failure`
+
+That default is a starting point, not a rule, but it captures the intended
+product model.
+
+## The common mistake
+
+The most common mistake is using `review` for work that is really thread or
+issue response.
+
+If the main question is “what is happening here and what should happen next,”
+that is usually `triage`.
+
+If the main question is “what is wrong with these changes,” that is usually
+`review`.
+
+## Good starter patterns
+
+- `mention` -> `triage` -> condition -> follow-up response or end
+- `issue_opened` -> `triage` -> parallel specialist agents -> join
+- `pr_opened` -> `review` -> condition -> `edit`
+- `ci_failure` -> `review` -> condition -> `edit` or human follow-up

@@ -1,0 +1,77 @@
+---
+title: Repo Sync and Rebinding
+description: Understand how installation-scoped repo sync works and how Mogplex repairs stale flow and trigger installation bindings.
+---
+
+Installations are not just metadata rows. They drive how repo sync and routing
+state stay aligned over time.
+
+## Installation-backed sync
+
+When GitHub App configuration is available, Mogplex prefers installation-scoped
+repo sync.
+
+That matters because installation-backed sync gives Mogplex a real
+`github_installation_id` for the repo instead of just an OAuth-discovered repo
+record.
+
+In practice, that means covered repos become the preferred source of truth for
+automation routing.
+
+## Why this matters for Projects
+
+Older OAuth-only repo rows can linger after a user moves to installation-backed
+GitHub access.
+
+Mogplex intentionally prefers covered repos when installation-backed sync is
+active so the current Projects view is not polluted by stale OAuth-only rows.
+
+## Metadata refresh
+
+If cached installation metadata is incomplete, Mogplex can refresh it from
+GitHub and persist the missing account login, account type, target type, and
+permissions.
+
+That is why the installations view can improve after reconciliation even if the
+underlying row started incomplete.
+
+## What happens when installations change
+
+When installation state changes from GitHub webhooks, Mogplex can:
+
+- upsert installation rows
+- resync repos for affected users
+- detach repo installation ids if an installation is removed
+
+This keeps repo coverage aligned with the actual GitHub App state instead of
+treating it as a one-time setup import.
+
+## Rebinding stale flow and trigger state
+
+Flows and triggers are installation-scoped too.
+
+So when repo coverage changes, stale installation bindings on automation
+entities can become a problem.
+
+Mogplex has a repair path for this during installation-backed sync:
+
+- it checks the current installation ids known for the user
+- if the situation is unambiguous
+- it can rebind stale flow and trigger installation ids to the current
+  installation
+
+This is deliberately conservative. Mogplex only does it when the installation
+state is clear enough to avoid guessing wrong.
+
+## The operational takeaway
+
+If installation routing feels stale, do not only look at the flow or trigger.
+
+Also check:
+
+- whether the repo is covered by the expected installation
+- whether installation-backed repo sync has run recently
+- whether the installation inventory is ambiguous for that user
+
+The “repo looks fine but automation does not wake up” class of bug is often a
+sync or binding problem, not a prompt problem.

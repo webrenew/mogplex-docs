@@ -1,5 +1,5 @@
 ---
-title: Agents
+title: Overview
 description: Manage the reusable agent roster plus shared skills, rules, and context libraries.
 ---
 
@@ -28,8 +28,16 @@ sub-nav is split into:
 - Group agents into built-in or custom categories
 - Swap models without rebuilding the rest of the agent definition
 - Reuse the same agent across triggers, assignments, and automations
+- Use stable agent slugs for targeted GitHub mention routing
 - Build a shared library of skills, rules, and context that the web app and CLI
   can both reference
+
+## In this section
+
+- [Roster and Slugs](/web/agents/roster-and-slugs) for how reusable agents are
+  defined, where slugs matter, and how mention routing really works
+- [Skills, Rules, and Context](/web/agents/skills-rules-context) for the shared
+  libraries that shape agent behavior across the product
 
 ## What the roster shows
 
@@ -46,6 +54,27 @@ live operating signals such as:
 
 That makes the roster useful both for editing definitions and for checking
 whether a reusable agent is actually being exercised in the product.
+
+## Slugs and Mention Routing
+
+For GitHub mentions, Mogplex routes against the agent slug, not the display
+name.
+
+That means:
+
+- `@mogplex` uses whichever mention trigger or automation is marked as the
+  default
+- `@mogplex/<slug>` targets a specific mention route by slug
+
+Examples:
+
+- `@mogplex/triage`
+- `@mogplex/frontend-review`
+- `@mogplex/ci-fixer`
+
+The slug is the important handle when you wire mention-based
+[Triggers](/web/triggers) or mention-entry [Automations](/web/automations).
+Keep it short, lowercase, and easy to predict from the agent's job.
 
 ## Important distinction
 

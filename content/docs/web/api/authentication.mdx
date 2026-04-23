@@ -1,0 +1,75 @@
+---
+title: Authentication
+description: Understand how the hosted Mogplex API authenticates browser sessions, CLI tokens, and internal test traffic.
+---
+
+The hosted Mogplex API is shared by the web app, the CLI, and internal
+automation or test workflows.
+
+That means auth is resolved in priority order instead of assuming every caller
+is a browser.
+
+## Current auth resolution order
+
+Today the control plane resolves auth in this order:
+
+1. `Authorization: Bearer mog_...` personal access token
+2. internal Playwright auth headers used in end-to-end testing
+3. browser session auth from the signed-in web app
+
+This is why one route helper can often serve both browser and CLI callers.
+
+## Browser sessions
+
+Normal web app usage goes through the signed-in browser session.
+
+That session is ultimately tied back to the Mogplex profile id, not just the
+raw Supabase auth user id, because product data is scoped to the profile row
+the rest of the app uses.
+
+## Personal access tokens
+
+The CLI and internal tooling authenticate with Mogplex personal access tokens
+using the `mog_` bearer format.
+
+That path has highest priority on purpose, so a CLI call does not accidentally
+fall back to a browser cookie or mixed auth state.
+
+## CLI browser handoff
+
+Browser-based CLI login runs through `/cli-auth`.
+
+That page:
+
+1. checks that the user is already signed into the web app
+2. validates the localhost callback and nonce the CLI requested
+3. shows a consent screen in the browser
+4. generates a PAT and POSTs it back to the CLI listener
+
+If the user is not signed in yet, the flow redirects through `/login` and then
+returns to `/cli-auth`.
+
+## MCP and CLI crossover
+
+Some routes intentionally serve different representations depending on caller
+needs.
+
+The clearest example is `/api/mcp-servers`:
+
+- default response shape for the web app
+- `?format=cli` response shape for the CLI
+
+That is a good model to keep in mind when reading the hosted API: many routes
+exist to support both product surfaces, not just one.
+
+## Practical implication
+
+If you are debugging an API request, first identify which auth path it should
+have used.
+
+That usually tells you whether the bug is:
+
+- missing PAT
+- missing browser session
+- wrong caller expectations
+- or an internal test-only auth path being assumed outside tests
