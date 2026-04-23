@@ -8,44 +8,72 @@ not as a generic public REST surface.
 
 Most route groups map directly to a product area.
 
-## Account and configuration
+## Identity and setup
 
 Representative routes:
 
 - `/api/auth/*`
+- `/api/auth/user`
 - `/api/settings`
+- `/api/settings/keys`
+- `/api/settings/api-keys`
 - `/api/models`
 
 These routes answer questions like:
 
-- who is the current user?
-- what providers and models are available?
-- what setup state does the product need to render correctly?
+- who is the current user in Mogplex terms?
+- what GitHub/App/Vercel setup state should the UI show?
+- what provider keys, CLI tokens, defaults, and models are available?
 
-## Projects and repos
+This family matters because setup state is first-class in the product. The UI
+does not just assume the account is ready.
+
+## Projects, repos, and GitHub coverage
 
 Representative routes:
 
 - `/api/repos`
+- `/api/repos/[id]`
 - `/api/workspaces`
+- `/api/workspaces/[id]`
 - `/api/github/installations`
+- `/api/github/repos`
+- `/api/github/owners`
+- `/api/github/pulls`
 
 These routes manage the imported repo graph the rest of Mogplex builds on.
 
-If a routing or sandbox workflow feels wrong, these are often the underlying
-state surfaces to inspect first.
+If routing, repo visibility, monorepo structure, or sandbox ownership feels
+wrong, this is often the state layer to inspect first.
 
-## Agents and reusable libraries
+## Connections and reusable libraries
 
 Representative routes:
 
+- `/api/connections`
+- `/api/connections/[id]`
+- `/api/connections/oauth`
+- `/api/mcp-servers`
+- `/api/mcp-servers/[id]`
 - `/api/agents`
+- `/api/agents/roster`
+- `/api/agents/generate`
 - `/api/agent-categories`
 - `/api/skills`
-- `/api/mcp-servers`
+- `/api/skills/registry`
+- `/api/skills/vercel-docs`
+- `/api/rules`
 
-This is the reusable behavior layer behind the roster, categories, skills, and
-MCP integration surfaces.
+This is the reusable behavior layer behind:
+
+- agent definitions
+- categories
+- MCP server sync
+- connection health
+- rules, skills, and shared context libraries
+
+If the product feels "configured wrong" rather than "running wrong", this is
+often the route family involved.
 
 ## Routing surfaces
 
@@ -54,42 +82,91 @@ Representative routes:
 - `/api/triggers`
 - `/api/assignments`
 - `/api/flows`
+- `/api/flows/[id]`
 
-These are the control-plane surfaces for durable routing rules.
+These routes back the three durable routing models in Mogplex:
+
+- installation-scoped event routing
+- repo-scoped standing work
+- multi-step workflow graphs
 
 They matter because Mogplex treats event routing, repo responsibility, and
-multi-step workflows as three different product models, not one overloaded
+workflow orchestration as different product models instead of one overloaded
 object.
 
-## Conversations and agent work
+## Conversations, memory, and live agent work
 
 Representative routes:
 
 - `/api/chat`
+- `/api/conversations`
 - `/api/commands`
 - `/api/memories`
+- `/api/memories/actions`
 
-These routes support interactive work once the user is already inside the
-workspace or CLI session.
+These routes support active work once the user is already inside a workspace or
+live session.
 
-## Runtime and operations
+This family is about ongoing agent interaction, not just setup or routing.
+
+## Sandbox runtime and observability
 
 Representative routes:
 
-- `/api/sandbox/*`
-- `/api/observability/*`
+- `/api/sandbox`
+- `/api/sandbox/[id]`
+- `/api/observability/stats`
+- `/api/observability/calls`
+- `/api/observability/call-events`
+- `/api/observability/jobs`
+- `/api/observability/automation-events`
+- `/api/observability/automation-failures`
+- `/api/observability/tool-calls`
 
-This is the runtime surface for sandboxes, calls, runs, failures, and
-operational repair actions.
+If the routing surface answers "what should run?", these routes answer:
 
-If the routing surface answers “what should run?”, these routes answer “what is
-running, and why is it healthy or unhealthy?”
+- what is running now?
+- what call or job failed?
+- which sandbox was involved?
+- how much did it cost?
+- what tool calls happened?
+
+## System plumbing and internal operations
+
+Representative routes:
+
+- `/api/webhooks/github`
+- `/api/cron/*`
+- `/api/jobs`
+- `/api/jobs/process`
+- `/api/test/*`
+- `/api/migrate`
+
+These are not the main user-facing control surfaces, but they matter when you
+are debugging the product as a whole.
+
+This family includes:
+
+- webhook ingestion
+- scheduled repair and sync jobs
+- internal processing routes
+- test helpers
+- migration and maintenance paths
+
+## A useful mental model
+
+When you are trying to find the right route family, ask one question first:
+
+**Is this about setup, reusable definition, routing, active execution, or system
+maintenance?**
+
+That usually narrows the relevant API surface immediately.
 
 ## Product-first, not platform-first
 
 This is the key architectural point:
 
-the Mogplex API is still organized around product behavior, not around a stable
+the Mogplex API is still organized around product behavior, not around a frozen
 versioned public contract.
 
 So if you build on it directly:
@@ -97,6 +174,3 @@ So if you build on it directly:
 - depend on specific routes intentionally
 - document the exact payloads you rely on
 - expect the product model to remain the source of truth
-
-That mindset is much safer than assuming the entire `/api/*` tree is already a
-long-term public platform.

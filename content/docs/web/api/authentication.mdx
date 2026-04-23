@@ -1,17 +1,17 @@
 ---
 title: Authentication
-description: Understand how the hosted Mogplex API authenticates browser sessions, CLI tokens, and internal test traffic.
+description: Understand how the hosted Mogplex API resolves PATs, Playwright headers, and browser sessions, plus when session-only auth is required.
 ---
 
-The hosted Mogplex API is shared by the web app, the CLI, and internal
-automation or test workflows.
+The hosted Mogplex API is shared by the web app, the CLI, and internal test
+workflows.
 
 That means auth is resolved in priority order instead of assuming every caller
 is a browser.
 
 ## Current auth resolution order
 
-Today the control plane resolves auth in this order:
+The common control-plane auth helper resolves in this order:
 
 1. `Authorization: Bearer mog_...` personal access token
 2. internal Playwright auth headers used in end-to-end testing
@@ -23,9 +23,12 @@ This is why one route helper can often serve both browser and CLI callers.
 
 Normal web app usage goes through the signed-in browser session.
 
-That session is ultimately tied back to the Mogplex profile id, not just the
-raw Supabase auth user id, because product data is scoped to the profile row
-the rest of the app uses.
+One important detail: the product ultimately resolves to the Mogplex **profile
+id**, not just the raw Supabase `auth.users.id`. Product data is scoped to the
+profile row the rest of the app uses.
+
+So when docs or code say "user id" in this control plane, it usually means the
+Mogplex profile id.
 
 ## Personal access tokens
 
@@ -34,6 +37,40 @@ using the `mog_` bearer format.
 
 That path has highest priority on purpose, so a CLI call does not accidentally
 fall back to a browser cookie or mixed auth state.
+
+Current PAT behavior includes:
+
+- one-time plaintext display at creation
+- hashed storage on the server
+- optional expiration
+- last-used tracking
+- lightweight per-key rate limiting during resolution
+
+## Internal Playwright auth
+
+The Playwright path exists for end-to-end tests and internal automation. It is
+checked before browser-session auth so test traffic can force a known identity
+without depending on an interactive browser login flow.
+
+This path is not the normal integration path for user tooling.
+
+## Session-only endpoints
+
+Not every route that "needs auth" accepts every auth source.
+
+Some sensitive routes intentionally require a real session-based identity and
+reject PAT auth. The token-management routes are the clearest example:
+
+- `/api/settings/api-keys`
+- related revoke and create token endpoints
+
+These use the session-only auth helper because it would be unsafe or circular
+to let a PAT manage PATs or other sensitive account credentials freely.
+
+So the practical rule is:
+
+- **shared product routes** often accept PATs
+- **sensitive account-management routes** may require a browser session
 
 ## CLI browser handoff
 
@@ -49,20 +86,19 @@ That page:
 If the user is not signed in yet, the flow redirects through `/login` and then
 returns to `/cli-auth`.
 
-## MCP and CLI crossover
+## Shared-route examples
 
-Some routes intentionally serve different representations depending on caller
-needs.
+A few routes are especially helpful for understanding the mixed auth model:
 
-The clearest example is `/api/mcp-servers`:
+- `/api/auth/user` returns setup-aware identity and capability state
+- `/api/settings` stores shared preferences like default model and theme
+- `/api/mcp-servers` can serve both web and CLI-oriented shapes depending on
+  `?format=cli`
 
-- default response shape for the web app
-- `?format=cli` response shape for the CLI
+That pattern is common in Mogplex: one route family supports multiple product
+surfaces, with the auth helper deciding who the caller is.
 
-That is a good model to keep in mind when reading the hosted API: many routes
-exist to support both product surfaces, not just one.
-
-## Practical implication
+## Practical debugging rule
 
 If you are debugging an API request, first identify which auth path it should
 have used.
@@ -72,4 +108,4 @@ That usually tells you whether the bug is:
 - missing PAT
 - missing browser session
 - wrong caller expectations
-- or an internal test-only auth path being assumed outside tests
+- or a session-only endpoint being hit from PAT-backed tooling

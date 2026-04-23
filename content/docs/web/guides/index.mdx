@@ -1,21 +1,21 @@
 ---
 title: Overview
-description: Practical workflows for operating the Mogplex web app without guessing which surface to use next.
+description: Practical operating guides for the Mogplex web app, organized by the setup or routing problem you are actually trying to solve.
 ---
 
-Use these guides when you want the operational flow, not just a route-by-route
-description.
+Use these guides when you want the working sequence between product surfaces,
+not just route-by-route descriptions.
 
 <Cards>
   <Card
     title="Project Workflow"
     href="/web/guides/project-workflow"
-    description="Connect GitHub, sync repos, open a workspace, and choose between triggers, assignments, and automations."
+    description="Connect GitHub, confirm App coverage, sync repos, open a workspace, and choose the right next surface."
   />
   <Card
     title="GitHub App Coverage"
     href="/web/guides/github-app-coverage"
-    description="Understand OAuth vs App coverage, why triggers stay empty, and how to verify the right installation."
+    description="Understand OAuth vs App coverage, why repos can be visible but not triggerable, and how to verify the right install."
   />
   <Card
     title="Choose the Right Routing Surface"
@@ -29,13 +29,29 @@ description.
   />
 </Cards>
 
-## Read these when
+## Start here if...
 
-- you are setting up a new repo and want the cleanest first path through the
-  product
-- you can see repos, but webhook-backed surfaces still look empty
-- you are deciding between Triggers, Assignments, and Automations
-- mention routing is not behaving the way you expected
+- you are setting up a repo for the first time:
+  [Project Workflow](/web/guides/project-workflow)
+- you can see repos, but trigger-backed surfaces still look empty:
+  [GitHub App Coverage](/web/guides/github-app-coverage)
+- you are not sure whether the job belongs in Triggers, Assignments, or
+  Automations:
+  [Choose the Right Routing Surface](/web/guides/choose-routing-surface)
+- mention routing is not behaving the way you expected:
+  [GitHub Mention Routing](/web/guides/github-mention-routing)
 
-The route docs explain each page. These guides explain the working sequence
-between pages.
+## How these guides relate to the rest of the docs
+
+The route docs explain what each page is for.
+
+These guides explain:
+
+- which page to start from
+- what prerequisite state must already exist
+- what common failure mode to check next
+- how to move between setup, routing, and runtime inspection without guessing
+
+If you already know the surface you need, go back to the route docs.
+
+If you know the problem but not the next page, start here.

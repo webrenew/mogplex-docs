@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: The hosted control-plane API behind the Mogplex web app.
+description: The hosted control-plane API behind the Mogplex web app, including shared browser/CLI auth and product-aligned route families.
 ---
 
 The hosted API is Mogplex's control plane.
@@ -8,19 +8,44 @@ The hosted API is Mogplex's control plane.
 It is the surface the web app talks to for projects, repos, agents,
 assignments, automations, sandboxes, settings, and runtime inspection.
 
-This matters because it is **not** positioned like a versioned public platform
-API yet. Route shape and response details follow the product, so treat it as the
-live application surface behind Mogplex rather than a long-term compatibility
-contract.
+This matters because it is **not** positioned like a stable versioned public
+platform API yet. Route shape and response details follow the product, so treat
+it as the live application surface behind Mogplex rather than a long-term
+compatibility contract.
 
 ## In this section
 
-- [Authentication](/web/api/authentication) for the current auth resolution
-  order across browser sessions, CLI tokens, and internal test headers
+- [Authentication](/web/api/authentication) for how browser sessions, personal
+  access tokens, and internal test headers are resolved today
 - [Route Families](/web/api/route-families) for how the current `/api/*`
   surface maps onto product areas
 
-## Auth model
+## The API is product-first
+
+The easiest way to read the hosted API is:
+
+- product state first
+- route naming second
+
+Most routes exist because the web app needs a control-plane surface for a real
+product behavior, not because Mogplex has already frozen a generic external
+REST contract.
+
+That is why the route tree maps so closely to product areas like:
+
+- settings and auth
+- repos and workspaces
+- agents and reusable libraries
+- triggers, assignments, and flows
+- sandbox runtime and observability
+
+## Shared auth model
+
+The same API is used by multiple Mogplex surfaces:
+
+- the signed-in browser app
+- the CLI when it talks to hosted Mogplex state
+- internal automated tests
 
 The current auth resolution order is:
 
@@ -28,50 +53,55 @@ The current auth resolution order is:
 2. internal Playwright auth headers used in end-to-end testing
 3. browser session auth from the signed-in web app
 
-That means:
+That means many routes can support both browser and CLI callers without
+inventing a second API namespace.
 
-- the web app normally authenticates with the signed-in browser session
-- the CLI and internal scripts can authenticate with a Mogplex personal access
-  token
-- a route that calls the shared auth helpers can usually serve both browser and
-  CLI callers without a separate auth path
+## Important auth nuance
 
-## Route families
+Not every route treats PAT auth the same way.
 
-Current route groups map closely to product areas:
+- Many shared read or control-plane routes accept PAT auth through the common
+  auth helper.
+- Some sensitive routes intentionally require a real browser session and reject
+  PAT auth. Token-management endpoints are the clearest example.
 
-- **Account and configuration**: `/api/auth/*`, `/api/models`, `/api/settings`
-- **Projects and repos**: `/api/repos`, `/api/workspaces`, `/api/connections`
-- **Agent library**: `/api/agents`, `/api/agent-categories`, `/api/skills`
-- **Routing surfaces**: `/api/flows`, `/api/triggers`, `/api/assignments`
-- **Conversations and agent work**: `/api/chat`, `/api/conversations`,
-  `/api/commands`, `/api/memories`
-- **Runtime and operations**: `/api/sandbox`, `/api/observability/*`
-- **GitHub coverage and sync**: `/api/github/installations`,
-  `/api/github/repos`, and related helpers
-- **MCP configuration**: `/api/mcp-servers`
+If an API call works in the browser but fails from a PAT-backed script, check
+whether the route uses the session-only auth helper instead of the generic one.
 
 ## Web and CLI crossover
 
-A few routes matter directly to both surfaces:
+A few routes are intentionally designed for both surfaces:
 
-- `/api/settings` is the shared settings endpoint for user-level preferences
-  such as the default model and theme
-- `/api/mcp-servers` returns the web app shape by default, and
-  `/api/mcp-servers?format=cli` returns the CLI-oriented representation
-- `/api/auth/user` returns the signed-in user's app-aware state, including GitHub
-  coverage and linked-platform capability data the product uses during setup
+- `/api/auth/user` returns app-aware setup state, including GitHub coverage and
+  linked-platform capability data
+- `/api/settings` stores shared defaults like theme and default model
+- `/api/mcp-servers` returns a web-oriented shape by default, and
+  `/api/mcp-servers?format=cli` returns a CLI-oriented representation
 
-The browser-based CLI login handoff runs through `/cli-auth`.
+The browser-based CLI login handoff runs through `/cli-auth`, not the `/api/*`
+tree directly. That page validates the localhost callback requested by the CLI,
+asks the user for consent inside the signed-in web app, and posts the resulting
+token back to the CLI listener.
 
-That page validates the localhost callback requested by the CLI, asks the user
-for consent inside the signed-in web app, and posts the resulting token back to
-the CLI listener. The normal browser login entrypoint is `/login`.
+## Route families
+
+At a high level, the current `/api/*` tree breaks down into:
+
+- **Identity and settings**: `/api/auth/*`, `/api/settings`, `/api/models`
+- **Projects and GitHub state**: `/api/repos`, `/api/workspaces`,
+  `/api/github/*`
+- **Reusable behavior**: `/api/agents`, `/api/agent-categories`, `/api/skills`,
+  `/api/rules`, `/api/mcp-servers`
+- **Routing**: `/api/triggers`, `/api/assignments`, `/api/flows`
+- **Runtime**: `/api/chat`, `/api/commands`, `/api/memories`, `/api/sandbox`,
+  `/api/observability/*`
+- **System plumbing**: `/api/webhooks/*`, `/api/cron/*`, `/api/test/*`
+
+See [Route Families](/web/api/route-families) for the concrete breakdown.
 
 ## Practical guidance
 
-Prefer the web app when you want the full Mogplex workflow and the product's
-setup guidance.
+Prefer the web app when you want the full Mogplex workflow and setup guidance.
 
 Reach for the hosted API when you are:
 
@@ -81,6 +111,6 @@ Reach for the hosted API when you are:
 - inspecting the current control-plane surface while implementing or debugging a
   feature
 
-If you need a stable workflow surface today, document the specific routes you
-depend on in your own integration, because the hosted API is still evolving with
-the product.
+If you depend on the hosted API directly today, document the specific routes
+and payloads you rely on in your own integration. The product model is still
+the source of truth.
