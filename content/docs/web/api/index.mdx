@@ -17,6 +17,8 @@ compatibility contract.
 
 - [Authentication](/web/api/authentication) for which callers PAT auth can
   represent and where session-only auth still applies
+- [Models](/web/api/models) for the standalone model catalog, CLI model export,
+  and per-user enablement rules
 - [Working Requests](/web/api/working-requests) for concrete `curl` examples
   that are already useful on day one
 - [Route Families](/web/api/route-families) for the broader control-plane map
@@ -28,6 +30,7 @@ If you only want the most useful first calls, start here:
 - `GET /api/auth/user` to verify setup state, GitHub readiness, and platform
   access
 - `GET /api/settings` to inspect shared defaults like theme and default model
+- `GET /api/models` to inspect the visible catalog and enabled model set
 - `GET /api/github/installations` to confirm real GitHub App coverage
 - `GET /api/mcp-servers?format=cli` to export the CLI-ready MCP view
 - `GET /api/observability/stats` to inspect runtime health and cost summary
@@ -109,9 +112,9 @@ tree directly. That page validates the localhost callback requested by the CLI,
 asks the user for consent inside the signed-in web app, and posts the resulting
 token back to the CLI listener.
 
-For the model split, see [Route Families](/web/api/route-families) under
-**Identity and setup**: `/api/models` is the standalone model route, while
-`/api/settings` only returns or updates the selected `default_model`.
+For the model split, see [Models](/web/api/models): `/api/models` is the
+standalone model route, while `/api/settings` only returns or updates the
+selected `default_model`.
 
 ## Route families
 

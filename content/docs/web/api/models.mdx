@@ -1,0 +1,187 @@
+---
+title: Models
+description: Use /api/models to inspect the visible model catalog, list enabled models, export CLI model options, and update per-user model enablement.
+---
+
+`/api/models` is the standalone model route in Mogplex.
+
+Use it when you need model availability, enabled state, or CLI picker data.
+
+Do **not** use `/api/settings` for that broader job. `/api/settings` only
+returns or updates the selected `default_model` preference after Mogplex has
+resolved it against the current catalog and the user's enabled-state rules.
+
+## What this route owns
+
+`/api/models` is the route for:
+
+- the visible model catalog
+- the subset of models enabled for the current user
+- CLI-formatted model lists
+- per-user enable or disable preferences
+
+It is **not** the route for:
+
+- changing the shared global model catalog
+- choosing which enabled model is the current default
+
+The underlying split is:
+
+- Supabase `ai_models` holds the canonical catalog
+- `user_model_preferences` holds per-user enable or disable state
+- the profile row stores the selected `default_model`
+
+## `GET /api/models`
+
+This route always returns the same top-level keys:
+
+- `catalog`
+- `models`
+
+What changes is how those keys are populated:
+
+- with user auth, `catalog` includes visible models plus per-model
+  `is_enabled`, and `models` is the enabled subset the user can actively use
+- without user auth, both `catalog` and `models` are the same visible
+  available catalog
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  "$MOGPLEX_BASE_URL/api/models"
+```
+
+Representative response excerpt:
+
+```json
+{
+  "models": [
+    {
+      "id": "provider/model-a",
+      "provider": "provider",
+      "name": "Model A",
+      "is_available": true,
+      "is_enabled": true,
+      "capabilities": ["chat", "tools"]
+    }
+  ],
+  "catalog": [
+    {
+      "id": "provider/model-a",
+      "provider": "provider",
+      "name": "Model A",
+      "is_available": true,
+      "is_enabled": true,
+      "capabilities": ["chat", "tools"]
+    },
+    {
+      "id": "provider/model-b",
+      "provider": "provider",
+      "name": "Model B",
+      "is_available": true,
+      "is_enabled": false
+    }
+  ]
+}
+```
+
+Unauthenticated response excerpt:
+
+```json
+{
+  "models": [
+    {
+      "id": "provider/model-a",
+      "provider": "provider",
+      "name": "Model A",
+      "is_available": true
+    }
+  ],
+  "catalog": [
+    {
+      "id": "provider/model-a",
+      "provider": "provider",
+      "name": "Model A",
+      "is_available": true
+    }
+  ]
+}
+```
+
+Practical behavior to know:
+
+- unauthenticated callers still get both keys, but they point at the same
+  visible available catalog
+- authenticated callers get `catalog` plus the enabled `models` subset
+- visibility filtering applies before the response is returned
+- recommendation metadata, pricing, context length, and capabilities can also
+  appear when present in the catalog
+
+## `GET /api/models?format=cli`
+
+Use the CLI format when a terminal client or internal tool needs the model list
+in the same shape the CLI picker expects.
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  "$MOGPLEX_BASE_URL/api/models?format=cli"
+```
+
+This route intentionally keeps CLI parity with the hosted product state:
+
+- models explicitly disabled by the user are removed from the CLI list
+- available models that are not explicitly disabled remain visible, even in the
+  CLI-oriented shape
+
+## `PATCH /api/models`
+
+Use `PATCH` to enable or disable a model for the current user.
+
+```bash
+curl -sS \
+  -X PATCH \
+  -H "Authorization: Bearer $MOGPLEX_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"model_id":"provider/model-b","is_enabled":true}' \
+  "$MOGPLEX_BASE_URL/api/models"
+```
+
+Representative success response:
+
+```json
+{
+  "ok": true
+}
+```
+
+Two rules matter:
+
+- `model_id` and `is_enabled` are required
+- catalog fields like `provider`, `name`, or `is_available` are rejected here
+
+If you try to mutate the shared catalog through `/api/models`, Mogplex returns
+`400` because catalog updates belong to the sync path, not to per-user API
+preference writes.
+
+## When to use `/api/models` vs `/api/settings`
+
+Use `/api/models` when you need:
+
+- the full visible model catalog
+- enabled or disabled model state
+- CLI-ready model export
+- per-user model preference writes
+
+Use `/api/settings` when you need:
+
+- the currently selected `default_model`
+- theme and other shared user defaults
+
+That split is the fastest way to avoid reaching for the wrong route.
+
+## Read next
+
+- [Working Requests](/web/api/working-requests) for copy-paste requests across
+  the most useful route families
+- [Route Families](/web/api/route-families) for the broader control-plane map

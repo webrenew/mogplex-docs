@@ -38,6 +38,9 @@ One important implementation detail:
 - `/api/settings` resolves the stored profile `default_model` against that
   catalog and enabled-state rules before returning it
 
+See [Models](/web/api/models) for the route-specific GET, CLI-format, and
+PATCH behavior.
+
 That means the split is:
 
 - use `/api/models` when you need models

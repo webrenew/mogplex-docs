@@ -1,4 +1,10 @@
 {
   "title": "API",
-  "pages": ["index", "authentication", "working-requests", "route-families"]
+  "pages": [
+    "index",
+    "authentication",
+    "models",
+    "working-requests",
+    "route-families"
+  ]
 }
