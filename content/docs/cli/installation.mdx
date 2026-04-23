@@ -68,11 +68,21 @@ The installer also supports a small set of environment variables:
 - `MOGPLEX_BASE_URL`
   Override the manifest host. The installer requires this to use HTTPS.
 
+If you only want a custom install directory, you do not need to pin a version.
+Add `MOGPLEX_VERSION` only when you intentionally want a fixed release.
+
 Example:
 
 ```bash
-MOGPLEX_VERSION=0.1.6 \
 MOGPLEX_INSTALL_DIR="$HOME/.local/bin" \
+curl -fsSL https://www.mogplex.com/install.sh | sh
+```
+
+Version pinning still works when you need it:
+
+```bash
+# Replace 0.x.y with the release you want to pin.
+MOGPLEX_VERSION=0.x.y \
 curl -fsSL https://www.mogplex.com/install.sh | sh
 ```
 
@@ -104,7 +114,8 @@ exec zsh -l
 ```
 
 On macOS and Linux, the installer requires `curl` or `wget` for download, plus
-`unzip` on macOS or `tar` on Linux for archive extraction.
+an archive extractor that matches the published asset format: `tar` for
+`.tar.gz`, or `unzip` or `ditto` for `.zip`.
 
 ## First run after install
 
@@ -129,7 +140,8 @@ binary in place.
 - `mogplex: command not found`: the install succeeded but your current shell has
   not picked up the updated `PATH` yet.
 - The installer downloads but fails before extraction: confirm the machine has
-  the expected archive tool (`unzip` on macOS or `tar` on Linux).
+  an extractor for the published archive format (`tar` for `.tar.gz`, or
+  `unzip` or `ditto` for `.zip`).
 - You pinned `MOGPLEX_BASE_URL` and the script exits immediately: the installer
   rejects non-HTTPS hosts.
 - Browser login works, but the CLI still has no model access: check the hosted
