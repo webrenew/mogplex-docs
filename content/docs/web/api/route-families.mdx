@@ -28,10 +28,26 @@ These routes answer questions like:
 - what GitHub/App/Vercel setup state should the UI show?
 - what provider keys, CLI tokens, defaults, and models are available?
 
+One important implementation detail:
+
+- the canonical model catalog lives in Supabase `ai_models`
+- per-user enabled or disabled state lives in `user_model_preferences`
+- the selected default model id lives on the profile row
+- `/api/models` is the standalone route that exposes the catalog and
+  user-visible enabled model set
+- `/api/settings` resolves the stored profile `default_model` against that
+  catalog and enabled-state rules before returning it
+
+That means the split is:
+
+- use `/api/models` when you need models
+- use `/api/settings` when you need the selected default model preference
+
 Good first calls in this family:
 
 - `GET /api/auth/user` for overall readiness
 - `GET /api/settings` for shared user defaults
+- `GET /api/models` for the standalone model catalog and enabled model set
 
 This family matters because setup state is first-class in the product. The UI
 does not just assume the account is ready.

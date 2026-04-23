@@ -99,7 +99,8 @@ A few routes are intentionally designed for both surfaces:
 
 - `/api/auth/user` returns app-aware setup state, including GitHub coverage and
   linked-platform capability data
-- `/api/settings` stores shared defaults like theme and default model
+- `/api/settings` stores shared defaults like theme and the selected
+  `default_model`
 - `/api/mcp-servers` returns a web-oriented shape by default, and
   `/api/mcp-servers?format=cli` returns a CLI-oriented representation
 
@@ -107,6 +108,10 @@ The browser-based CLI login handoff runs through `/cli-auth`, not the `/api/*`
 tree directly. That page validates the localhost callback requested by the CLI,
 asks the user for consent inside the signed-in web app, and posts the resulting
 token back to the CLI listener.
+
+For the model split, see [Route Families](/web/api/route-families) under
+**Identity and setup**: `/api/models` is the standalone model route, while
+`/api/settings` only returns or updates the selected `default_model`.
 
 ## Route families
 
