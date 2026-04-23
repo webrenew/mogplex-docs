@@ -47,19 +47,9 @@ html > body[data-scroll-locked] {
 
 @media (min-width: 768px) {
   #nd-docs-layout {
-    /* Fumadocs sets the sidebar track inline; override it so desktop can shrink to content up to 270px instead of reserving a fixed column. */
-    --fd-sidebar-col: fit-content(270px) !important;
     --fd-sidebar-width: 270px;
-  }
-
-  #nd-docs-layout [data-sidebar-placeholder] {
-    --fd-sidebar-width: fit-content(270px);
-    max-inline-size: 270px;
-  }
-
-  #nd-docs-layout #nd-sidebar {
-    inline-size: fit-content(270px);
-    max-inline-size: 270px;
+    /* Grow the main track past 97rem so the outer 1fr gutters collapse at ultra-wide viewports; the article inside is still capped at max-w-[900px] mx-auto. */
+    --fd-layout-width: 200rem;
   }
 
   /* Fumadocs still mounts the collapsed-panel shell on desktop; keep it hidden. */
