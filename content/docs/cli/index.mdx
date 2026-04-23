@@ -44,6 +44,7 @@ These files explain most CLI behavior:
 
 - `~/.mogplex/auth.json` stores browser login or provider credentials.
 - `~/.mogplex/config.toml` stores CLI configuration and profiles.
+- `./.mogplex/config.toml` stores project-level config overrides inside a repo.
 - `~/.mogplex/logs/` stores structured session logs.
 - `AGENTS.md` teaches Mogplex how to work inside a specific repo.
 - `.agents/commands/` adds repo-scoped slash commands.
@@ -86,6 +87,8 @@ the [web app](/web).
 - "How do repo-specific conventions get loaded?"
   Through `AGENTS.md`, `.agents/commands/`, optional `agent.json`, and your
   local config.
+- "Where do I change defaults, profiles, or per-run safety controls?"
+  In [Configuration and Flags](/cli/guides/configuration-and-flags).
 - "Why does the CLI behave differently across shells?"
   Environment variables beat stored auth, and repo-local instruction files can
   change the assembled prompt.
@@ -97,5 +100,7 @@ the [web app](/web).
 
 - [Quickstart](/cli/quickstart) for the first working session
 - [Authentication](/cli/guides/authentication) for credential precedence
+- [Configuration and Flags](/cli/guides/configuration-and-flags) for config
+  files, profiles, and global overrides
 - [Exec Mode](/cli/guides/exec-mode) for one-off tasks and scripts
 - [Slash Commands](/cli/guides/slash-commands) for the local control surface

@@ -1,0 +1,70 @@
+---
+title: Legacy Routes
+description: Map older Mogplex dashboard routes like /flows, /library, and /primitives to the current surfaces and docs.
+---
+
+Older route names still appear in bookmarks, screenshots, logs, and internal
+notes.
+
+This page is the fast map from those older names to the current Mogplex
+surfaces.
+
+## Current redirect map
+
+| Older route | Current destination | Best doc page |
+| --- | --- | --- |
+| `/flows` | `/automations` | [Flows](/web/flows) or [Automations](/web/automations) |
+| `/library` | `/agents/skills` by default, with tab-specific redirects for rules, context, and models | [Library](/web/library) |
+| `/primitives` | `/agents/skills` by default, with tab-specific redirects for rules and context | [Primitives](/web/primitives) |
+
+## When the old route names still matter
+
+You will still run into these names when you:
+
+- follow an old bookmark
+- read implementation notes or screenshots from an earlier UI
+- inspect logs or route traces that still use the older path
+- compare the browser route with current docs and wonder whether the feature
+  moved
+
+## How to read them now
+
+### `/flows`
+
+The product surface is now **Automations**.
+
+Use [Flows](/web/flows) when you need the naming translation, and use
+[Automations](/web/automations) for live behavior.
+
+### `/library`
+
+The older library idea has been split by job:
+
+- skills, rules, and context now live under [Agents](/web/agents)
+- models now live under [Settings](/web/settings)
+
+Use [Library](/web/library) when you need the tab-by-tab redirect map.
+
+### `/primitives`
+
+This route now forwards into the same agent-library surfaces, but it does not
+own the models tab.
+
+Use [Primitives](/web/primitives) for the exact redirect behavior.
+
+## Related route-name mismatch
+
+The UI still says **Projects** even though the live route is `/spaces`.
+
+For that translation, use:
+
+- [Projects](/web/spaces) for the current live behavior
+- [Projects (Legacy Docs Route)](/web/projects) if you landed on an older docs
+  link
+
+## Practical rule
+
+If you find an older Mogplex route in the wild, do not assume the feature was
+removed.
+
+Check whether it was renamed, split, or redirected before you treat it as dead.
