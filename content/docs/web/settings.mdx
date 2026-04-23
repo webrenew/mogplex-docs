@@ -8,6 +8,20 @@ Settings is the account-level control plane for Mogplex.
 If something about your identity, repo coverage, model access, shared tools, or
 CLI sync looks wrong, this is the first page to inspect.
 
+## Use this page to fix account problems, not routing logic
+
+Settings is where you answer questions like:
+
+- can Mogplex actually act on behalf of this GitHub user or org?
+- do I have hosted model access for the account?
+- are the shared MCP or REST connections healthy?
+- is sandbox billing coming from Mogplex or my own Vercel project?
+- why did the CLI sign in, but not inherit the hosted state I expected?
+
+If the question is “what should run for this repo?”, use
+[Projects](/web/spaces), [Assignments](/web/assignments),
+[Triggers](/web/triggers), or [Automations](/web/automations) instead.
+
 ## Set these up first
 
 For a new account, the most reliable order is:
@@ -22,6 +36,9 @@ For a new account, the most reliable order is:
 6. generate CLI access tokens only when the CLI or scripts need to
    authenticate as Mogplex itself
 
+That order keeps you from debugging downstream surfaces before the account can
+actually support them.
+
 ## What lives here
 
 Settings currently groups together:
@@ -33,6 +50,21 @@ Settings currently groups together:
 - **CLI Access Tokens** for CLI and script authentication
 - **Preferences** for theme and default model
 - **Models** for the hosted model catalog your account can actually use
+
+## Start at the top of the page first
+
+The top of Settings is intentionally opinionated.
+
+It is the part of the product that tells you:
+
+- whether GitHub is connected at all
+- whether the GitHub App is installed on the right owner
+- whether synced repos exist yet
+- whether Personal Vercel still needs action
+- what the next most likely setup step is
+
+Treat that top block as the “what is missing?” answer before you debug any
+deeper form.
 
 ## Account section
 
@@ -60,10 +92,19 @@ coverage for that owner.
 
 Personal Vercel is optional.
 
-Link it only when you want to choose your own billing project for sandbox work.
-If your account does not have platform sandbox billing available, this section
-is also where Mogplex tells you that Personal Vercel is required before sandbox
-launch can succeed.
+Link it when you want sandbox usage to bill against your own Vercel project
+instead of Mogplex-managed platform billing.
+
+If your account does not have platform sandbox billing enabled, this section is
+also where Mogplex tells you that Personal Vercel is required before sandbox
+work can start.
+
+This means sandbox launch failures are often one of two things:
+
+- the repo is configured for user-billed sandbox work, but Personal Vercel is
+  not linked yet
+- Personal Vercel is linked, but the repo-specific project or team mapping is
+  still wrong in [Projects](/web/spaces)
 
 ## GitHub App coverage details
 
@@ -77,7 +118,7 @@ For each installation, Mogplex can show:
 - a GitHub manage link when one can be derived
 - the list of synced repos under that installation
 
-That makes Settings the fastest answer to:
+This is the fastest way to answer a common setup problem:
 
 **Can Mogplex merely see this repo, or is it actually covered for App-backed
 work?**
@@ -98,6 +139,11 @@ The page supports:
 - auth modes including none, bearer token, API key, basic auth, and OAuth
 - testing a connection after setup
 - enable, disable, reconnect, or remove actions
+
+The operational rule here is simple:
+
+configure and test the integration in Settings first, then debug agent prompts
+or routing only after the connection itself is known-good.
 
 ### Current MCP quick-add presets
 
@@ -129,6 +175,12 @@ The page can verify whether a stored key is valid, show when it was added, and
 delete it if needed. If platform AI is not enabled for the account, this
 section is where Mogplex pushes you to bring your own provider key.
 
+That split matters:
+
+- if the problem is hosted execution, this section is relevant
+- if the problem is only your local shell session, use local env vars or CLI
+  auth instead
+
 ## CLI Access Tokens
 
 **CLI Access Tokens** are separate from provider API keys.
@@ -145,18 +197,15 @@ The section supports:
 - last-used metadata
 - revocation
 
-If you only need model access for hosted runs, use **API Keys** instead.
+If you only need provider model access for hosted runs, use **API Keys**
+instead.
 
 ## Preferences and Models
 
 Settings also owns the user-level defaults that affect hosted behavior and sync
-paths:
+surfaces.
 
-- theme preference
-- default model
-- enabled hosted model catalog
-
-This is a common source of confusion:
+The important split is:
 
 - **Models section** controls what models are available to the account
 - **Agent settings** choose which available model a specific agent should use
@@ -164,7 +213,7 @@ This is a common source of confusion:
 If an agent cannot select the model you expect, check **Models** before you
 edit the agent itself.
 
-## Common failure modes
+## Fast troubleshooting map
 
 - **Triggers page is empty**: GitHub OAuth may be connected, but App coverage is
   missing for the repo owner.
@@ -174,7 +223,11 @@ edit the agent itself.
 - **A connection exists but agent calls still fail**: test the connection here
   before debugging prompts or routing.
 - **Sandbox launch asks for Personal Vercel**: that setup is optional overall,
-  but required for user-billed sandbox flows.
+  but required for user-billed sandbox flows when platform sandbox billing is
+  unavailable.
+- **The repo is visible, but webhook-backed work still does not fire**:
+  visibility and App-backed coverage are different states. Check the
+  installation list here first.
 
 ## Why Settings matters
 

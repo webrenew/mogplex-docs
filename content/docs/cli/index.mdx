@@ -16,6 +16,18 @@ workflows, local MCP configuration, and repo-scoped conventions like
   <Card title="Guides" href="/cli/guides" />
 </Cards>
 
+## Start here when the repo on disk is the source of truth
+
+The CLI is the best Mogplex surface when:
+
+- the repo is already checked out locally
+- you want work to happen in the terminal instead of through GitHub events
+- you need repo-local instructions, slash commands, or shell-friendly one-off
+  runs
+
+The web app still matters for shared account state, but the CLI is the faster
+tool for actual repo-in-place execution.
+
 ## Choose the right CLI mode
 
 - `mogplex` launches the interactive session. Use this when you want back and
@@ -38,7 +50,7 @@ Actual slash execution from the shell goes through exec mode.
 - local slash-command workflows
 - reusing models, MCP definitions, and tokens synced from your Mogplex account
 
-## What the CLI stores locally
+## What the CLI loads from your machine and repo
 
 These files explain most CLI behavior:
 
@@ -52,7 +64,10 @@ These files explain most CLI behavior:
 - `agent.json` is an optional project-level config file the interactive CLI can
   scaffold on first run in a repo.
 
-## First working session
+That list is worth understanding because “why is Mogplex behaving like this?”
+usually comes down to one of those local files or an environment variable.
+
+## The shortest reliable setup
 
 1. Install the binary with [Installation](/cli/installation).
 2. Run `mogplex`.
@@ -64,7 +79,7 @@ If you want shared configuration from the hosted product, connect the account in
 the [web app](/web/settings) first so the CLI can reuse synced models and MCP
 definitions.
 
-## Use the CLI and web app together
+## Web app vs CLI
 
 The cleanest setup is usually:
 
@@ -76,10 +91,15 @@ The cleanest setup is usually:
 That split keeps shared account state in one place and local execution in the
 tool that is best at working inside a repo.
 
-If you want shared configuration, repo import, or workflow authoring, start in
-the [web app](/web).
+## What a healthy CLI setup looks like
 
-## Common first questions
+- `mogplex` opens cleanly
+- `mogplex exec "..."` works without special ceremony
+- `mogplex slash list` shows the registry you expect
+- repo-local instructions actually change behavior inside the repo
+- shared hosted state appears only when you intended to use account-backed login
+
+## Common “where do I start?” questions
 
 - "Should I start with `mogplex` or `mogplex exec`?"
   Start with `mogplex` for back-and-forth work and `mogplex exec` for one task
@@ -100,7 +120,7 @@ the [web app](/web).
 
 - [Quickstart](/cli/quickstart) for the first working session
 - [Authentication](/cli/guides/authentication) for credential precedence
-- [Configuration and Flags](/cli/guides/configuration-and-flags) for config
-  files, profiles, and global overrides
-- [Exec Mode](/cli/guides/exec-mode) for one-off tasks and scripts
+- [Exec Mode](/cli/guides/exec-mode) for one-off tasks
 - [Slash Commands](/cli/guides/slash-commands) for the local control surface
+- [Project Commands](/cli/guides/project-commands) for repo-local instructions,
+  slash files, and `/init`

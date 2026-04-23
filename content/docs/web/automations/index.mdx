@@ -8,6 +8,17 @@ Automations are the workflow graph surface in the web app.
 Use them when one GitHub event should lead to multiple steps, branches, or
 publish-controlled behavior instead of a simple one-event-to-one-agent route.
 
+## Why you move up to Automations
+
+Automations exists for the moment when simple routing stops being enough.
+
+If you need to say any of these, you are in automation territory:
+
+- “only do the edit if the review node found a real issue”
+- “split this work across multiple agents and join it later”
+- “hold the route as a draft until we publish”
+- “delay the next step until later”
+
 ## In this section
 
 - [Agent Roles](/web/automations/agent-roles) for the exact difference between
@@ -37,6 +48,11 @@ Two implementation details matter in practice:
   **entry agent slug**. That means the slug on an agent node connected directly
   to the start node, not a later downstream node.
 
+This is the key split:
+
+- [Agents](/web/agents) owns reusable definitions
+- Automations owns orchestration around those definitions
+
 ## What the editor gives you beyond simple routing
 
 The automation editor is more than a canvas.
@@ -52,6 +68,19 @@ It also gives you:
 
 That combination is the main reason to choose Automations over
 [Triggers](/web/triggers).
+
+## Build from the start node outward
+
+The cleanest way to author an automation is:
+
+1. pick the start event first
+2. define the first agent role correctly
+3. add conditions, delays, or parallel branches only where they change the
+   outcome
+4. publish only when the draft matches the route you want live
+
+Most workflow confusion comes from choosing the graph shape too early before the
+entry event and entry role are actually clear.
 
 ## Pick the Right Agent Role
 
@@ -81,9 +110,9 @@ language of the thread or event. Typical cases:
   conversation
 
 Use `review` when the agent should inspect changed code and produce findings
-about correctness, security, performance, or regressions. Typical cases:
+about it. Typical cases:
 
-- a PR opens and you want structured code review output
+- a pull request opens and you want review comments
 - a push lands on the default branch and you want a branch-level review
 - a CI failure should trigger code-oriented analysis before a fix step
 
@@ -103,7 +132,7 @@ Example:
 @mogplex/triage summarize this issue and suggest the next step.
 ```
 
-Important rules:
+Rules:
 
 - Bare `@mogplex` only routes to mention automations whose start node is marked
   **Default mention target**.
@@ -139,6 +168,9 @@ for iterative changes on a live route.
 - `issue_opened` -> `triage` -> condition -> parallel follow-up agents
 - `mention` -> `triage` -> delay -> follow-up response
 
+These patterns are intentionally small. If you cannot explain the workflow in
+one sentence, sketch the sentence before you sketch the graph.
+
 ## Getting started
 
 1. Connect GitHub and make sure the repo owner is covered by a GitHub App
@@ -148,6 +180,14 @@ for iterative changes on a live route.
 4. If the start event is `@mention`, decide whether this should be the default
    mention target or a slug-targeted route.
 5. Publish the automation when the draft is ready.
+
+## What a healthy automation setup looks like
+
+- the installation you need is available
+- the start event is explicit
+- the entry agent role matches the job
+- node-level overrides are deliberate, not accidental
+- the published version is the one you actually intend to run
 
 ## Use Automations vs Triggers
 

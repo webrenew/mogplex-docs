@@ -12,6 +12,14 @@ Use them when the rule is simply:
 If you need branching, delays, multiple agents, or a draft/publish workflow,
 move up to [Automations](/web/automations).
 
+## Why Triggers exists
+
+Triggers is the “do the obvious thing” surface.
+
+It is for cases where you do not need a canvas, a repo-owned standing contract,
+or a multi-step workflow. You just need one GitHub event on one installation to
+wake one agent reliably.
+
 ## What a trigger binds
 
 Each trigger binds:
@@ -26,6 +34,10 @@ Triggers are installation-scoped, not repo-scoped. They listen to webhook
 events from the selected GitHub App installation and then dispatch to the
 chosen agent.
 
+That scope is the main reason to choose Triggers over
+[Assignments](/web/assignments): the installation is the source of truth, not a
+single repo.
+
 ## Supported events
 
 Current trigger events are:
@@ -37,6 +49,14 @@ Current trigger events are:
 - issue comment
 - push
 - CI failure
+
+## Choose Triggers vs Assignments vs Automations
+
+- Use **Triggers** when the rule should apply at the installation event layer.
+- Use **Assignments** when a single repo should own standing work like PR
+  review, CI failure response, or cron.
+- Use **Automations** when one event should branch, delay, fan out, or publish
+  as a workflow graph.
 
 ## Requirements
 
@@ -50,6 +70,20 @@ Mogplex GitHub App installed.
 The creation form searches installations by both account scope and synced repos,
 so this page is often the fastest way to notice that repos are synced but still
 not webhook-covered.
+
+## How to create a good trigger
+
+When you create a trigger, the practical sequence is:
+
+1. choose the GitHub App installation that owns the repos you care about
+2. choose the event type that should wake work
+3. choose the agent that should respond
+4. for mention routes, decide whether this is the default route for bare
+   `@mogplex`
+
+Keep the rule as narrow as possible. If you feel tempted to explain branches,
+follow-up steps, or parallel work in prose, the route probably belongs in
+[Automations](/web/automations) instead.
 
 ## How creation works
 
@@ -95,7 +129,7 @@ Rules:
 For the full mention model, see
 [GitHub Mention Routing](/web/guides/github-mention-routing).
 
-## What the page shows after creation
+## What healthy trigger operations look like
 
 Existing triggers are grouped by installation and show live operating signals,
 including:
@@ -111,7 +145,10 @@ including:
 The page is optimized for fast routing edits, so enable/disable and delete are
 inline instead of hidden in a deeper detail view.
 
-## When to use Triggers
+That means the trigger row is not just configuration. It is also the first
+operational summary for whether the route is alive, under pressure, or failing.
+
+## Good fits for Triggers
 
 Use Triggers when you want a direct event-to-agent mapping, for example:
 

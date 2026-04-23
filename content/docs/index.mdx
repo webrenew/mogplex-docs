@@ -3,14 +3,16 @@ title: Get started
 description: Start with the right Mogplex surface, follow the first-day setup path, and get to a working repo quickly.
 ---
 
-Mogplex has two surfaces that are meant to work together:
+Mogplex is easiest to understand as one product with two working surfaces:
 
-- the **web app** is the shared control plane for GitHub coverage, repos,
-  agents, routing, settings, and observability
-- the **CLI** is the local runtime for repo-in-place work from your terminal
+- the **web app** is the shared control plane for GitHub coverage, repo setup,
+  reusable agents, routing, settings, and runtime inspection
+- the **CLI** is the local runtime for doing work directly in a checked-out repo
+  from your terminal
 
-You do not need to learn the whole product at once. The first useful question
-is simpler:
+You do not need to understand the whole product before you get value from it.
+
+The first useful question is simpler:
 
 **Where does this piece of work start?**
 
@@ -18,7 +20,7 @@ is simpler:
   <Card
     title="CLI"
     href="/cli"
-    description="Interactive sessions, `exec`, slash commands, and local MCP-aware workflows."
+    description="Interactive sessions, `exec`, slash commands, and repo-local workflows."
   />
   <Card
     title="Web app"
@@ -27,58 +29,74 @@ is simpler:
   />
 </Cards>
 
-## Pick the right starting surface
+In practice, most users do this:
 
-- Start in **Web App** when you need account setup, GitHub coverage, repo sync,
-  reusable agents, installation-backed routing, or shared observability.
-- Start in **CLI** when you already have a local repo and want Mogplex to
-  inspect, review, edit, or automate work from the terminal.
-- Use **both** when the account and routing state should live in the web app,
-  but the day-to-day work should happen close to the repo in your shell.
+1. set up shared account state once in the web app
+2. do repo-in-place work in the CLI
+3. return to the web app when they need routing, inspection, or repair actions
+
+## Start in the web app when...
+
+- Mogplex still needs to connect GitHub, install the GitHub App, or sync repos.
+- You need reusable agents, hosted connections, model access, or shared MCP
+  definitions.
+- The work should run from GitHub events, repo assignments, schedules, or a
+  publishable workflow.
+- You are debugging why routing, coverage, or hosted execution looks wrong.
+
+## Start in the CLI when...
+
+- The repo is already checked out locally.
+- You want Mogplex to inspect, review, edit, or automate one task from the
+  terminal.
+- The source of truth is the working copy on disk, not a hosted route.
+- You want slash commands, repo-local instructions, or shell-friendly `exec`
+  runs.
 
 ## Fast decision guide
 
-- "I need Mogplex to see my repos and respond to GitHub events."
-  Start with [Web App](/web), especially [Settings](/web/settings) and
-  [Installations](/web/installations).
-- "I already have the repo checked out and want Mogplex to do one task."
+- “I need Mogplex to see my repos and respond to GitHub events.”
+  Start with [Web App](/web), especially [Settings](/web/settings),
+  [Installations](/web/installations), and [Projects](/web/spaces).
+- “I already have the repo open locally and want Mogplex to do one task.”
   Start with [CLI](/cli), then use `mogplex` or `mogplex exec`.
-- "I need one GitHub event to wake one agent."
+- “I need one GitHub event to wake one agent.”
   Start with [Triggers](/web/triggers).
-- "I need repo-bound standing work like PR review, issue triage, or cron."
-  Start with [Assignments](/web/assignments) or [Projects](/web/spaces).
-- "I need branching, delays, multiple agents, or a publishable workflow."
+- “I need standing work owned by one repo, like PR review or cron.”
+  Start with [Assignments](/web/assignments).
+- “I need branching, delays, parallel work, or a draft/publish workflow.”
   Start with [Automations](/web/automations).
 
-## Shortest first-day path
+## The shortest reliable first-day path
 
-If you want one reliable setup order that works for most users, use this:
+If you want one setup order that works for most accounts and repos, use this:
 
 1. Open the [web app](/web) and connect GitHub in [Settings](/web/settings).
-2. Confirm GitHub App coverage in [Installations](/web/installations), then
-   sync repos in [Projects](/web/spaces).
-3. Inspect or create the reusable agents you want in [Agents](/web/agents).
-4. Choose the smallest routing surface that fits the job:
+2. Confirm the correct user or org has Mogplex GitHub App coverage in
+   [Installations](/web/installations).
+3. Sync repos and open the target repo in [Projects](/web/spaces).
+4. Check or create the reusable agents you want in [Agents](/web/agents).
+5. Choose the smallest routing surface that fits the job:
    - [Triggers](/web/triggers) for `one event -> one agent`
-   - [Assignments](/web/assignments) for repo-bound standing work
+   - [Assignments](/web/assignments) for standing repo-owned work
    - [Automations](/web/automations) for multi-step workflows
-5. Install the [CLI](/cli) and run a first local task in the repo.
-6. Use [Observability](/web/observability) once work is actually running.
+6. Install the [CLI](/cli) and run a first local task in the repo.
+7. Use [Observability](/web/observability) once work is actually running.
 
-## Fastest end-to-end proof
+## The fastest end-to-end proof
 
-If you only want to prove Mogplex is working before you invest in deeper setup,
-install the CLI and run one session:
+If you only want to prove Mogplex works before you invest in deeper routing
+setup, install the CLI and run one session:
 
 ```bash
 curl -fsSL https://www.mogplex.com/install.sh | sh
 mogplex
 ```
 
-If you are not authenticated yet, the CLI walks you into browser sign-in or
-local provider-key setup.
+If you are not authenticated yet, the CLI walks you into either browser sign-in
+with Mogplex or direct local provider-key setup.
 
-Success looks like:
+That first proof is credible when:
 
 - `mogplex` opens an interactive session
 - you can authenticate with either your Mogplex account or a provider key
@@ -95,9 +113,9 @@ export OPENAI_API_KEY=sk-...
 mogplex
 ```
 
-## What good looks like
+## What “working” should mean after the first hour
 
-By the end of your first pass, you should be able to say yes to these:
+By the end of an initial pass, you should be able to say yes to these:
 
 - Mogplex can see the repos you expect.
 - The repo owner has GitHub App coverage, not just OAuth visibility.
@@ -105,13 +123,11 @@ By the end of your first pass, you should be able to say yes to these:
 - One local CLI task completes successfully.
 - You know whether this job belongs in Triggers, Assignments, or Automations.
 
-## Read next
+If one of those is still false, the best next pages are usually:
 
-- New to the hosted control plane:
-  [Web App Overview](/web)
-- New to the local runtime:
-  [CLI Overview](/cli)
-- Need the exact GitHub mention rules:
-  [GitHub Mention Routing](/web/guides/github-mention-routing)
-- Unsure which routing surface to choose:
-  [Choose the Right Routing Surface](/web/guides/choose-routing-surface)
+- [Web App Overview](/web) if the issue is setup, routing, or hosted state
+- [CLI Overview](/cli) if the issue is local execution or repo-aware behavior
+- [GitHub Mention Routing](/web/guides/github-mention-routing) if GitHub
+  comment routing is not behaving the way you expect
+- [Choose the Right Routing Surface](/web/guides/choose-routing-surface) if the
+  job still does not obviously belong in Triggers, Assignments, or Automations
