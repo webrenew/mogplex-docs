@@ -41,7 +41,7 @@ When the right installation exists, Mogplex can:
 - use installation-backed webhook events for triggers and automations
 - generate a GitHub manage link back to the installation when metadata is known
 
-## What Settings shows
+## What the app surfaces show
 
 Inside [Settings](/web/settings), each installation can show:
 
@@ -72,6 +72,18 @@ login or target type, and then derive:
 
 That is why the Settings page can often recover from stale installation records
 without asking you to reconnect everything manually.
+
+## Common setup pattern
+
+1. Connect GitHub in [Settings](/web/settings).
+2. Confirm the expected personal account or org appears in the installation
+   list.
+3. Sync repos into [Projects](/web/spaces).
+4. Only after that, debug [Triggers](/web/triggers) or
+   [Automations](/web/automations).
+
+If you skip step 2, you can spend time debugging a routing problem that is
+really just missing GitHub App coverage.
 
 ## In this section
 

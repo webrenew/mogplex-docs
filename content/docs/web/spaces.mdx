@@ -25,14 +25,13 @@ automation attached to a specific repository.
 Use Projects when you need to:
 
 - sync imported repositories and search them quickly
-- group repos into projects, rename those groups, or create a new repo inside a
-  project
+- group repos into projects and organize the list
 - favorite repos, hide noisy repos, or filter by owner
 - start or stop a preview sandbox
 - open a workspace session for a repo
 - add monorepo sub-project entries instead of forcing one root for the whole
   repo
-- create repo-bound work such as agent assignments and cron jobs
+- create repo-bound work such as assignments or cron-backed automation
 - edit repo settings, secrets, and snapshots
 
 Opening a workspace is not a passive navigation step. If the repo does not
@@ -80,7 +79,7 @@ its Mogplex setup.
 Use this tab to inspect the repo snapshot state Mogplex is using for sandbox
 work.
 
-## First successful workflow
+## A practical first workflow
 
 1. Connect GitHub in [Settings](/web/settings).
 2. Confirm the right user or org has Mogplex GitHub App coverage in
@@ -108,18 +107,30 @@ settings aligned to the actual app you want to run.
 If automatic detection misses the right target, set `root_directory` manually
 in repo settings.
 
+## Sandbox management
+
+Projects is where sandbox launch usually starts, but it is not the only sandbox
+surface.
+
+Use [Sandboxes](/spaces/sandboxes) when you need a cross-repo operational view
+of running or pending previews, or when you want manual override on a specific
+sandbox instead of going through the repo card.
+
 ## Failure modes that matter
 
-- **Repo is visible but trigger-backed features do not work**: GitHub OAuth is
-  connected, but the correct GitHub App installation is missing.
-- **Open workspace feels slow the first time**: the repo probably needs its
-  sandbox created or installed first.
-- **User-billed sandbox launch fails**: the repo is set to use your Vercel
-  project, but the linked team or project is missing or invalid.
-- **Preview opens the wrong app in a monorepo**: create a sub-project repo or
-  set `root_directory`, `dev_command`, and `dev_port` explicitly.
-- **A repo disappeared from the main list**: it may be hidden. Toggle removed
-  repos back on from the Projects controls.
+- **Repo is visible but trigger-backed features do not work**:
+  GitHub OAuth is connected, but the correct GitHub App installation is
+  missing.
+- **Open workspace feels slow the first time**:
+  the repo probably needs its sandbox created or installed first.
+- **User-billed sandbox launch fails**:
+  the repo is set to use your Vercel project, but the linked team or project is
+  missing or invalid.
+- **Preview opens the wrong app in a monorepo**:
+  create a sub-project repo or set `root_directory`, `dev_command`, and
+  `dev_port` explicitly.
+- **A repo disappeared from the main list**:
+  it may be hidden. Toggle removed repos back on from the Projects controls.
 
 ## Related surfaces
 

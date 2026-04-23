@@ -78,6 +78,18 @@ The slug is the durable handle when you wire mention-based
 [Triggers](/web/triggers) or mention-entry [Automations](/web/automations).
 Keep it short, lowercase, and predictable from the job the agent does.
 
+## Skills, rules, and context are separate on purpose
+
+The non-roster tabs exist because Mogplex treats reusable behavior as more than
+just a system prompt.
+
+- **Skills** hold reusable procedures, tools, prompts, and workflows.
+- **Rules** hold account-level instruction files shared across agents.
+- **Context** holds reusable memory and background knowledge.
+
+That split lets you keep the reusable agent definition stable while still
+evolving the shared knowledge it depends on.
+
 ## How Agents relates to the rest of the product
 
 Think of the reusable agent definition as the base layer:
@@ -91,6 +103,14 @@ Flow nodes inside Automations can still override parts of the reusable
 definition, such as model choice, role, step count, or timeout, without
 rewriting the master agent.
 
+## Start here when
+
+- you need a reusable agent before wiring routing
+- you want to fork a preset instead of building from scratch
+- mention routing needs a predictable slug
+- several repos or automations should share the same core behavior
+- model or category hygiene has drifted and you want to clean it up centrally
+
 ## In this section
 
 - [Roster and Slugs](/web/agents/roster-and-slugs) for agent identity, presets,
@@ -98,14 +118,6 @@ rewriting the master agent.
 - [Skills, Rules, and Context](/web/agents/skills-rules-context) for the shared
   libraries that shape agent behavior
 
-## When to start here
-
-Start in Agents when:
-
-- you need a reusable agent before wiring routing
-- you want to fork a preset instead of building from scratch
-- mention routing needs a predictable slug
-- several repos or automations should share the same core behavior
-
 If you already know the repo and just need to attach recurring work, start from
-[Projects](/web/spaces) or [Assignments](/web/assignments) instead.
+[Projects](/web/spaces), [Assignments](/web/assignments), or
+[Triggers](/web/triggers) instead.
