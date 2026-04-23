@@ -1,16 +1,31 @@
 ---
 title: Flows
-description: Older links to /flows now map to the current Automations surface.
+description: Older links to /flows now map to Automations, even though the API and backend still use the legacy flow terminology in a few places.
 ---
 
 The legacy `/flows` route now redirects to `/automations`.
 
 Use [Automations](/web/automations) for the current workflow builder.
 
-## Why the route changed
+## The naming changed, the runtime mostly did not
 
-The original flow builder grew into a broader automation surface, so the route
-now reflects the live product language instead of the earlier internal naming.
+The original flow builder grew into a broader automation surface, so the UI and
+docs now use **Automations** as the product term.
+
+But the implementation still uses **flow** in several places.
+
+That is why users can still run into both names at once.
+
+## Legacy term vs current meaning
+
+| Legacy term | What it means now | Where you may still see it |
+| --- | --- | --- |
+| flow | automation | `/api/flows`, internal types, some run metadata, and backend tables |
+| flow version | published automation snapshot | publish lifecycle, stored versions, routing against `published_version_id` |
+| flow run | automation run | run details and observability-backed execution records |
+
+If you are reading logs, API routes, or internal references, mentally translate
+`flow` to `automation`.
 
 ## What moved with it
 
@@ -27,6 +42,21 @@ Automations surface, including:
 - recent automation runs
 - assistant-guided workflow suggestions
 
+## Why the old term still matters
+
+Even though the route changed, the older term is still operationally relevant.
+
+You may still see it when you:
+
+- call or inspect `/api/flows`
+- debug publish behavior that creates a new flow version
+- read implementation details that talk about `flows` and `flow_versions`
+- inspect webhook routing or run records that still key off a `flow_id`
+
+So the product language is newer than the storage and API language.
+
+That is not a contradiction. It is just the current state of the system.
+
 ## Current mental model
 
 Use [Automations](/web/automations) when one GitHub event should fan into a
@@ -34,6 +64,26 @@ multi-step workflow with branching or staged execution.
 
 Use [Triggers](/web/triggers) when you only need a direct event-to-agent wakeup
 without the automation canvas.
+
+## How to read older references
+
+If you find an older link, API example, or implementation note that still says
+`flow`, read it like this:
+
+- `flow` means the automation itself
+- `flow version` means the published snapshot webhook routing uses
+- `flow run` means one execution of that automation
+
+That translation is usually enough to make old and new references line up.
+
+## Getting the current docs
+
+For live behavior, use:
+
+- [Automations](/web/automations)
+- [Agent Roles](/web/automations/agent-roles)
+- [Publishing and Routing](/web/automations/publishing-and-routing)
+- [GitHub Mention Routing](/web/guides/github-mention-routing)
 
 This page stays in place so older bookmarks and links still land on the current
 documentation path.

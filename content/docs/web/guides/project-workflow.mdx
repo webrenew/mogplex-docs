@@ -1,18 +1,42 @@
 ---
 title: Project Workflow
-description: The practical path from GitHub connection to workspace launch and production routing in Mogplex.
+description: The practical path from GitHub connection to repo import, sandbox launch, and production routing in Mogplex.
 ---
 
-This is the cleanest way to approach Mogplex when you are setting up a repo for
-the first time.
+This is the cleanest first-run path when you are setting up Mogplex for a repo
+or org for the first time.
+
+The main thing to keep straight is that Mogplex separates three jobs:
+
+- connecting your GitHub identity
+- getting the right repos into Projects
+- enabling the routing surface you actually want
+
+If you do those in the right order, setup gets much easier to reason about.
 
 ## 1. Connect GitHub
 
 Start in [Settings](/web/settings) and connect GitHub.
 
-That gives Mogplex your account identity, but it does not automatically make
-every repo triggerable yet. For triggered work, you also need GitHub App
-coverage.
+That establishes your account identity and is enough to start importing repos.
+
+It is **not** the same thing as GitHub App coverage.
+
+That distinction matters because Mogplex treats these setup states
+differently:
+
+| State | What it unlocks | What it does not unlock yet |
+| --- | --- | --- |
+| Disconnected | Nothing GitHub-backed | Repo import, repo creation, trigger routing |
+| OAuth connected | Repo import and repo creation | Webhook-backed routing |
+| App install pending | Repo import can still work if OAuth is already connected | Trigger-ready coverage until the install completes |
+| App installed, no synced repos yet | Installation coverage exists | Repos will not show up in Projects until they are synced or imported |
+| App installed with synced repos | Full GitHub-backed setup | N/A |
+
+If you only remember one rule, use this one:
+
+- GitHub connection lets Mogplex see repos
+- GitHub App coverage lets Mogplex route webhook-backed work into them
 
 ## 2. Confirm App coverage
 
@@ -25,29 +49,75 @@ You want to verify:
 - the installation lists the repos you care about
 - Mogplex has started syncing covered repos into Projects
 
-If that is not true yet, use the [GitHub App Coverage](/web/guides/github-app-coverage)
-guide before going further.
+If that is not true yet, use the
+[GitHub App Coverage](/web/guides/github-app-coverage) guide before going
+further.
 
-## 3. Import and organize repos in Projects
+## 3. Create the project structure you actually want
 
 Go to [Projects](/web/spaces).
 
-From there you can:
+Projects can be empty. You do not need to wait for a perfect import state
+before organizing the workspace structure.
 
-- sync covered repos into the default imported project
+In practice, you usually choose one of these paths:
+
+- keep using the default imported project for synced repos
+- create additional projects to separate teams, products, or environments
+- create a brand-new GitHub repo directly inside a project
+
+Mogplex supports both imported repos and app-created repos, so "set up
+Projects" is not the same thing as "sync everything first."
+
+## 4. Import or create repos
+
+From [Projects](/web/spaces), you can:
+
+- import repos into the default imported project
 - create additional projects to group repos
+- create a new GitHub repo inside a project when GitHub is already connected
 - add sub-project repos for monorepo targets
 - configure repo-specific settings such as sandbox behavior, env sync, and
   linked Vercel project state
 
-## 4. Open a workspace
+Two practical nuances matter here:
+
+- If GitHub is connected through OAuth, you can still import repos before the
+  App install is finished.
+- Once installation-backed sync is active, covered repos become the preferred
+  source of truth in Projects, which helps avoid stale OAuth-only duplicates.
+
+## 5. Set up sandbox billing if you plan to launch workspaces
+
+Repo import and routing setup do not require Vercel, but sandbox-backed
+workspace sessions do.
+
+Mogplex supports two main paths:
+
+- Mogplex-managed platform sandbox access for accounts that have it enabled
+- your own Vercel billing project linked through [Settings](/web/settings)
+
+If Vercel is connected but you have not selected a billing project yet,
+Projects will push you toward creating a project with Vercel billing attached.
+
+If you only want to configure routing first, you can do that before you finish
+the sandbox path.
+
+## 6. Open a workspace
 
 From [Projects](/web/spaces), open a workspace session for the repo you want.
 
 If a sandbox is not already running, Mogplex can launch one as part of opening
 the workspace. This is the fastest route into active repo work.
 
-## 5. Choose the routing model
+That means the normal operator loop is:
+
+1. import or create the repo
+2. open the workspace
+3. let Mogplex launch the sandbox if needed
+4. start doing repo work from the session
+
+## 7. Choose the routing model
 
 Once the repo is imported, choose the lightest surface that matches the job:
 
@@ -57,9 +127,27 @@ Once the repo is imported, choose the lightest surface that matches the job:
 - Use [Automations](/web/automations) when you need branching, multiple steps,
   or publish control
 
-## 6. Watch it in Observability
+For webhook-backed routing, make sure the repo is App-covered, not just synced.
+
+That is the most common setup miss when a repo looks available in Projects but
+still will not wake Triggers or Automations.
+
+## 8. Watch it in Observability
 
 After work starts running, move to [Observability](/web/observability).
 
 That is where you confirm run status, pressure, failures, call details, tool
 usage, and sandbox-linked execution state.
+
+## Fastest successful setup path
+
+If you want the shortest version:
+
+1. Connect GitHub in [Settings](/web/settings)
+2. Install the GitHub App for the repo owner
+3. Open [Projects](/web/spaces) and import or create the repo
+4. Link Vercel billing if you need sandbox-backed workspaces
+5. Open a workspace
+6. Add a Trigger, Assignment, or Automation
+7. Test the exact GitHub event you expect, then confirm it in
+   [Observability](/web/observability)

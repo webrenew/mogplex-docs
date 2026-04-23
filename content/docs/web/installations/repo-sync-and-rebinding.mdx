@@ -1,10 +1,16 @@
 ---
 title: Repo Sync and Rebinding
-description: Understand how installation-scoped repo sync works and how Mogplex repairs stale flow and trigger installation bindings.
+description: Understand how installation-scoped repo sync works, what Mogplex updates or preserves, and when stale trigger or automation bindings can be repaired.
 ---
 
-Installations are not just metadata rows. They drive how repo sync and routing
-state stay aligned over time.
+Installations are not just metadata rows.
+
+They are part of the live routing model for repos, triggers, and automations.
+
+That means sync has two jobs at once:
+
+- keep the repo inventory accurate
+- keep installation-scoped routing attached to the right installation id
 
 ## Installation-backed sync
 
@@ -18,13 +24,40 @@ record.
 In practice, that means covered repos become the preferred source of truth for
 automation routing.
 
+## OAuth sync vs installation sync
+
+These paths look similar in the UI, but they behave differently:
+
+| Sync path | What it does | What it avoids doing |
+| --- | --- | --- |
+| OAuth-only sync | Imports repos Mogplex can discover through the connected GitHub user | Does not overwrite an existing App installation id on a repo |
+| Installation sync | Imports the repos GitHub says belong to a specific App installation and records that installation id | Does not guess across multiple installations |
+| Webhook reconciliation | Reacts to install, uninstall, repo add/remove, rename, transfer, and delete events | Does not rely on manual resync to stay current |
+
+That separation is deliberate. An OAuth import is useful for visibility, but it
+is not allowed to silently clobber App-backed routing state.
+
+## What Mogplex updates and what it preserves
+
+During repo sync, Mogplex intentionally protects a few things:
+
+- base repo rows are the sync target
+- sub-project repos with a `root_directory` are not overwritten as if they were
+  standalone base repos
+- GitHub metadata such as `full_name`, owner, repo name, and default branch
+  still propagates to matching sub-project rows
+- an OAuth-only sync will not erase a stored `github_installation_id`
+
+That combination lets Mogplex refresh repo identity without destroying monorepo
+structure or installation coverage.
+
 ## Why this matters for Projects
 
 Older OAuth-only repo rows can linger after a user moves to installation-backed
 GitHub access.
 
-Mogplex intentionally prefers covered repos when installation-backed sync is
-active so the current Projects view is not polluted by stale OAuth-only rows.
+When installation-backed sync is active, Mogplex prefers covered repos in
+Projects so stale OAuth-only rows do not crowd the active list.
 
 ## Metadata refresh
 
@@ -41,31 +74,48 @@ When installation state changes from GitHub webhooks, Mogplex can:
 
 - upsert installation rows
 - resync repos for affected users
-- detach repo installation ids if an installation is removed
+- add installation coverage to newly added repos
+- detach repo installation ids if an installation or repo scope is removed
+- delete repo rows when GitHub reports the repo itself was deleted
 
 This keeps repo coverage aligned with the actual GitHub App state instead of
 treating it as a one-time setup import.
 
-## Rebinding stale flow and trigger state
+The important webhook-backed update paths are:
 
-Flows and triggers are installation-scoped too.
+- `installation` events such as create, permission change, unsuspend, delete,
+  and suspend
+- `installation_repositories` events when repos are added to or removed from an
+  installation
+- `repository` events such as create, rename, transfer, visibility changes, and
+  delete
+
+## Rebinding stale trigger and automation state
+
+Automations and triggers are installation-scoped too.
 
 So when repo coverage changes, stale installation bindings on automation
 entities can become a problem.
 
 Mogplex has a repair path for this during installation-backed sync:
 
-- it checks the current installation ids known for the user
-- if the situation is unambiguous
-- it can rebind stale flow and trigger installation ids to the current
-  installation
+- it loads the current installation ids known for the user
+- it only proceeds if there is exactly one current installation
+- it only proceeds if that installation matches the installation being synced
+- it then updates stale automation and trigger installation ids to that current
+  one
 
 This is deliberately conservative. Mogplex only does it when the installation
 state is clear enough to avoid guessing wrong.
 
+If a user currently has multiple installations, Mogplex skips the automatic
+rebind instead of guessing which installation the stale routes should now point
+at.
+
 ## The operational takeaway
 
-If installation routing feels stale, do not only look at the flow or trigger.
+If installation routing feels stale, do not only look at the automation or
+trigger.
 
 Also check:
 
@@ -73,5 +123,16 @@ Also check:
 - whether installation-backed repo sync has run recently
 - whether the installation inventory is ambiguous for that user
 
-The “repo looks fine but automation does not wake up” class of bug is often a
+The "repo looks fine but automation does not wake up" class of bug is often a
 sync or binding problem, not a prompt problem.
+
+## Good troubleshooting order
+
+1. Check [Settings](/web/settings) to confirm the right installation exists for
+   the repo owner
+2. Check [Projects](/web/spaces) to confirm the repo is App-covered, not just
+   visible
+3. Re-run repo sync if coverage recently changed
+4. Re-test the exact GitHub event that should wake the route
+5. Use [Observability](/web/observability) to confirm whether the event reached
+   the expected trigger or automation
