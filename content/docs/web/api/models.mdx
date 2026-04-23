@@ -33,10 +33,17 @@ The underlying split is:
 
 ## `GET /api/models`
 
-With user auth, this route returns two useful shapes:
+This route always returns the same top-level keys:
 
-- `catalog`: the visible model catalog, including per-model `is_enabled`
-- `models`: the enabled subset that the current user can actively use
+- `catalog`
+- `models`
+
+What changes is how those keys are populated:
+
+- with user auth, `catalog` includes visible models plus per-model
+  `is_enabled`, and `models` is the enabled subset the user can actively use
+- without user auth, both `catalog` and `models` are the same visible
+  available catalog
 
 ```bash
 curl -sS \
@@ -78,10 +85,34 @@ Representative response excerpt:
 }
 ```
 
+Unauthenticated response excerpt:
+
+```json
+{
+  "models": [
+    {
+      "id": "provider/model-a",
+      "provider": "provider",
+      "name": "Model A",
+      "is_available": true
+    }
+  ],
+  "catalog": [
+    {
+      "id": "provider/model-a",
+      "provider": "provider",
+      "name": "Model A",
+      "is_available": true
+    }
+  ]
+}
+```
+
 Practical behavior to know:
 
-- unauthenticated callers only get the visible available catalog
-- authenticated callers get both `catalog` and the enabled `models` subset
+- unauthenticated callers still get both keys, but they point at the same
+  visible available catalog
+- authenticated callers get `catalog` plus the enabled `models` subset
 - visibility filtering applies before the response is returned
 - recommendation metadata, pricing, context length, and capabilities can also
   appear when present in the catalog
@@ -99,8 +130,8 @@ curl -sS \
 
 This route intentionally keeps CLI parity with the hosted product state:
 
-- explicitly disabled models are removed
-- available models remain visible to the CLI even when you are asking for the
+- models explicitly disabled by the user are removed from the CLI list
+- available models that are not explicitly disabled remain visible, even in the
   CLI-oriented shape
 
 ## `PATCH /api/models`
