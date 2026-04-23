@@ -37,6 +37,22 @@ Two implementation details matter in practice:
   **entry agent slug**. That means the slug on an agent node connected directly
   to the start node, not a later downstream node.
 
+## What the editor gives you beyond simple routing
+
+The automation editor is more than a canvas.
+
+It also gives you:
+
+- draft editing with autosave
+- manual save when you want an explicit checkpoint
+- publish and activate controls separate from drafting
+- duplicate, pause, and delete actions
+- recent runs for the selected automation
+- assistant-generated graph suggestions you can apply back into the draft
+
+That combination is the main reason to choose Automations over
+[Triggers](/web/triggers).
+
 ## Pick the Right Agent Role
 
 The role on an agent node changes how Mogplex expects that node to behave.
@@ -74,7 +90,7 @@ about correctness, security, performance, or regressions. Typical cases:
 Use `edit` when you want the graph to apply changes only after an earlier node
 has already decided that code should be mutated.
 
-## Mention Routing
+## Mention routing
 
 Mention-driven automations use exact GitHub comment syntax.
 
@@ -98,13 +114,10 @@ Important rules:
 - PR or issue comments without `@mogplex` use the `pr_comment` or
   `issue_comment` event types instead of `mention`.
 
-For predictable routing, keep one default mention automation per installation
-and make the entry agent slug obvious.
-
 For the exact mention rules across Triggers and Automations, see
 [GitHub Mention Routing](/web/guides/github-mention-routing).
 
-## Drafting and Publish Lifecycle
+## Drafting and publish lifecycle
 
 Automations keep a draft graph, autosave as you edit, and expose a separate
 publish step.
@@ -116,13 +129,17 @@ Publishing does two things:
 
 That lets you keep changing a draft without immediately changing live routing.
 
-## Good Starter Patterns
+If an automation already has a published version, draft edits stay local to the
+editor until you publish again. That separation is what makes the canvas safe
+for iterative changes on a live route.
+
+## Good starter patterns
 
 - `pr_opened` -> `review` -> condition -> `edit` or end
 - `issue_opened` -> `triage` -> condition -> parallel follow-up agents
 - `mention` -> `triage` -> delay -> follow-up response
 
-## Getting Started
+## Getting started
 
 1. Connect GitHub and make sure the repo owner is covered by a GitHub App
    installation.

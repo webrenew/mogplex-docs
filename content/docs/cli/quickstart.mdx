@@ -3,8 +3,13 @@ title: Quickstart
 description: Install the CLI, choose an auth path, run a first task, and confirm the current Mogplex CLI surface is working.
 ---
 
-The fastest path is: install the binary, start `mogplex`, choose how to
-authenticate, and run a task.
+The shortest useful loop is:
+
+1. install the binary
+2. start `mogplex`
+3. choose an auth path
+4. run one task
+5. confirm the slash and repo-local surfaces behave the way you expect
 
 ## 1. Install
 
@@ -70,7 +75,11 @@ If you want to inspect what Mogplex has already stored locally, run:
 mogplex login status
 ```
 
-## 4. Run a one-off task
+## 4. Run one interactive or one-off task
+
+If you want a live session, stay inside `mogplex` and ask for work directly.
+
+If you want a one-shot result with normal shell exit behavior, use exec mode:
 
 ```bash
 mogplex exec "review the staged diff for regressions"
@@ -103,6 +112,13 @@ mogplex slash list
 That shows the built-in in-session commands plus any project or user commands
 loaded from `.agents/commands/` and `~/.mogplex/commands/`.
 
+If you want to execute a slash command from the shell instead of only listing
+it, go through exec mode:
+
+```bash
+mogplex exec "/status"
+```
+
 ## 6. Make Mogplex repo-aware
 
 Inside a repo, the next upgrade is to add repo-local instructions and commands:
@@ -110,8 +126,20 @@ Inside a repo, the next upgrade is to add repo-local instructions and commands:
 - `AGENTS.md` for stable repo guidance
 - `.agents/commands/` for repo-scoped slash commands
 - `/init` inside a live session to scaffold the basics quickly
+- optional `agent.json` when you want project-level config beyond markdown
+  instructions
 
 See [Project Commands](/cli/guides/project-commands) for the full pattern.
+
+## 7. Know what "working" looks like
+
+By this point, a healthy setup looks like:
+
+- `mogplex` opens cleanly
+- `mogplex login status` matches the auth mode you chose
+- `mogplex exec "..."` returns a normal result
+- `mogplex slash list` shows the commands you expect
+- repo-local instructions affect behavior once you add them
 
 ## Common first-run problems
 

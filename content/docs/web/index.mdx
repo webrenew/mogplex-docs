@@ -22,7 +22,7 @@ hosted credentials and connections the CLI can reuse.
   <Card title="API" href="/web/api" />
 </Cards>
 
-## Surface map
+## What the web app actually owns
 
 - **Projects** lives at `/spaces`. It is where repository import, project
   organization, sandbox launch, and workspace opening happen.
@@ -65,6 +65,18 @@ For a new account or a new repo, the most reliable path through the product is:
 
 If the choice is not obvious yet, read
 [Choose the Right Routing Surface](/web/guides/choose-routing-surface).
+
+## How the web app and CLI fit together
+
+The clean split is usually:
+
+- do shared account setup, GitHub coverage, and routing in the web app
+- do repo-local execution in the CLI
+- come back to the web app for observability, repair actions, and shared
+  configuration
+
+This matters because Mogplex intentionally reuses some hosted state in the CLI,
+including account-backed model defaults and remote MCP definitions.
 
 ## Legacy routes
 

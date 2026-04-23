@@ -7,7 +7,7 @@ The Mogplex CLI (`mogplex`) is the local runtime for Mogplex.
 
 Use it for interactive terminal sessions, one-off `exec` runs, slash-command
 workflows, local MCP configuration, and repo-scoped conventions like
-`AGENTS.md`, `agent.json`, and `.agents/commands/`.
+`AGENTS.md`, optional `agent.json`, and `.agents/commands/`.
 
 <Cards>
   <Card title="Installation" href="/cli/installation" />
@@ -16,7 +16,7 @@ workflows, local MCP configuration, and repo-scoped conventions like
   <Card title="Guides" href="/cli/guides" />
 </Cards>
 
-## CLI mental model
+## Choose the right CLI mode
 
 - `mogplex` launches the interactive session. Use this when you want back and
   forth, slash commands, model switching, and a persistent local workflow.
@@ -25,8 +25,11 @@ workflows, local MCP configuration, and repo-scoped conventions like
 - `mogplex "<prompt>"` is a shorthand for a one-off non-interactive run.
 - `mogplex slash list` shows the slash-command registry available in the
   current environment.
-- `AGENTS.md`, `.agents/commands/`, `~/.mogplex/config.toml`, and
-  `~/.mogplex/auth.json` shape how the CLI behaves.
+- `mogplex exec "/status"` or another slash line executes a slash command
+  without opening the full TUI.
+
+The important distinction is that `mogplex slash list` is for discovery.
+Actual slash execution from the shell goes through exec mode.
 
 ## What the CLI is best at
 
@@ -35,7 +38,20 @@ workflows, local MCP configuration, and repo-scoped conventions like
 - local slash-command workflows
 - reusing models, MCP definitions, and tokens synced from your Mogplex account
 
-## First-run path
+## What the CLI stores locally
+
+These files explain most CLI behavior:
+
+- `~/.mogplex/auth.json` stores browser login or provider credentials.
+- `~/.mogplex/config.toml` stores CLI configuration and profiles.
+- `~/.mogplex/logs/` stores structured session logs.
+- `AGENTS.md` teaches Mogplex how to work inside a specific repo.
+- `.agents/commands/` adds repo-scoped slash commands.
+- `~/.mogplex/commands/` adds user-scoped slash commands across repos.
+- `agent.json` is an optional project-level config file the interactive CLI can
+  scaffold on first run in a repo.
+
+## First working session
 
 1. Install the binary with [Installation](/cli/installation).
 2. Run `mogplex`.
@@ -46,14 +62,6 @@ workflows, local MCP configuration, and repo-scoped conventions like
 If you want shared configuration from the hosted product, connect the account in
 the [web app](/web/settings) first so the CLI can reuse synced models and MCP
 definitions.
-
-## Files that matter
-
-- `~/.mogplex/auth.json` stores browser login or provider credentials.
-- `~/.mogplex/config.toml` stores CLI configuration and profiles.
-- `AGENTS.md` teaches Mogplex how to work inside a specific repo.
-- `.agents/commands/` adds repo-scoped slash commands.
-- `~/.mogplex/commands/` adds user-scoped slash commands across repos.
 
 ## Use the CLI and web app together
 
@@ -69,6 +77,21 @@ tool that is best at working inside a repo.
 
 If you want shared configuration, repo import, or workflow authoring, start in
 the [web app](/web).
+
+## Common first questions
+
+- "Should I start with `mogplex` or `mogplex exec`?"
+  Start with `mogplex` for back-and-forth work and `mogplex exec` for one task
+  plus an exit code.
+- "How do repo-specific conventions get loaded?"
+  Through `AGENTS.md`, `.agents/commands/`, optional `agent.json`, and your
+  local config.
+- "Why does the CLI behave differently across shells?"
+  Environment variables beat stored auth, and repo-local instruction files can
+  change the assembled prompt.
+- "Where should I configure shared models and MCP servers?"
+  In the [web app settings](/web/settings) if you want account-backed sync, or
+  locally in CLI config if you want shell-only behavior.
 
 ## Read next
 

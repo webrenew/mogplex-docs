@@ -13,6 +13,17 @@ platform API yet. Route shape and response details follow the product, so treat
 it as the live application surface behind Mogplex rather than a long-term
 compatibility contract.
 
+## How to read this API correctly
+
+Read the hosted API in this order:
+
+1. what product surface are you trying to drive?
+2. which current route family backs that surface?
+3. what auth mode is that route willing to accept?
+
+If you start by assuming a clean public REST contract, you will overestimate how
+stable the route shape is meant to be.
+
 ## In this section
 
 - [Authentication](/web/api/authentication) for how browser sessions, personal
