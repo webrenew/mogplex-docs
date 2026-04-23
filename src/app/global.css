@@ -47,10 +47,12 @@ html > body[data-scroll-locked] {
 
 @media (min-width: 768px) {
   #nd-docs-layout {
+    /* Fumadocs switches from drawer to full sidebar at 768px. */
     --fd-sidebar-width: 270px;
   }
 
-  [data-sidebar-panel] {
+  /* Fumadocs still mounts the collapsed-panel shell on desktop; keep it hidden. */
+  #nd-docs-layout [data-sidebar-panel] {
     display: none;
   }
 }
