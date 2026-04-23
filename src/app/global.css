@@ -47,8 +47,19 @@ html > body[data-scroll-locked] {
 
 @media (min-width: 768px) {
   #nd-docs-layout {
-    /* Fumadocs switches from drawer to full sidebar at 768px; prefer the normal 270px width and only shrink slightly on the narrowest desktop viewports. */
-    --fd-sidebar-width: min(270px, 35vw);
+    /* Fumadocs sets the sidebar track inline; override it so desktop can shrink to content up to 270px instead of reserving a fixed column. */
+    --fd-sidebar-col: fit-content(270px) !important;
+    --fd-sidebar-width: 270px;
+  }
+
+  #nd-docs-layout [data-sidebar-placeholder] {
+    --fd-sidebar-width: fit-content(270px);
+    max-inline-size: 270px;
+  }
+
+  #nd-docs-layout #nd-sidebar {
+    inline-size: fit-content(270px);
+    max-inline-size: 270px;
   }
 
   /* Fumadocs still mounts the collapsed-panel shell on desktop; keep it hidden. */
