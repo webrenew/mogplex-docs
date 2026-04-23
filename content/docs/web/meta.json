@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "spaces",
+    "sandboxes",
     "agents",
     "automations",
     "triggers",

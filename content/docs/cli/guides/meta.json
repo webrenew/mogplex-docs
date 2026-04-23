@@ -1,4 +1,4 @@
 {
   "title": "Guides",
-  "pages": ["index", "authentication", "exec-mode", "slash-commands", "project-commands"]
+  "pages": ["index", "authentication", "configuration-and-flags", "exec-mode", "slash-commands", "project-commands"]
 }

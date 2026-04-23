@@ -11,6 +11,7 @@ hosted credentials and connections the CLI can reuse.
 
 <Cards>
   <Card title="Projects" href="/web/spaces" />
+  <Card title="Sandboxes" href="/web/sandboxes" />
   <Card title="Agents" href="/web/agents" />
   <Card title="Automations" href="/web/automations" />
   <Card title="Triggers" href="/web/triggers" />
@@ -26,6 +27,8 @@ hosted credentials and connections the CLI can reuse.
 
 - **Projects** lives at `/spaces`. It is where repository import, project
   organization, sandbox launch, and workspace opening happen.
+- **Sandboxes** lives at `/spaces/sandboxes`. It is the cross-repo runtime
+  view for running, pending, and stale preview environments.
 - **Agents** lives under `/agents/*` and manages the reusable agent roster plus
   shared skills, rules, and context.
 - **Automations** at `/automations` is the canvas builder for multi-step
@@ -80,15 +83,19 @@ including account-backed model defaults and remote MCP definitions.
 
 ## Legacy routes
 
-Two older dashboard routes still exist, but they now forward to the current
+Several older dashboard routes still exist, but they now forward to the current
 surfaces:
 
-- `/flows` redirects to `/automations`
-- `/library` redirects to agent libraries or model settings, depending on tab
+- [`/flows`](/web/flows) redirects to `/automations`
+- [`/library`](/web/library) redirects to agent libraries or model settings,
+  depending on tab
+- [`/primitives`](/web/primitives) redirects to the agent library surfaces
 
 The product language still says **Projects** even though the route is
 `/spaces`. The docs use the current UI label and call out the route where it
 matters.
+
+For the full redirect map, use [Legacy Routes](/web/guides/legacy-routes).
 
 ## Common first-run questions
 
@@ -100,6 +107,8 @@ matters.
   they are fully triggerable.
 - **Where do I set up models and external tools?** Use
   [Settings](/web/settings). Agent behavior belongs in [Agents](/web/agents).
+- **Where do I manually stop or inspect previews across repos?** Use
+  [Sandboxes](/web/sandboxes).
 - **Where do I start for mention-driven workflows?** Use
   [Triggers](/web/triggers) for a direct mention route, or
   [Automations](/web/automations) if the mention should fan into a workflow.

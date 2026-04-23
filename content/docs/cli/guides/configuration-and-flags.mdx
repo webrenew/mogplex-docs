@@ -1,0 +1,200 @@
+---
+title: Configuration and Flags
+description: Understand config.toml locations, profiles, environment precedence, and the global CLI flags that override Mogplex behavior per run.
+---
+
+Use this guide when you need to answer:
+
+- where does Mogplex read configuration from?
+- which layer wins when config, env vars, profiles, and flags disagree?
+- which flags are safe to treat as per-run overrides?
+
+## The three layers to think about
+
+Mogplex configuration is easiest to understand when you separate it into three
+jobs:
+
+- **config files** for stable defaults
+- **environment variables** for shell-scoped or secret state
+- **CLI flags** for one-off overrides on a single run
+
+If behavior feels surprising, the usual cause is that one of those layers is
+outranking the others.
+
+## Config file locations
+
+The main user config lives at:
+
+```text
+$MOGPLEX_HOME/config.toml
+```
+
+If `MOGPLEX_HOME` is unset, the default path is:
+
+```text
+~/.mogplex/config.toml
+```
+
+Project-level config can also live inside a repo at:
+
+```text
+./.mogplex/config.toml
+```
+
+Two environment details matter:
+
+- `MOGPLEX_HOME` overrides the home directory location entirely
+- `CODEX_HOME` still works as a fallback, but it is deprecated in favor of
+  `MOGPLEX_HOME`
+
+## Resolution order
+
+Mogplex resolves config from lowest priority to highest priority in this exact
+order:
+
+1. built-in defaults
+2. user config at `$MOGPLEX_HOME/config.toml`
+3. project config at `./.mogplex/config.toml`
+4. the active profile under `[profiles.<name>]`
+5. environment variables
+6. `--config KEY=VALUE` overrides
+7. per-invocation CLI flags such as `--sandbox` and `--model`
+
+That means a repo config can override your home config, env vars can override
+both, and explicit flags still win over everything else.
+
+## Profiles
+
+Profiles are the clean way to switch between named CLI behaviors without
+rewriting your main config every time.
+
+Example:
+
+```toml
+model_provider = "openai"
+sandbox_mode = "read-only"
+approval_policy = "on-request"
+
+[profiles.write]
+sandbox_mode = "workspace-write"
+
+[profiles.safe]
+sandbox_mode = "read-only"
+approval_policy = "never"
+```
+
+Select a profile with either:
+
+```bash
+mogplex --profile fast
+```
+
+or:
+
+```bash
+MOGPLEX_PROFILE=fast mogplex
+```
+
+`--profile` wins over `MOGPLEX_PROFILE`, and `CODEX_PROFILE` is only a fallback
+when the Mogplex-prefixed variable is absent.
+
+## One-off overrides with `--config`
+
+Use `--config` when you want to override a config key without editing any file.
+
+Examples:
+
+```bash
+mogplex --config sandbox_mode=workspace-write --config approval_policy=never
+mogplex --config model_provider=anthropic exec "summarize this repository"
+```
+
+This is useful when you want the run to stay self-documenting in shell history
+or CI logs.
+
+## Global flags that matter most
+
+The top-level CLI currently supports these high-signal flags:
+
+- `--config KEY=VALUE` for direct config-key overrides
+- `--sandbox MODE` for `read-only`, `workspace-write`, or
+  `danger-full-access`
+- `--approval POLICY` for `untrusted`, `on-failure`, `on-request`, or `never`
+- `--cwd DIR` to change the working directory
+- `--model NAME` to override the selected model
+- `--profile NAME` to activate one named profile
+- `--feature KEY[=VAL]` to toggle feature flags
+- `--color WHEN` for `auto`, `always`, or `never`
+
+These flags are parsed before Mogplex decides whether you are launching the TUI
+or exec mode, so they apply to both `mogplex` and `mogplex exec ...` unless the
+flag itself is exec-specific.
+
+## Output flags are exec-specific
+
+Structured output belongs to one-off runs, not the interactive TUI.
+
+Use these with `mogplex exec` or the bare-prompt exec shorthand:
+
+- `--output text`
+- `--output json`
+- `--output jsonl`
+- `--json`
+- `--jsonl`
+
+Examples:
+
+```bash
+mogplex exec --json "summarize this repository"
+mogplex --jsonl "review the staged diff for regressions"
+```
+
+If another program is going to parse the result, prefer JSON or JSONL instead
+of screen-oriented text.
+
+## Slash-command config still lives in `config.toml`
+
+The `slash_commands` section in `config.toml` is still the right place for
+slash-registry policy such as:
+
+- disabling specific command names
+- adding aliases
+- adding extra user-scope command directories
+
+Keep repo behavior in `.agents/commands/`, and keep personal registry policy in
+config.
+
+For the slash loader itself, see [Slash Commands](/cli/guides/slash-commands).
+For repo-local command files, see
+[Project Commands](/cli/guides/project-commands).
+
+## Startup behavior toggle
+
+Mogplex checks for published updates on startup and can print an update banner
+in interactive shells.
+
+If you want to suppress that banner for a shell session or script, set:
+
+```bash
+MOGPLEX_SKIP_UPDATE_CHECK=1
+```
+
+## Common mistakes
+
+- assuming project config beats environment variables: env vars still win
+- forgetting that `--profile` only selects `[profiles.NAME]`, not a different
+  config file
+- using `--json` with interactive `mogplex` and expecting the TUI to emit
+  machine-readable output
+- relying on `CODEX_HOME` or `CODEX_PROFILE` without realizing they are fallback
+  compatibility paths, not the preferred names
+
+## A practical split
+
+- put durable personal defaults in `$MOGPLEX_HOME/config.toml`
+- put repo-specific defaults in `./.mogplex/config.toml`
+- use profiles for named modes like `write`, `safe`, or `ci`
+- use flags when the override should only apply to one run
+
+That keeps the CLI predictable without turning every invocation into a wall of
+arguments.

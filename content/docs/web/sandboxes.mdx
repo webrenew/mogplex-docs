@@ -1,0 +1,124 @@
+---
+title: Sandboxes
+description: Use the Sandboxes view at /spaces/sandboxes to inspect running and pending previews across repos, open a workspace pinned to a sandbox, and manually stop or remove stale runtimes.
+---
+
+Sandboxes is the cross-repo runtime view for Mogplex previews.
+
+In the app, this surface lives at `/spaces/sandboxes`. Use it when
+[Projects](/web/spaces) is too repo-centric and you need to operate the
+sandbox fleet directly.
+
+## Use Sandboxes when
+
+- you need one list of live and pending sandboxes across repos
+- a preview is stuck in creating or installing and you want manual override
+- you need to open a workspace pinned to one specific sandbox instance
+- you want to jump straight from a sandbox to health or observability
+- you need to stop or remove stale sandbox records after the repo work moved on
+
+If you are still choosing the repo or changing repo settings, start from
+[Projects](/web/spaces). If you already know the failing call or job, move into
+[Observability](/web/observability).
+
+## What the page actually shows
+
+The current page supports:
+
+- search by repo, branch, preview URL, or status
+- a status filter for **Live + pending** versus **All**
+- status-first sorting, with running sandboxes shown before installing,
+  creating, error, and older inactive records
+- repo, working branch, base branch, preview URL, and last-activity cues
+- direct actions for opening the workspace, opening health, stopping a
+  sandbox, deleting the record, and refreshing the list
+
+That makes it the operational answer to:
+
+**Which preview runtime is actually alive right now?**
+
+## What the main actions do
+
+### Open workspace
+
+This opens a workspace session pinned to that sandbox and lands you back in the
+main app with preview focus already attached to the chosen runtime.
+
+Use it when the repo has more than one recent sandbox branch and you want to be
+certain you are attaching to the right one.
+
+### Health
+
+This opens the same repo workspace pinned to that sandbox, but focuses the
+preview health view instead of the normal preview tab.
+
+Use it when the runtime exists but the preview still looks unhealthy.
+
+### Observability
+
+Each sandbox can deep-link into [Observability](/web/observability) with the
+repo and sandbox record preselected.
+
+That is the path when you need the call, job, and cost trail behind a runtime
+problem instead of only the preview state.
+
+### Stop
+
+Use **Stop** for a sandbox that is still running, creating, or installing and
+should not keep consuming time or billing.
+
+### Delete
+
+**Delete** removes the sandbox record and does a best-effort teardown of the
+remote sandbox.
+
+Use it for stale or broken records you no longer need to keep around.
+
+## How Sandboxes relates to Projects
+
+[Projects](/web/spaces) is still where sandbox launch usually begins.
+
+Use Projects when you need to:
+
+- pick the repo
+- change repo settings like root directory, dev command, env mapping, or
+  timeout
+- start preview from the repo card
+- open a normal workspace without caring which sandbox instance backs it
+
+Use Sandboxes when you already know the runtime is the thing you need to
+inspect or control.
+
+## Common situations
+
+### A preview never becomes healthy
+
+1. Open Sandboxes and filter to **Live + pending**.
+2. Find the repo or working branch.
+3. Open **Health** if the runtime exists but the preview looks wrong.
+4. Open [Observability](/web/observability) if you need the linked call, job,
+   or sandbox record details.
+
+### A repo has multiple recent sandbox branches
+
+Open Sandboxes instead of guessing from Projects. The list shows the working
+branch directly, which is often the fastest way to tell which runtime matches
+the work you care about.
+
+### A sandbox is clearly stale
+
+Use **Delete** when the record should disappear entirely. Use **Stop** when you
+want to halt the current runtime but keep the record around long enough to
+inspect it.
+
+## Failure modes that matter
+
+- **A repo exists but no sandbox row does**: the runtime likely never launched;
+  go back to [Projects](/web/spaces) and start from the repo card.
+- **A sandbox row exists but workspace open feels wrong**: open the workspace
+  from the sandbox row so the session binds to the exact runtime you meant.
+- **Preview is up but the run trail is still unclear**: jump to
+  [Observability](/web/observability) from the sandbox context instead of
+  debugging from the repo alone.
+- **Delete feels destructive**: it is meant for stale or broken runtime
+  records, not for routine day-to-day stop and start control.

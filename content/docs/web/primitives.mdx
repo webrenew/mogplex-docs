@@ -1,0 +1,49 @@
+---
+title: Primitives
+description: Older links to /primitives now resolve to the current Agents surfaces for skills, rules, and context.
+---
+
+The legacy `/primitives` route still exists in the app, but it now forwards to
+the current agent-library surfaces.
+
+It resolves to one of these destinations:
+
+- `/agents/skills` by default
+- `/agents/rules` when the old link asked for the rules tab
+- `/agents/context` when the old link asked for the context tab
+
+Use those pages for the current product behavior.
+
+## Current mapping
+
+If you are cleaning up old bookmarks or internal references, this is the
+redirect map the app uses today:
+
+- `/primitives` -> skills
+- `/primitives?tab=rules` -> rules
+- `/primitives?tab=context` -> context
+
+Unlike `/library`, this route does not forward to the models tab in Settings.
+
+## Why the route still exists
+
+Older navigation used `/primitives` as an entrypoint into the reusable agent
+building blocks.
+
+Mogplex now exposes those pieces directly under [Agents](/web/agents), but the
+redirect remains so existing links still land on a valid current surface.
+
+## What the old Primitives concept became
+
+The older route now maps onto these current pages:
+
+- [Skills, Rules, and Context](/web/agents/skills-rules-context) for the
+  current explanation of how these surfaces split up
+- [Library](/web/library) when you are untangling older links that also used
+  the broader `/library` naming
+
+## Rule of thumb
+
+If the old reference was about reusable behavior or shared knowledge, it now
+belongs under [Agents](/web/agents), not under one standalone `/primitives`
+surface.
