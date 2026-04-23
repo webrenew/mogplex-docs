@@ -8,6 +8,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
     <DocsLayout
       tree={source.getPageTree()}
       sidebar={{
+        collapsible: false,
         footer: (
           <div className="flex w-full justify-center pt-2">
             <ThemeSwitcher />
