@@ -1,79 +1,129 @@
 ---
 title: Observability
-description: Inspect model activity, runs, pressure, automation failures, and sandbox-linked execution details across CLI, cloud, and automation.
+description: Inspect Mogplex run health, pressure, sandbox time, model-call activity, tool calls, and estimated cost across CLI, cloud, and automation.
 ---
 
 Observability is the runtime view for Mogplex work that has already started.
 
-The full page is designed to answer two operator questions quickly:
+Today the page has two layers:
 
-1. what is happening right now across CLI, cloud, and automation
-2. where do I go next to debug the specific bad thing
+- summary cards for run health, pressure, sandbox time, tokens, and cost
+- an activity table for model-call-level inspection
 
-## What the page shows
+That split matters. The summary cards tell you whether the system is healthy at
+a glance; the activity table is where you inspect concrete calls.
 
-- **Summary** for total calls, tokens, cost, and top-level health signals
-- **Activity** for model calls across CLI, cloud, and automation
-- **Runs** for job-level execution across triggers, assignments, and flows
-- **Pressure** for suppressed, deferred, and failed dispatch starts
-- **Automation Failures** for timeout, auth, provider, and configuration
-  failures
-- **Sandbox-linked drilldown** from call rows when execution touched a sandbox
+## What the summary cards show
 
-This is the page where the product converges after something begins running.
+The summary area combines three kinds of signal.
 
-## The debugging flow Mogplex expects
+### Job health
 
-Start broad and narrow only when the signal demands it:
+- total runs
+- currently running runs
+- stale pending runs
+- failed runs in the last 24 hours
+- repaired runs in the last 24 hours
+- 24-hour run success rate
 
-1. Look at **Summary** to confirm whether this is isolated or systemic.
-2. Use **Runs** when you care about a job or workflow outcome.
-3. Use **Pressure** when work is not starting or is being intentionally held.
-4. Use **Automation Failures** when the job did start but the system itself
-   failed around it.
-5. Use **Activity** when you need the model-level detail: tokens, cost, tool
-   usage, latency, or the exact call record.
+### Dispatch pressure and queue health
 
-## Filters and drilldown
+- suppressed starts in the last 24 hours
+- deferred starts in the last 24 hours
+- start failures in the last 24 hours
+- oldest pending age
 
-- Filter by surface, status, repo, sandbox, or date range.
-- Expand a call row to inspect the stored prompt/response context, tool calls,
-  and sandbox metadata.
-- Open sandbox health directly from a call when sandbox context is available.
-- Repair, requeue, or cancel supported jobs from the runs surface.
+### Usage and spend
 
-The date-range presets currently include `1h`, `today`, `7d`, and `30d`.
+- total calls
+- calls today
+- tokens used
+- estimated cost
+- average call duration
+- call success rate
+- total sandbox time plus active and total sandbox counts
+
+This means Observability can surface automation and sandbox health even before
+you open a single detailed call row.
+
+## What the Activity table shows
+
+The main table is call-level, not job-level.
+
+Each row shows:
+
+- **When** the call started
+- **Surface**: Live, CLI, Cloud, or Automation
+- **Who**: model plus call type
+- **Where**: repo context when available
+- **IO**: input and output token counts
+- **Cost**
+- **Duration**
+- **Result**
+
+Current table filters are:
+
+- surface
+- status
+
+Repo and sandbox filters are also supported through deep links from elsewhere in
+the app, such as the sandbox management page or repo-specific drilldowns.
+
+## What the surface badges mean
+
+The surface badge is derived from the call record:
+
+- **Live** means the call is still pending or streaming
+- **CLI** means it came from a runtime command in the local CLI path
+- **Cloud** means it ran outside a job-backed automation
+- **Automation** means it is attached to a job run
+
+That makes the table useful when you are asking whether spend or failures are
+coming from local CLI work, hosted work, or automation.
+
+## Expand a row when you need the real story
+
+Opening a call row exposes the details Mogplex captured for that call, which
+can include:
+
+- a GitHub deep link when the source metadata maps back to a PR, issue, or
+  related event
+- sandbox billing information, linked Vercel project/team, sandbox record ID,
+  preview URL, and runtime ID
+- a shortcut to open sandbox health directly
+- runtime command ID when the call came from the CLI path
+- the error string, if the call failed
+- an event timeline
+- tool calls with captured inputs and outputs
+- raw metadata for deeper inspection
+
+This is the part of the app that answers questions like "what tool did the
+agent call?", "which sandbox did this run touch?", and "what GitHub object did
+this call come from?"
 
 ## Practical workflows
 
-### A trigger or assignment did not run
+### A sandbox-backed run looks unhealthy
 
-1. Check **Runs** for the expected repo, source, and agent.
-2. If there is no run, check **Pressure** for suppression or deferral.
-3. If the route still looks idle, go back to the source surface:
+1. Open the relevant call row.
+2. Inspect sandbox billing and preview metadata.
+3. Jump straight to sandbox health from the row instead of debugging the model
+   call in isolation.
+
+### Cost or token usage jumped unexpectedly
+
+1. Read the summary cards first to confirm whether this is broad or isolated.
+2. Filter Activity by surface or status.
+3. Sort through the highest-cost or highest-token calls and inspect tool usage
+   in expanded rows.
+
+### A trigger or assignment seems quiet
+
+1. Check whether the summary cards show runs, stale pending work, suppression,
+   or start failures.
+2. If no relevant call appears in Activity, go back to the source surface:
    [Triggers](/web/triggers), [Assignments](/web/assignments), or
    [Automations](/web/automations).
 
-### A run happened but the result looked wrong
-
-1. Find the job in **Runs**.
-2. Expand into its latest call trail through **Activity**.
-3. Inspect model choice, tokens, tool calls, and linked repo or sandbox
-   context.
-
-### Sandbox work looks unhealthy
-
-1. Find the relevant call in **Activity**.
-2. Open the sandbox-linked detail.
-3. Jump into sandbox health instead of debugging the AI call in isolation.
-
-## Read the signals correctly
-
-- **Pressure** is about dispatch and scheduling behavior.
-- **Automation Failures** is about concrete system failures such as timeouts,
-  auth issues, and provider errors.
-- **Activity** is about the model work itself.
-- **Runs** is the best answer to "did the job happen, and what was its state?"
-
-Observability is where [Triggers](/web/triggers), [Assignments](/web/assignments),
-and [Automations](/web/automations) converge once something is already running.
+Observability becomes most useful once work has queued or started. Source
+surfaces still own creation, enable/disable, and routing edits.

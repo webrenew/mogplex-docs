@@ -1,6 +1,6 @@
 ---
 title: Assignments
-description: Bind a repo, an agent, and a work type together for repeatable review, triage, CI, and cron-driven work.
+description: Bind one repo, one agent, and one standing work type together for repeatable review, triage, CI, and cron-driven work.
 ---
 
 Assignments are the repo-to-agent routing layer for repeatable work.
@@ -13,22 +13,27 @@ durable unit of routing.
 ## Use Assignments when
 
 - one repo should always have the same review or triage behavior
-- you want standing repo work without building a workflow graph
 - the repo itself is the source of truth for what should run
-- you need recurring cron or cron-refactor work tied to a repo
+- you want standing work without building a workflow graph
+- you need recurring cron-driven work tied to one repo
 
 If the source of truth is a GitHub event across an installation, use
-[Triggers](/web/triggers). If the routing needs multiple steps, delays, or
-branching, use [Automations](/web/automations).
+[Triggers](/web/triggers). If the routing needs branching, joins, delays, or
+multiple steps, use [Automations](/web/automations).
 
-## Current assignment types
+## Supported assignment types
 
-- **PR review** for standing pull request review behavior
-- **Push review** for branch or commit-driven review work
-- **Issue triage** for repo-specific issue intake and response
-- **CI failure** for standing failure investigation or repair work
-- **Cron** for scheduled recurring work
-- **Cron Refactor** for scheduled refactor-style maintenance
+Current assignment types are:
+
+- **PR Review** (`pr_review`)
+- **Push Review** (`push_review`)
+- **Issue Triage** (`issue_triage`)
+- **CI Failure** (`ci_failure`)
+- **Cron** (`cron`)
+- **Cron Refactor** (`cron_refactor`)
+
+The Projects surface can create some of these directly from a repo card, which
+is usually the fastest path when you already know the repo that owns the work.
 
 ## Creation model
 
@@ -38,54 +43,63 @@ Every assignment is a three-part mapping:
 2. choose the agent
 3. choose the assignment type
 
-One important product detail: if you assign a built-in preset agent, Mogplex
-can fork that preset into your account automatically so the assignment has a
-real owned agent behind it.
+One important detail from the app layer: if you assign a built-in preset agent,
+Mogplex can fork that preset into your account automatically so the assignment
+has a real owned agent behind it.
 
 ## What the page shows after creation
 
-For each assignment, Mogplex shows the latest operating signal it has:
+Each assignment row is both a routing rule and a small operational console.
 
+It can show:
+
+- the repo and agent pair
+- assignment type
 - last run status and timestamp
 - failed, running, pending, suppressed, and deferred counts
-- latest error message or pressure reason
-- supported repair, cancel, and requeue actions for the latest job
+- the latest error string
+- the latest pressure reason when start was intentionally held
+- inline **Repair**, **Cancel**, and **Requeue** controls when the latest job
+  supports them
 
-That makes the page both a routing surface and an operational dashboard for
-standing repo work.
+That means Assignments is not just where you define repeatable work. It is also
+the first place to see whether that work is healthy.
 
 ## Recommended workflow
 
 1. Create the assignment from the target repo and agent.
 2. Let the first run happen naturally from its source event or schedule.
-3. Use the assignment row as the first operational check for status, error, and
-   pressure.
-4. If needed, repair, requeue, or cancel from the latest job controls.
-5. Move into [Observability](/web/observability) when you need call-level or
-   failure-level detail.
+3. Read the assignment row first for status, pressure, and last error.
+4. Use **Repair**, **Cancel**, or **Requeue** only when the current job state
+   supports it.
+5. Move into [Observability](/web/observability) when you need call-level,
+   tool-level, or sandbox-linked detail.
 
 ## Good fits
 
 - a standing PR review agent for one repo
+- a repo-specific CI failure investigator
+- an issue triage agent for a busy service repo
 - a scheduled maintenance or refactor job
-- a repo-specific triage agent for issues or CI failures
-- a push review agent for a high-risk branch or service
+- a push review agent for a sensitive branch or codebase
 
 ## Common mistakes
 
-- Using Assignments for cross-installation event routing. That is a
-  [Triggers](/web/triggers) problem instead.
-- Using Assignments when the logic really needs branches, joins, or delays.
-  That belongs in [Automations](/web/automations).
-- Treating the assignment row as the full debugging surface. It is the summary,
-  not the deep inspection page.
+- using Assignments for cross-installation event routing
+- using Assignments when the logic really needs branching or multi-step flow
+  control
+- treating the assignment row as the full debugging surface instead of the
+  summary surface
 
-## Failure signals to interpret correctly
+## Read the signals correctly
 
 - **Failed** usually means the latest job did start and ended badly.
 - **Pending** means work is queued but not running yet.
 - **Suppressed** means Mogplex intentionally declined to start that work.
-- **Deferred** usually means the system delayed start because of pressure or
-  related operational controls.
-- **Pressure: ...** means the fleet decided not to run immediately and you
-  should inspect the reason before retrying blindly.
+- **Deferred** means the system delayed start because of pressure or fleet
+  controls.
+- **Pressure: ...** means you should inspect the reason before retrying
+  blindly.
+
+If you need to understand model choice, tool calls, sandbox linkage, or cost,
+continue into [Observability](/web/observability).

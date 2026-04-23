@@ -1,6 +1,6 @@
 ---
 title: Triggers
-description: Route GitHub webhook events directly to one agent without building a full workflow graph.
+description: Route one GitHub webhook event directly to one agent without building a full automation graph.
 ---
 
 Triggers are the lightest routing surface for GitHub events.
@@ -9,31 +9,31 @@ Use them when the rule is simply:
 
 `one event -> one agent`
 
-If you need branching, delays, multiple agents, or draft/publish separation,
+If you need branching, delays, multiple agents, or a draft/publish workflow,
 move up to [Automations](/web/automations).
 
-## What a trigger actually binds
+## What a trigger binds
 
 Each trigger binds:
 
-- a GitHub App installation
+- one GitHub App installation
 - one supported event type
 - one agent
 - an enabled or disabled state
-- for mention triggers, whether the route should catch bare `@mogplex`
-  mentions by default
+- for mention triggers only, whether bare `@mogplex` mentions should route here
 
 Triggers are installation-scoped, not repo-scoped. They listen to webhook
-events from the selected GitHub App installation.
+events from the selected GitHub App installation and then dispatch to the
+chosen agent.
 
 ## Supported events
 
-Current trigger events include:
+Current trigger events are:
 
 - `@mention`
 - pull request opened
-- pull request comment
 - issue opened
+- pull request comment
 - issue comment
 - push
 - CI failure
@@ -42,40 +42,14 @@ Current trigger events include:
 
 Triggers only work for repos covered by an installed GitHub App.
 
-GitHub OAuth on its own is not enough. If the page is empty, check
-[Installations](/web/installations) and confirm the correct account or org has
-the Mogplex GitHub App installed.
+GitHub OAuth on its own is not enough. If the page is empty, or the creation
+form says no installations are available, check
+[Installations](/web/installations) and confirm the correct user or org has the
+Mogplex GitHub App installed.
 
-The product empty state is explicit here: it tells you when repos are synced
-but there are still no GitHub App installations available for webhook-backed
-routing.
-
-## Mention syntax
-
-The most important thing to know is that GitHub mentions use exact syntax.
-
-- `@mogplex` is a bare mention
-- `@mogplex/<agent-slug>` is a targeted mention
-
-Example:
-
-```text
-@mogplex/triage please summarize this PR thread and suggest next steps.
-```
-
-Rules:
-
-- Bare `@mogplex` only routes to mention triggers marked as the default for
-  that installation.
-- `@mogplex/<agent-slug>` targets the trigger whose agent slug matches the text
-  after `/`.
-- The slash matters. `@mogplex triage` is not the same as
-  `@mogplex/triage`.
-- Mention events come from GitHub comments, not from issue titles or PR
-  descriptions.
-
-For the full mention model, see
-[GitHub Mention Routing](/web/guides/github-mention-routing).
+The creation form searches installations by both account scope and synced repos,
+so this page is often the fastest way to notice that repos are synced but still
+not webhook-covered.
 
 ## How creation works
 
@@ -86,11 +60,40 @@ When you create a trigger, the form asks for:
 3. the agent to wake up
 
 If the event is `@mention`, the form also shows whether the route should be the
-default for bare `@mogplex` mentions. That toggle only appears for mention
-starts because it is not meaningful for the other event types.
+default for bare `@mogplex` mentions. That toggle only exists for mention
+triggers because it is not meaningful for the other event types.
 
-If the selected agent exposes a slug, the form also tells you the exact targeted
-mention handle, such as `@mogplex/triage`.
+If the selected agent already has a slug, the form shows the exact targeted
+mention handle, such as `@mogplex/triage`. When you save the trigger, Mogplex
+ensures the agent has a slug so targeted mention routing can resolve
+consistently.
+
+## Mention routing rules
+
+The most important detail is that GitHub mention syntax is exact.
+
+- `@mogplex` is a bare mention
+- `@mogplex/<agent-slug>` is a targeted mention
+
+Example:
+
+```text
+@mogplex/triage summarize this PR thread and suggest next steps.
+```
+
+Rules:
+
+- Bare `@mogplex` only routes to mention triggers marked as the default for
+  that installation.
+- `@mogplex/<agent-slug>` targets the trigger whose agent slug matches the text
+  after `/`.
+- The slash matters. `@mogplex triage` is not the same as
+  `@mogplex/triage`.
+- Mention routing comes from GitHub comment events, not from issue titles or PR
+  titles.
+
+For the full mention model, see
+[GitHub Mention Routing](/web/guides/github-mention-routing).
 
 ## What the page shows after creation
 
@@ -98,12 +101,15 @@ Existing triggers are grouped by installation and show live operating signals,
 including:
 
 - enabled or disabled state
+- the event badge and selected agent
+- the agent slug when targeted mention routing is possible
 - last run status and timestamp
 - failed, running, pending, suppressed, and deferred counts
+- the latest pressure reason when dispatch was intentionally held
 - whether a mention trigger is the default target for bare `@mogplex`
 
-The page is optimized for fast routing changes, so enable/disable and delete
-controls are in-line.
+The page is optimized for fast routing edits, so enable/disable and delete are
+inline instead of hidden in a deeper detail view.
 
 ## When to use Triggers
 
@@ -114,14 +120,16 @@ Use Triggers when you want a direct event-to-agent mapping, for example:
 - route `@mention` events to a default repo assistant
 - target a specific agent with `@mogplex/<agent-slug>`
 
-If you need conditions, parallel branches, delays, or publish control, use
-[Automations](/web/automations).
+If the durable unit is a specific repo instead of an installation, use
+[Assignments](/web/assignments). If the workflow needs conditions, branches, or
+multiple steps, use [Automations](/web/automations).
 
 ## Common mistakes
 
 - writing `@mogplex triage` instead of `@mogplex/triage`
 - expecting OAuth-synced repos to appear before GitHub App coverage exists
-- using Triggers when the workflow really needs branches or multiple steps
+- using Triggers when the logic really belongs to one repo and should be an
+  [Assignment](/web/assignments)
 - assuming bare `@mogplex` will route anywhere without a default mention route
 
 ## If routing does not fire
@@ -132,5 +140,7 @@ Check these in order:
 2. the trigger is enabled
 3. the event type matches what actually happened
 4. if this is a mention:
-   - bare `@mogplex` has a default mention route
-   - targeted `@mogplex/<agent-slug>` matches the selected agent slug exactly
+   - bare `@mogplex` has a default mention route on that installation
+   - targeted `@mogplex/<agent-slug>` matches the agent slug exactly
+5. if the route still looks idle, inspect [Observability](/web/observability)
+   for call activity and then return to the trigger row for pressure signals

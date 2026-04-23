@@ -1,94 +1,131 @@
 ---
 title: Projects
-description: Use Projects at /spaces to import repos, organize them, launch sandboxes, and turn repo discovery into active work.
+description: Use Projects at /spaces to organize repos, launch sandboxes, open workspaces, and configure repo-specific runtime settings.
 ---
 
 In the Mogplex app, the top-bar label is **Projects** and the route is
 `/spaces`.
 
-This is the operational entrypoint for repository-backed work. If you are asking
-"which repo should I work on, is it ready, and how do I open it into a live
-workspace?" this is the page you want.
+This page is the operational starting point for repo-backed work. It is where
+repo discovery turns into a running workspace, a live preview, or standing
+automation attached to a specific repository.
 
-## Terms that matter
+## Mental model
 
-- A **repo** is the imported GitHub repository record Mogplex knows about.
-- A **project** is the grouping layer used to organize repos intentionally.
-- A **workspace** is the active working session you open for a repo.
-- A **sandbox** is the preview or runtime environment tied to that repo work.
+- A **repo** is the imported GitHub repository Mogplex knows about.
+- A **project** is the grouping layer shown in the UI. Under the hood, this is
+  a workspace record that holds shared sandbox defaults.
+- A **workspace session** is the live chat/editor/terminal session you open for
+  a repo.
+- A **sandbox** is the runtime and preview environment attached to that repo
+  work.
 
-## Use Projects when you need to
+## What Projects actually manages
 
-- sync or inspect imported repositories
-- group repos into projects
-- search, filter, favorite, or hide repos
-- launch or stop preview sandboxes
+Use Projects when you need to:
+
+- sync imported repositories and search them quickly
+- group repos into projects, rename those groups, or create a new repo inside a
+  project
+- favorite repos, hide noisy repos, or filter by owner
+- start or stop a preview sandbox
 - open a workspace session for a repo
-- configure repo-specific settings such as root directory, dev command, env
-  sync mode, and linked Vercel state
-- create repo-scoped assignments or cron-style work from the repo surface
+- add monorepo sub-project entries instead of forcing one root for the whole
+  repo
+- create repo-bound work such as agent assignments and cron jobs
+- edit repo settings, secrets, and snapshots
 
-## Prerequisites
+Opening a workspace is not a passive navigation step. If the repo does not
+already have a running sandbox, Mogplex can launch one first and then bind the
+workspace session to it automatically.
 
-Projects works best after three setup steps are done:
+## Repo card quick actions
 
-1. GitHub identity is connected in [Settings](/web/settings).
-2. The Mogplex GitHub App is installed for the user or org that owns the repos.
-3. Repo sync has run at least once.
+Each repo card can surface:
 
-If you can see repos but cannot use webhook-backed features yet, that usually
-means OAuth is connected but GitHub App coverage is still missing.
+- preview state such as live, starting, unreachable, idle, or error
+- the current working branch when a sandbox exists
+- effective sandbox timeout and preview port hints
+- assigned agents and cron schedules
+- quick actions for **Open workspace**, **Start Preview**, **Stop Preview**,
+  **Assign Agent**, **Create Cron**, **Settings**, **Favorite**, and **Hide**
+
+If you need a cross-repo list of running or pending sandboxes, use
+[Sandboxes](/spaces/sandboxes).
+
+## Repo settings you can control
+
+The repo settings dialog has three tabs.
+
+### General
+
+General settings are where you control the runtime shape for that repo:
+
+- sandbox billing mode: Mogplex billing or your linked Vercel project
+- repo-linked Vercel team and Vercel project
+- env mapping mode: sandbox only, sandbox + preview conventions, or sync from a
+  linked Vercel project
+- root directory for monorepos or sub-projects
+- install command, dev command, and dev port
+- sandbox timeout override
+- manual environment variables in `.env`-style `KEY=value` format
+
+### GitHub Secrets
+
+Use this tab when the repo needs GitHub secret configuration managed alongside
+its Mogplex setup.
+
+### Snapshot
+
+Use this tab to inspect the repo snapshot state Mogplex is using for sandbox
+work.
 
 ## First successful workflow
 
-1. Sync the target repos into Mogplex.
-2. Find the repo in Projects and confirm it appears under the right owner or
-   project group.
-3. Open the repo.
-4. If no live preview exists yet, launch a sandbox.
-5. Once the sandbox is ready, open a workspace session.
-6. From that repo surface, decide whether the next step is:
-   - local work in the workspace
-   - standing routing in [Assignments](/web/assignments)
-   - direct event routing in [Triggers](/web/triggers)
-   - a richer workflow in [Automations](/web/automations)
+1. Connect GitHub in [Settings](/web/settings).
+2. Confirm the right user or org has Mogplex GitHub App coverage in
+   [Installations](/web/installations).
+3. Sync repos and find the target repo in Projects.
+4. Open repo settings if you need to set a root directory, dev command, preview
+   port, or Vercel linkage before boot.
+5. Open the workspace. If no sandbox is running yet, Mogplex can launch it as
+   part of that action.
+6. From the repo card, choose the next layer:
+   - stay in the live workspace for interactive work
+   - create a repo-bound [Assignment](/web/assignments)
+   - add a [Trigger](/web/triggers) when routing should be installation-wide
+   - move to [Automations](/web/automations) for multi-step flows
 
-## What the page is managing for you
+## Monorepos and sub-projects
 
-- imported repository coverage and visibility
-- project-level grouping
-- repo-level operational settings
-- sandbox launch and cleanup
-- workspace entry
-- monorepo sub-project entrypoints
-- quick jumps into repo-bound agent work
+Projects has explicit support for monorepos.
 
-Projects is where discovery turns into execution. It is not just a catalog.
-Opening a repo can launch a sandbox, bind a workspace session to it, and expose
-repo-specific actions that continue into the rest of the product.
+If a repo has multiple app or package entrypoints, use the monorepo browser to
+scan detected workspaces and add sub-project repos for specific
+`root_directory` paths. That keeps preview commands, env mapping, and sandbox
+settings aligned to the actual app you want to run.
 
-## Operational signals to watch
+If automatic detection misses the right target, set `root_directory` manually
+in repo settings.
 
-- A repo is visible but not fully usable: GitHub OAuth exists, but GitHub App
-  coverage is missing for that owner or org.
-- A repo cannot launch a user-billed sandbox: Personal Vercel is either not
-  linked or not bound for that repo's billing setup.
-- A repo opens slowly: the sandbox probably needs to be launched first.
-- A monorepo needs multiple entrypoints: use sub-project repo entries rather
-  than pretending one root fits every target.
+## Failure modes that matter
 
-## If Projects is empty
-
-The next step is usually one of:
-
-- install or finish the GitHub App so repo sync can run cleanly
-- open [Settings](/web/settings) and connect GitHub first
-- link Personal Vercel if you specifically want user-billed sandboxes
+- **Repo is visible but trigger-backed features do not work**: GitHub OAuth is
+  connected, but the correct GitHub App installation is missing.
+- **Open workspace feels slow the first time**: the repo probably needs its
+  sandbox created or installed first.
+- **User-billed sandbox launch fails**: the repo is set to use your Vercel
+  project, but the linked team or project is missing or invalid.
+- **Preview opens the wrong app in a monorepo**: create a sub-project repo or
+  set `root_directory`, `dev_command`, and `dev_port` explicitly.
+- **A repo disappeared from the main list**: it may be hidden. Toggle removed
+  repos back on from the Projects controls.
 
 ## Related surfaces
 
-- Use [Installations](/web/installations) to understand GitHub App coverage
-- Use [Triggers](/web/triggers) for direct event-to-agent routing
-- Use [Automations](/web/automations) for multi-step workflow authoring
-- Use [Assignments](/web/assignments) for repo-bound standing work
-- Use [Observability](/web/observability) after work has started running
+- [Installations](/web/installations) explains GitHub App coverage and repo
+  triggerability.
+- [Assignments](/web/assignments) is for standing repo-to-agent work.
+- [Triggers](/web/triggers) is for installation-scoped event routing.
+- [Observability](/web/observability) is where you inspect cost, calls,
+  sandbox linkage, and runtime health after work starts.
