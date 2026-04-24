@@ -1,0 +1,71 @@
+---
+title: Skills
+description: Agent Skills that teach external agents (Claude Code, Claude Agent SDK, Cursor, opencode) how to drive a user's Mogplex workspace through the `mogplex` CLI — a drop-in substitute when a Mogplex MCP server is not available.
+---
+
+Mogplex ships a set of [Anthropic Agent Skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills) that let any skill-aware agent operate a user's Mogplex workspace through the CLI, without MCP, and without asking the user to paste tokens into a JSON config.
+
+## Source of truth
+
+The canonical skill files live in the docs repo at `skills/<name>/SKILL.md` and follow the standard Anthropic skill format (YAML frontmatter with `name` and `description`, markdown body, file named `SKILL.md` in a directory that matches the skill name).
+
+## Skills
+
+<Cards>
+  <Card
+    title="using-mogplex-cli"
+    href="/cli/skills/using-mogplex-cli"
+    description="Umbrella skill. Routes the agent to the right command when the user asks for a Mogplex workspace action."
+  />
+  <Card
+    title="mogplex-exec"
+    href="/cli/skills/mogplex-exec"
+    description="Run a one-off, non-interactive Mogplex task and capture structured output."
+  />
+  <Card
+    title="mogplex-slash"
+    href="/cli/skills/mogplex-slash"
+    description="Discover the slash-command registry and run slash commands from the shell."
+  />
+  <Card
+    title="mogplex-auth"
+    href="/cli/skills/mogplex-auth"
+    description="Verify or establish Mogplex CLI authentication before running other commands."
+  />
+</Cards>
+
+## Install
+
+### Claude Code
+
+```bash
+# Global
+cp -R skills/* ~/.claude/skills/
+
+# Or per-project
+mkdir -p .claude/skills && cp -R skills/* .claude/skills/
+```
+
+### Claude Agent SDK
+
+Skills picked up automatically via `settingSources: ["user", "project"]`:
+
+```ts
+import { query } from "@anthropic-ai/claude-agent-sdk";
+
+const response = query({
+  prompt: "Run /status against my Mogplex workspace",
+  options: { settingSources: ["user", "project"] },
+});
+```
+
+### Cursor / opencode / other hosts
+
+Copy the body of each `SKILL.md` into the host's project-rules or system-prompt-include mechanism. The frontmatter is Claude Code / Agent SDK-specific; the markdown body is portable.
+
+## Design principles
+
+- **CLI-first.** Skills assume `mogplex` is on `PATH`. They never instruct the agent to read or write credential files directly.
+- **Auth preflight.** Every action-performing skill tells the agent to run `mogplex login status` first.
+- **Structured output.** Skills prefer `--json` / `--jsonl` for anything the agent has to parse.
+- **No silent writes.** Any command that mutates state is flagged so the agent asks the user before running it.
