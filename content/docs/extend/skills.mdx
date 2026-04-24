@@ -22,7 +22,7 @@ Together they cover the same capability surface the [MCP server](/extend/mcp-ser
 
 ## Why this is the right path today
 
-- **No pasted tokens.** The `mogplex login` browser flow owns the credential and writes it to the OS keyring. The external agent never sees raw auth material.
+- **No pasted tokens.** The `mogplex login` browser flow owns the credential and writes it to `~/.mogplex/auth.json` — see the [Authentication guide](/cli/guides/authentication) for precedence rules and file contents. The external agent never sees raw auth material.
 - **Works in every skill-aware host.** The skill format is portable: Claude Code, Claude Agent SDK, and any host that reads `SKILL.md`-style files. Cursor project rules work too by copying the skill body.
 - **Thin wrapper.** Skills do not duplicate Mogplex logic — they are instructions for how to call the existing CLI, which calls the existing Mogplex runtime.
 - **No infra dependency.** Ships the moment the CLI is on the user's `PATH`. Nothing to deploy, no tokens to provision.
@@ -33,7 +33,7 @@ Together they cover the same capability surface the [MCP server](/extend/mcp-ser
 | --- | --- | --- |
 | Status | **Available** | Preview design; not live |
 | Protocol | Skill file + shell | MCP Streamable HTTP |
-| Auth | `mogplex login` → OS keyring | OAuth 2.1 + PKCE (DCR) |
+| Auth | `mogplex login` → `~/.mogplex/auth.json` | OAuth 2.1 + PKCE (DCR) |
 | Token pasted in config? | No | No |
 | Execution path | External agent shells out to `mogplex exec` | External agent calls MCP tool |
 | Streaming progress | `--jsonl` | MCP `notifications/progress` |
@@ -44,8 +44,22 @@ When the MCP server ships, both paths will stay supported. Skills will continue 
 
 ## Install
 
+First fetch the skill files from [`webrenew/mogplex-docs`](https://github.com/webrenew/mogplex-docs). Either clone the repo or download the `skills/` tree directly:
+
 ```bash
-# Global (Claude Code)
+# Option A — clone and cd
+git clone https://github.com/webrenew/mogplex-docs.git
+cd mogplex-docs
+
+# Option B — sparse download of just the skills/ tree
+npx -y degit webrenew/mogplex-docs/skills mogplex-skills
+cd mogplex-skills && cd ..    # or rename the dir as you like
+```
+
+Then copy the `skills/` contents into your agent host:
+
+```bash
+# Global (Claude Code) — run from the directory containing `skills/`
 mkdir -p ~/.claude/skills && cp -R skills/* ~/.claude/skills/
 
 # Or per-project

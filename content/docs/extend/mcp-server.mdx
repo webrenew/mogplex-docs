@@ -9,7 +9,11 @@ The Mogplex MCP server is in **preview design state** — not generally availabl
 
 ## What it is
 
-A remote Model Context Protocol server running at `https://mogplex.com/mcp`. Any MCP-aware agent host (Claude Code, Cursor, Claude Desktop, opencode, custom Agent SDK apps) can connect and call Mogplex tools, agents, skills, and memories as MCP primitives — without the user pasting a token into a JSON config.
+A remote Model Context Protocol server hosted by Mogplex. Any MCP-aware agent host (Claude Code, Cursor, Claude Desktop, opencode, custom Agent SDK apps) will be able to connect and call Mogplex tools, agents, skills, and memories as MCP primitives — without the user pasting a token into a JSON config.
+
+<Callout>
+The final endpoint path is not yet committed. Examples on this page use `https://mogplex.com/mcp` as a **placeholder**; the shipping URL (exact host, version prefix) will be announced in release notes and this page will be updated then. Do not wire the placeholder URL into production clients.
+</Callout>
 
 ## What it replaces
 
@@ -50,17 +54,17 @@ Mogplex skills are additionally exposed as MCP **prompts**, since a skill defini
 
 ## Install (once available)
 
-Remote Streamable HTTP — no shim, no token pasting, the host drives OAuth:
+Remote Streamable HTTP — no shim, no token pasting, the host drives OAuth. The shape of the commands below is accurate; the URL is a placeholder that will be finalized when the server ships:
 
 ```bash
-# Claude Code
-claude mcp add --transport http mogplex https://mogplex.com/mcp
+# Claude Code — replace <URL> with the final endpoint from release notes
+claude mcp add --transport http mogplex <URL>
 
 # Cursor
-# Settings → MCP → Add server → URL: https://mogplex.com/mcp
+# Settings → MCP → Add server → URL: <URL>
 ```
 
-For hosts that don't yet speak remote MCP with OAuth, a stdio shim `npx -y @mogplex/mcp` will ship alongside. The shim runs the OAuth flow once, caches the token in the OS keyring, and proxies stdio ↔ HTTP.
+For hosts that don't yet speak remote MCP with OAuth, a stdio shim `npx -y @mogplex/mcp` will ship alongside. The shim runs the OAuth flow once, stores the token in `~/.mogplex/auth.json` (same file the CLI uses), and proxies stdio ↔ HTTP.
 
 ## How it relates to Connections (inbound MCP)
 
