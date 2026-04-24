@@ -1,0 +1,43 @@
+---
+title: Extend
+description: Reach Mogplex capabilities from outside Mogplex — local agents (Claude Code, Cursor, opencode, Claude Agent SDK) driving a user's workspace, skills, memories, and agents through the CLI today or the Mogplex MCP server when it ships.
+---
+
+Mogplex is usable from two surfaces that ship today: the [web app](/web) and the [CLI](/cli). This section covers the third direction: letting *other* agents reach Mogplex.
+
+The core question is: your teammate is in Claude Code, Cursor, or a custom Claude Agent SDK app, and wants to use their Mogplex skills, memories, or agents from there — without pasting tokens into a JSON config. What should they do?
+
+<Cards>
+  <Card
+    title="MCP server (preview)"
+    href="/extend/mcp-server"
+    description="The Mogplex MCP server — remote Streamable HTTP, OAuth 2.1 + PKCE, no token pasting. Planned; not yet generally available."
+  />
+  <Card
+    title="Skills (available today)"
+    href="/extend/skills"
+    description="Anthropic Agent Skills that teach any skill-aware host how to drive a Mogplex workspace through the `mogplex` CLI. Ships today; the MCP-ready substitute."
+  />
+</Cards>
+
+## Which path is right today
+
+| If the user's agent host… | Use |
+| --- | --- |
+| Is skill-aware (Claude Code, Agent SDK, Cursor project rules) | [Skills](/extend/skills) |
+| Supports remote MCP with OAuth, and the Mogplex MCP server is live | [MCP server](/extend/mcp-server) |
+| Needs a scripted integration from any shell or CI | `mogplex exec --json "…"` — see the [Exec mode guide](/cli/guides/exec-mode) |
+
+Skills are the recommended path until the MCP server is generally available. They cover every capability an MCP tool call would — tool execution, slash-command dispatch, skill listings, memory read/write, auth — and they do not require the user to paste a token anywhere.
+
+## How this section relates to the rest of the docs
+
+- **Inbound MCP** (Mogplex *consuming* external MCP servers like Zapier, Notion, Supabase) is configured in [Settings → Connections](/web/settings). That direction is live today.
+- **Outbound MCP** (Mogplex *exposed as* an MCP server to external agents) is covered here at [MCP server](/extend/mcp-server).
+- **CLI Skills** documentation lives under [CLI → Skills](/cli/skills). The [Skills](/extend/skills) page in this section is a pointer; the canonical reference is under CLI.
+
+## Design principles this section follows
+
+- **No pasted tokens.** Whether the user picks Skills or MCP, the auth flow owns the credential — either `mogplex login` writing to the OS keyring (Skills path) or OAuth 2.1 + PKCE against the browser session (MCP path).
+- **One source of truth per capability.** Tools, agents, skills, and memories are implemented once in the Mogplex runtime and exposed through whichever surface the host supports. Both paths call the same underlying services.
+- **Auth preflight is mandatory.** Both paths require a working credential before any action runs. Skills enforce it with a `command -v mogplex` + `mogplex login status` gate; MCP enforces it at the Streamable HTTP bearer-token middleware.
