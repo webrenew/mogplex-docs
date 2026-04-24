@@ -30,7 +30,15 @@ mkdir -p ~/.claude/skills && cp -R skills/* ~/.claude/skills/
 mkdir -p .claude/skills && cp -R skills/* .claude/skills/
 ```
 
-If you pulled the skills tree with `npx degit webrenew/mogplex-docs/skills mogplex-skills` instead (so there is no outer `skills/` directory), run the copy as `cp -R mogplex-skills/* ~/.claude/skills/`.
+If you pulled the skills tree with `npx degit webrenew/mogplex-docs/skills mogplex-skills` instead (so there is no outer `skills/` directory):
+
+```bash
+# Global
+mkdir -p ~/.claude/skills && cp -R mogplex-skills/* ~/.claude/skills/
+
+# Or per-project (run from your project root)
+mkdir -p .claude/skills && cp -R mogplex-skills/* .claude/skills/
+```
 
 ## Install into an Agent SDK app
 
