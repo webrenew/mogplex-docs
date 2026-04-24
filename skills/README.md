@@ -22,7 +22,7 @@ Each subdirectory is a single skill with a `SKILL.md` using standard YAML frontm
 
 ```bash
 # Global install
-cp -R skills/* ~/.claude/skills/
+mkdir -p ~/.claude/skills && cp -R skills/* ~/.claude/skills/
 
 # Or per-project
 mkdir -p .claude/skills && cp -R skills/* .claude/skills/

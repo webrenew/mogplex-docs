@@ -16,14 +16,14 @@ Mogplex exposes its workspace, slash-command registry, agent roster, skills, and
 
 ## Preflight — always run first
 
-Before any command that talks to Mogplex, verify the CLI is installed and authenticated:
+Before any command that talks to Mogplex, verify the CLI is installed and authenticated. The install check must gate the auth check — do not continue if `mogplex` is not on `PATH`:
 
 ```bash
-command -v mogplex >/dev/null || echo "mogplex CLI not installed"
+command -v mogplex >/dev/null 2>&1 || { echo "mogplex CLI not installed — ask the user to install it first"; exit 1; }
 mogplex login status
 ```
 
-If `login status` shows no stored credential and no provider env var is set, stop and follow [`mogplex-auth`](../mogplex-auth/SKILL.md) before continuing. Do not attempt to edit `~/.mogplex/auth.json` directly.
+If the first line fails, stop and tell the user to install the CLI (point them at [Installation](https://mogplex.dev/cli/installation)) before running anything else. If `login status` runs but shows no stored credential and no provider env var is set, follow [`mogplex-auth`](../mogplex-auth/SKILL.md). Do not attempt to edit `~/.mogplex/auth.json` directly.
 
 ## Core command map
 
