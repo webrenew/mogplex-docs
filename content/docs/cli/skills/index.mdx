@@ -38,14 +38,20 @@ The canonical skill files live in the docs repo at `skills/<name>/SKILL.md` and 
 
 ## Install
 
+The skill files are hosted in [`webrenew/mogplex-docs`](https://github.com/webrenew/mogplex-docs) under `skills/`. Fetch them first, then copy into your agent host.
+
 ### Claude Code
 
 ```bash
-# Global
-mkdir -p ~/.claude/skills && cp -R skills/* ~/.claude/skills/
+# Fetch just the skills/ tree (no full clone needed)
+npx -y degit webrenew/mogplex-docs/skills mogplex-skills
+cd mogplex-skills
 
-# Or per-project
-mkdir -p .claude/skills && cp -R skills/* .claude/skills/
+# Global
+mkdir -p ~/.claude/skills && cp -R . ~/.claude/skills/
+
+# Or per-project (run from your project root, not the downloaded skills dir)
+mkdir -p .claude/skills && cp -R /path/to/mogplex-skills/* .claude/skills/
 ```
 
 ### Claude Agent SDK

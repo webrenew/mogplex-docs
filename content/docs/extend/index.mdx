@@ -9,14 +9,14 @@ The core question is: your teammate is in Claude Code, Cursor, or a custom Claud
 
 <Cards>
   <Card
-    title="MCP server (preview)"
-    href="/extend/mcp-server"
-    description="The Mogplex MCP server — remote Streamable HTTP, OAuth 2.1 + PKCE, no token pasting. Planned; not yet generally available."
-  />
-  <Card
     title="Skills (available today)"
     href="/extend/skills"
     description="Anthropic Agent Skills that teach any skill-aware host how to drive a Mogplex workspace through the `mogplex` CLI. Ships today; the MCP-ready substitute."
+  />
+  <Card
+    title="MCP server (preview)"
+    href="/extend/mcp-server"
+    description="The Mogplex MCP server — remote Streamable HTTP, OAuth 2.1 + PKCE, no token pasting. Planned; not yet generally available."
   />
 </Cards>
 
@@ -38,6 +38,6 @@ Skills are the recommended path until the MCP server is generally available. The
 
 ## Design principles this section follows
 
-- **No pasted tokens.** Whether the user picks Skills or MCP, the auth flow owns the credential — either `mogplex login` writing to the OS keyring (Skills path) or OAuth 2.1 + PKCE against the browser session (MCP path).
+- **No pasted tokens.** Whether the user picks Skills or MCP, the auth flow owns the credential — either `mogplex login` writing to `~/.mogplex/auth.json` (Skills path) or OAuth 2.1 + PKCE against the browser session (MCP path). In both cases the external agent never sees raw auth material.
 - **One source of truth per capability.** Tools, agents, skills, and memories are implemented once in the Mogplex runtime and exposed through whichever surface the host supports. Both paths call the same underlying services.
 - **Auth preflight is mandatory.** Both paths require a working credential before any action runs. Skills enforce it with a `command -v mogplex` + `mogplex login status` gate; MCP enforces it at the Streamable HTTP bearer-token middleware.
