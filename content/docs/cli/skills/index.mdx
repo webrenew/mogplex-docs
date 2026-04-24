@@ -38,20 +38,30 @@ The canonical skill files live in the docs repo at `skills/<name>/SKILL.md` and 
 
 ## Install
 
-The skill files are hosted in [`webrenew/mogplex-docs`](https://github.com/webrenew/mogplex-docs) under `skills/`. Fetch them first, then copy into your agent host.
+The skill files are hosted in [`webrenew/mogplex-docs`](https://github.com/webrenew/mogplex-docs) under `skills/`. Pick one fetch method (this sets a `SKILLS` path variable), then copy into your agent host.
 
 ### Claude Code
 
 ```bash
-# Fetch just the skills/ tree (no full clone needed)
+# Option A — full clone
+git clone https://github.com/webrenew/mogplex-docs.git
+SKILLS=mogplex-docs/skills
+
+# Option B — sparse download of just the skills/ tree
+#   degit copies the *contents* of skills/ into mogplex-skills/,
+#   so mogplex-skills is the skills tree (no nested skills/ dir).
 npx -y degit webrenew/mogplex-docs/skills mogplex-skills
-cd mogplex-skills
+SKILLS=mogplex-skills
+```
 
+Then, in the same shell:
+
+```bash
 # Global
-mkdir -p ~/.claude/skills && cp -R . ~/.claude/skills/
+mkdir -p ~/.claude/skills && cp -R "$SKILLS"/* ~/.claude/skills/
 
-# Or per-project (run from your project root, not the downloaded skills dir)
-mkdir -p .claude/skills && cp -R /path/to/mogplex-skills/* .claude/skills/
+# Or per-project (run from your project root)
+mkdir -p .claude/skills && cp -R "$SKILLS"/* .claude/skills/
 ```
 
 ### Claude Agent SDK

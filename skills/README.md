@@ -20,6 +20,8 @@ Each subdirectory is a single skill with a `SKILL.md` using standard YAML frontm
 
 ## Install into Claude Code
 
+Run from the `mogplex-docs` repo root (the directory that contains this `skills/` folder):
+
 ```bash
 # Global install
 mkdir -p ~/.claude/skills && cp -R skills/* ~/.claude/skills/
@@ -27,6 +29,8 @@ mkdir -p ~/.claude/skills && cp -R skills/* ~/.claude/skills/
 # Or per-project
 mkdir -p .claude/skills && cp -R skills/* .claude/skills/
 ```
+
+If you pulled the skills tree with `npx degit webrenew/mogplex-docs/skills mogplex-skills` instead (so there is no outer `skills/` directory), run the copy as `cp -R mogplex-skills/* ~/.claude/skills/`.
 
 ## Install into an Agent SDK app
 
