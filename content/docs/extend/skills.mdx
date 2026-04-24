@@ -1,0 +1,61 @@
+---
+title: Skills
+description: Anthropic Agent Skills that teach Claude Code, the Claude Agent SDK, Cursor, opencode, and other skill-aware hosts how to drive a user's Mogplex workspace through the `mogplex` CLI. Available today.
+---
+
+Skills are the currently-shipping path for letting an external agent reach a user's Mogplex capabilities. They are the drop-in substitute for the [MCP server](/extend/mcp-server) until that ships.
+
+<Callout>
+The canonical skill files and the per-skill reference pages live under [CLI → Skills](/cli/skills). This page is the entry point from the Extend section — it describes the shape of the set and the trade-offs versus MCP. Go to [/cli/skills](/cli/skills) for the individual skills.
+</Callout>
+
+## What the set covers
+
+| Skill | Role |
+| --- | --- |
+| [`using-mogplex-cli`](/cli/skills/using-mogplex-cli) | Umbrella. Routes the agent to the right command when the user asks for a Mogplex workspace action. |
+| [`mogplex-exec`](/cli/skills/mogplex-exec) | One-off non-interactive runs with `--json` / `--jsonl` output. |
+| [`mogplex-slash`](/cli/skills/mogplex-slash) | Discover and run Mogplex slash commands from the shell. |
+| [`mogplex-auth`](/cli/skills/mogplex-auth) | Auth preflight, env-var precedence, troubleshooting decision tree. |
+
+Together they cover the same capability surface the [MCP server](/extend/mcp-server) will expose — tool execution, slash-command dispatch, skill and memory access, agent runs, and auth — without needing the host to speak MCP or hold a bearer token.
+
+## Why this is the right path today
+
+- **No pasted tokens.** The `mogplex login` browser flow owns the credential and writes it to the OS keyring. The external agent never sees raw auth material.
+- **Works in every skill-aware host.** The skill format is portable: Claude Code, Claude Agent SDK, and any host that reads `SKILL.md`-style files. Cursor project rules work too by copying the skill body.
+- **Thin wrapper.** Skills do not duplicate Mogplex logic — they are instructions for how to call the existing CLI, which calls the existing Mogplex runtime.
+- **No infra dependency.** Ships the moment the CLI is on the user's `PATH`. Nothing to deploy, no tokens to provision.
+
+## Skills vs MCP server at a glance
+
+| | Skills (today) | MCP server (preview) |
+| --- | --- | --- |
+| Status | **Available** | Preview design; not live |
+| Protocol | Skill file + shell | MCP Streamable HTTP |
+| Auth | `mogplex login` → OS keyring | OAuth 2.1 + PKCE (DCR) |
+| Token pasted in config? | No | No |
+| Execution path | External agent shells out to `mogplex exec` | External agent calls MCP tool |
+| Streaming progress | `--jsonl` | MCP `notifications/progress` |
+| Host requirement | Skill-aware (Claude Code, Agent SDK, Cursor rules) | Remote-MCP-aware with OAuth |
+| Host reach today | High | Claude Code ≥ latest, Cursor, a few others |
+
+When the MCP server ships, both paths will stay supported. Skills will continue to be the right answer for hosts that don't speak remote MCP, for CI contexts, and for anyone who prefers shell-driven integration.
+
+## Install
+
+```bash
+# Global (Claude Code)
+mkdir -p ~/.claude/skills && cp -R skills/* ~/.claude/skills/
+
+# Or per-project
+mkdir -p .claude/skills && cp -R skills/* .claude/skills/
+```
+
+See [CLI → Skills](/cli/skills) for Agent SDK integration, Cursor instructions, and the full install matrix.
+
+## See also
+
+- [CLI → Skills](/cli/skills) — canonical reference for every skill
+- [MCP server (preview)](/extend/mcp-server) — what Skills are a substitute for
+- [Extend overview](/extend) — the decision between Skills and MCP

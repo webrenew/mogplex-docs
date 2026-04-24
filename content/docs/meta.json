@@ -1,5 +1,5 @@
 {
   "title": "Mogplex Docs",
   "root": true,
-  "pages": ["index", "cli", "web"]
+  "pages": ["index", "cli", "web", "extend"]
 }

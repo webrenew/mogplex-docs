@@ -1,0 +1,89 @@
+---
+title: MCP server (preview)
+description: The Mogplex MCP server exposes Mogplex tools, agents, skills, and memories to any MCP-aware local agent over remote Streamable HTTP, authenticated via OAuth 2.1 + PKCE. Planned; preview state.
+---
+
+<Callout type="warn">
+The Mogplex MCP server is in **preview design state** — not generally available. Use [Skills](/extend/skills) today; this page documents the direction of travel so integrators can plan.
+</Callout>
+
+## What it is
+
+A remote Model Context Protocol server running at `https://mogplex.com/mcp`. Any MCP-aware agent host (Claude Code, Cursor, Claude Desktop, opencode, custom Agent SDK apps) can connect and call Mogplex tools, agents, skills, and memories as MCP primitives — without the user pasting a token into a JSON config.
+
+## What it replaces
+
+The substitute available today is the **Skills** approach (see [Skills](/extend/skills)). Skills teach an external agent to drive Mogplex through the `mogplex` CLI. The MCP server path replaces that shim with a direct protocol-native integration once the host supports remote MCP with OAuth.
+
+```
+Claude Code / Cursor ──► mogplex.com/mcp  (Streamable HTTP, bearer token)
+                              │
+                              ▼
+              Mogplex tool/agent/skill/memory handlers
+              (same code paths the in-app agent uses)
+```
+
+## Auth model
+
+Spec-compliant MCP OAuth 2.1 + PKCE, reusing the user's existing Supabase session:
+
+- `/.well-known/oauth-protected-resource` on the MCP endpoint.
+- `/.well-known/oauth-authorization-server` on the app origin.
+- **Dynamic Client Registration** at `/oauth/register` so each client (Claude Code, Cursor, a custom app) provisions its own `client_id` without the user editing any config.
+- Short-lived access tokens (1h, audience `mcp`), rotating refresh tokens (30d), stored hashed in Supabase.
+- Scopes: `tools:read`, `tools:execute`, `memories:read`, `memories:write`, `agents:run`, `skills:read`, `workspaces:read`. Default grant is read-only; execute and write require explicit consent at the authorize step.
+
+Users manage active clients from **Settings → Connections → Local agents** (revoke, inspect last-used, see requested scopes).
+
+## Tool surface (planned v1)
+
+Each tool is a thin adapter over an existing Mogplex service, not a new capability:
+
+- `mogplex_list_workspaces`, `mogplex_get_workspace`
+- `mogplex_list_skills`, `mogplex_get_skill`, `mogplex_run_skill`
+- `mogplex_list_agents`, `mogplex_run_agent` (streamed progress via MCP notifications)
+- `mogplex_search_memories`, `mogplex_add_memory`, `mogplex_edit_memory`
+- `mogplex_list_rules`, `mogplex_get_rule`
+- `mogplex_run_tool` (generic dispatcher)
+
+Mogplex skills are additionally exposed as MCP **prompts**, since a skill definition maps naturally to that primitive.
+
+## Install (once available)
+
+Remote Streamable HTTP — no shim, no token pasting, the host drives OAuth:
+
+```bash
+# Claude Code
+claude mcp add --transport http mogplex https://mogplex.com/mcp
+
+# Cursor
+# Settings → MCP → Add server → URL: https://mogplex.com/mcp
+```
+
+For hosts that don't yet speak remote MCP with OAuth, a stdio shim `npx -y @mogplex/mcp` will ship alongside. The shim runs the OAuth flow once, caches the token in the OS keyring, and proxies stdio ↔ HTTP.
+
+## How it relates to Connections (inbound MCP)
+
+Do not confuse the two directions:
+
+| Direction | Where configured | Who authenticates |
+| --- | --- | --- |
+| **Mogplex consumes an MCP server** (Zapier, Notion, …) | [Settings → Connections](/web/settings) | Mogplex to the external service |
+| **Mogplex exposed as an MCP server** | [Settings → Connections → Local agents](/web/settings) (when live) | External agent to Mogplex |
+
+Both can be in use at the same time. An agent running outside Mogplex can call the Mogplex MCP server, and Mogplex can turn around and call a Notion MCP connection from within the same logical tool call.
+
+## Status
+
+- Design: approved.
+- Schema, OAuth endpoints, Streamable HTTP handler, stdio shim: planned, not yet merged.
+- Current public substitute: [Skills](/extend/skills) and the [CLI](/cli).
+
+When the server ships, this page will update with the live endpoints, the final scope list, and the Settings UI screenshot. Subscribe to release notes or watch the [mogplex-cli repo](https://github.com/webrenew/mogplex-cli) for the `@mogplex/mcp` package.
+
+## See also
+
+- [Skills](/extend/skills) — today's substitute
+- [CLI Skills reference](/cli/skills) — canonical skill files
+- [Settings → Connections](/web/settings) — inbound MCP (Mogplex as consumer)
+- [MCP specification](https://modelcontextprotocol.io/specification)
