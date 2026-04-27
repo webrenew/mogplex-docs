@@ -34,7 +34,7 @@ Permission rules can be set globally or per-project. The project file lives at:
 ~/.mogplex/projects/<repo-slug>/permissions.json
 ```
 
-It can override the mode and add `allow` / `deny` / `ask` rules that are layered **on top of** the global rules. Projects can be more permissive than the global file.
+It can override the mode and add `allow` / `deny` / `ask` rules that are layered **on top of** the global rules. Projects can only be **more permissive** than the global file — a project `deny` cannot tighten something the global file (or the mode default) already allows. See [Concepts → Permissions](/cli/concepts/permissions#how-rules-resolve) for the resolver rules.
 
 Example — make a single sandbox repo run unattended while the global policy stays strict:
 

@@ -3,6 +3,8 @@ title: Permissions
 description: Two-mode permission model — `approval` and `auto` — with global and per-project rules layered on disk.
 ---
 
+import { Callout } from 'fumadocs-ui/components/callout';
+
 The CLI's permission system has two halves:
 
 1. A **mode** that sets the baseline: `approval` (default, asks before touching the workspace) or `auto` (run anything without asking).
@@ -59,7 +61,13 @@ Each rule has one of three sources: `default`, `global`, or `project`. The resol
 
 1. **Built-in defaults** for the active mode.
 2. **Global rules** from `~/.mogplex/permissions.json`.
-3. **Project rules** from `~/.mogplex/projects/<repo-slug>/permissions.json` — projects can be **more permissive** than the global file.
+3. **Project rules** from `~/.mogplex/projects/<repo-slug>/permissions.json`.
+
+For each pattern, the most permissive level wins: `allow` beats `ask` beats `deny`. A `deny` only takes effect when no other layer (mode default, global, or project) marks the same pattern `allow` or `ask`. In other words, a layer can only **loosen** what an outer layer already restricts — it cannot tighten it.
+
+<Callout type="warn">
+  **A project `deny` cannot override a global `allow`.** If `~/.mogplex/permissions.json` allows `bash:rm -rf *`, adding the same pattern to a project `deny` list will not block it. To restrict a pattern in a single repo, remove it from the global `allow` list and re-add it as `allow` only in the projects where it should run. This applies to mode defaults too: a global file cannot tighten what the active mode's built-in defaults already allow.
+</Callout>
 
 The slash status output (`/permissions`) explains why a pattern landed in `allow` vs `ask` vs `deny`, including which file it came from.
 

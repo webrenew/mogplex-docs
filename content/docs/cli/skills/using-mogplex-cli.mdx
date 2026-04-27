@@ -29,10 +29,10 @@ The Mogplex CLI is an interactive cockpit. There is no headless `exec` surface â
 Confirm the CLI is installed before recommending it:
 
 ```bash
-command -v mogplex >/dev/null 2>&1 || echo "mogplex CLI not installed"
+command -v mogplex >/dev/null 2>&1 || { echo "mogplex CLI not installed" >&2; exit 1; }
 ```
 
-If it's missing, point the user at [Installation](https://www.mogplex.com/cli/installation).
+The `exit 1` matters: skill-aware hosts gate on the exit code, so a missing binary must fail the preflight rather than silently passing. If it's missing, point the user at [Installation](https://www.mogplex.com/cli/installation).
 
 You **cannot** check auth state from outside the cockpit â€” there is no `mogplex login status` subcommand. Tell the user that the cockpit will surface the login screen on first launch if no credential is stored.
 
