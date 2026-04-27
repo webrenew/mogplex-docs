@@ -1,21 +1,20 @@
 ---
 title: Project Commands
-description: Use `AGENTS.md`, `.agents/commands/`, and `/init` to make Mogplex behave like part of the repository instead of a generic terminal tool.
+description: Use `AGENTS.md` and per-project permission files to make Mogplex behave like part of the repository.
 ---
 
-The CLI gets dramatically better when the repository teaches it how to work.
+Two repo-local layers shape how the CLI behaves inside a checked-out repo:
 
-Two local layers matter most:
+- `AGENTS.md` at the repo root — durable instructions for any agent operating in this codebase.
+- `~/.mogplex/projects/<repo-slug>/permissions.json` — per-project permission overrides.
 
-- `AGENTS.md` at the project root
-- markdown slash commands under `.agents/commands/`
+Both are optional; the CLI works without either. They make the experience dramatically better when the repo has stable conventions or wants different gates than your global default.
 
 ## `AGENTS.md`
 
-`AGENTS.md` is the repo-local instruction layer. It is the place for stable
-truths about how work should happen in this codebase.
+`AGENTS.md` is the repo-local instruction layer. Place it at the project root.
 
-Good `AGENTS.md` content includes:
+Good content includes:
 
 - project purpose and architecture notes
 - build, test, lint, and typecheck commands
@@ -23,151 +22,58 @@ Good `AGENTS.md` content includes:
 - naming or error-handling patterns
 - repo-specific guardrails the assistant should follow
 
-Keep `AGENTS.md` durable. If the guidance changes every hour, it probably
-belongs in the current task prompt instead.
+Keep it durable. If guidance changes hourly, it belongs in the task prompt instead.
 
-## Where project slash commands live
+`AGENTS.md` is read by the Mogplex orchestrator when it spawns agents into the repo — it's not parsed by the CLI itself, but it shapes every run that runs in this repo.
 
-Mogplex loads project commands from:
+## Per-project permissions
 
-```text
-<repo>/.agents/commands/**/*.md
-```
-
-This is the preferred path because it follows a cross-tool convention other AI
-coding tools can also understand.
-
-The legacy path still works:
+Permission rules can be set globally or per-project. The project file lives at:
 
 ```text
-<repo>/.mogplex/commands/**/*.md
+~/.mogplex/projects/<repo-slug>/permissions.json
 ```
 
-User-scoped commands are loaded from:
+It can override the mode and add `allow` / `deny` / `ask` rules that are layered **on top of** the global rules. Projects can be more permissive than the global file.
 
-```text
-$AGENTS_HOME/commands/**/*.md
-# or, by default
-~/.mogplex/commands/**/*.md
+Example — make a single sandbox repo run unattended while the global policy stays strict:
+
+```json
+{
+  "version": 1,
+  "rules": {
+    "allow": ["bash:*", "write:**", "read:**"]
+  }
+}
 ```
 
-## Precedence rules
-
-When the same command name exists in more than one place, Mogplex resolves it
-in this order:
-
-1. project commands from `.agents/commands/`
-2. project commands from the legacy `.mogplex/commands/`
-3. user commands
-4. built-in commands
-
-That means a repo-local command can intentionally override a user command, and
-either can shadow a built-in when you have a good reason.
-
-## Command file format
-
-A custom command is a markdown file with optional YAML frontmatter. The body is
-the prompt template sent to the model.
-
-Example:
-
-```markdown
----
-description: Review staged changes for correctness and missing tests
-arguments:
-  - name: focus
-    kind: positional
-aliases:
-  - staged-review
----
-Review the staged git diff for correctness bugs, regressions, and missing
-tests.
-
-Extra focus: $1
-```
-
-Useful frontmatter fields include:
-
-- `description`
-- `aliases`
-- `arguments`
-- `model`
-- `allowed-tools`
-- `available-during-task`
-
-A bare markdown file with no frontmatter is still a valid command.
-
-## Template substitution
-
-Command bodies support positional and named placeholders:
-
-- `$ARGUMENTS` for all positional args joined together
-- `$1`, `$2`, and so on for positional slots
-- `${NAME}` or `$NAME` for named args
-
-That lets one command file handle a family of repeatable prompts without shell
-scripting.
-
-## Namespacing from directories
-
-Nested directories turn into namespaced slash commands:
-
-```text
-.agents/commands/release/notes.md  ->  /release:notes
-.agents/commands/deploy.md         ->  /deploy
-```
-
-Use this when the repo has enough commands that a flat list starts getting
-messy.
-
-## Bootstrap with `/init`
-
-Inside a live session, `/init` scaffolds the basics:
-
-- an `AGENTS.md`
-- a starter `.agents/commands/review.md`
-
-That makes `/init` the fastest way to turn an unprepared repo into one with
-basic Mogplex conventions.
+See [Concepts → Permissions](/cli/concepts/permissions) for the schema, resolution rules, and how `/permissions` reports each rule's source.
 
 ## Verify what loaded
 
-Use the slash registry to confirm what Mogplex can see:
+In the composer:
 
-```bash
-mogplex slash list
-mogplex slash list --json
+```text
+/permissions
 ```
 
-That output includes built-ins plus project and user commands after precedence
-resolution.
-
-## Config-level control
-
-The `slash_commands` section in `~/.mogplex/config.toml` can:
-
-- disable commands by name
-- create aliases
-- add extra user-scope directories
-
-That means repo-local behavior belongs in the repo, while personal preferences
-belong in your home config.
-
-For config file locations, profile selection, and full precedence rules, use
-[Configuration and Flags](/cli/guides/configuration-and-flags).
+Without an argument, `/permissions` shows the resolved mode and rules and explains where each pattern came from (`default`, `global`, or `project`).
 
 ## Recommended split
 
 - put long-lived repo rules in `AGENTS.md`
-- put repeatable prompt workflows in `.agents/commands/`
-- keep personal-only shortcuts in `~/.mogplex/commands/`
-- use normal shell scripts when the behavior is command-shaped instead of
-  prompt-shaped
+- put per-repo permission overrides in `~/.mogplex/projects/<repo-slug>/permissions.json`
+- keep personal-only defaults in `~/.mogplex/permissions.json` (global)
+- use `/permissions <mode>` for one-off mode flips that don't deserve a config file
 
 ## Anti-patterns
 
 - putting volatile task notes in `AGENTS.md`
-- storing personal-only commands in the repo
-- creating a repo command that duplicates a built-in name without good reason
-- using slash command files for workflows that would be clearer as shell
-  scripts or project tooling
+- relying on a per-project `permissions.json` to **restrict** something the global already allows (the merge can only add allows; deny rules need to be set explicitly per scope)
+- editing `permissions.json` while the cockpit is mid-run — wait until `/permissions` confirms the next state, then `/run` again
+
+## See also
+
+- [Concepts → Permissions](/cli/concepts/permissions)
+- [Concepts → Approvals](/cli/concepts/approvals)
+- [Configuration and Flags](/cli/guides/configuration-and-flags)

@@ -1,0 +1,82 @@
+---
+title: Panels
+description: Every panel in the cockpit — what it shows, when it updates, what it doesn't do.
+---
+
+The CLI lays out seven panels. Each one subscribes to the central store via selectors, so they can never disagree.
+
+## Header
+
+The status bar across the top.
+
+| Field | Meaning |
+| --- | --- |
+| **repo / branch** | The active repository and branch |
+| **model** | The model the active run is using |
+| **mode** | Run mode (idle, planning, executing, etc.) |
+| **run status** | ready, running, paused, completed, failed, killed |
+| **dirty** | Whether the working tree has uncommitted changes |
+| **perms** | Active permission mode (`approval` or `auto`) |
+| **transport** | Connection health: `nominal` (connected), `connecting`, `reconnect`, `degraded`, `offline` |
+
+The transport label uses aerospace-ops phrasing — `nominal` means everything is connected and healthy.
+
+## Agents
+
+The left rail. Lists every agent on the active run as a card with:
+
+- agent number
+- name and role (architect, builder, reviewer, tester, researcher)
+- model
+- status (starting, planning, thinking, calling_tool, editing, reviewing, testing, blocked, waiting_for_approval, paused, completed, failed, killed)
+- current action (truncated to fit)
+- an animated activity frame for actively-working agents
+
+Below the agent cards, a **system status** block shows transport health, the active model, and MCP server counts.
+
+Press the focus key (see [Keybindings](/cli/reference/keybindings)) to navigate; selecting an agent and pressing enter opens the **Agent Detail** drawer.
+
+## Timeline
+
+The center panel. Streams structured events as they happen — tool calls, patches, approvals, errors, model routing decisions, run lifecycle. Events are typed (validated by Zod schemas in `contracts/`), not parsed stdout.
+
+Use it to:
+
+- watch what an agent is actually doing
+- find the event that triggered an approval or an error
+- scroll back through the run's history
+
+## Context & Memory
+
+What's loaded in context and what's been written to memory. Subscribes to memory events from core. Open the **Memory** drawer (`/memory`) to manage entries.
+
+## MCP strip
+
+A compact status row of configured MCP servers and their readiness. Open the **MCP** drawer (`/mcp`) for the full per-server view.
+
+## Command input
+
+The composer at the bottom. Type:
+
+- a freeform task — sends to the active agent
+- `/<command>` — runs a slash command (see [Commands](/cli/commands))
+- partial slash — autocomplete candidates appear above the line
+
+Unknown slash commands surface as inline composer errors so you don't accidentally send them as prompts.
+
+## Priority alerts
+
+A strip that surfaces things you should not miss even if a drawer is closed:
+
+- high-risk pending approvals
+- usage / cost threshold crossings
+- run limits about to be hit
+- transport degradation or reconnect events
+
+Alerts auto-dismiss when the underlying condition clears.
+
+## Read next
+
+- [Drawers](/cli/reference/drawers)
+- [Keybindings](/cli/reference/keybindings)
+- [Concepts → Architecture](/cli/concepts/architecture)

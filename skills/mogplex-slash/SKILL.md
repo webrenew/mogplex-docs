@@ -1,99 +1,76 @@
 ---
 name: mogplex-slash
-description: Discovers and runs Mogplex slash commands from the shell via `mogplex slash list` and `mogplex exec "/..."`. Use when the user asks for a slash command like /status, /mcp, /skills, /sandbox, or /logs, or when a project stores commands in `.agents/commands/` or `~/.mogplex/commands/`.
+description: Recommends the right Mogplex slash command for a user's intent and explains what each command does in the cockpit composer. Use when the user asks how to start, pause, kill, attach, model-switch, approve, or export a Mogplex run.
 ---
 
 # Mogplex slash commands
 
-Slash commands are Mogplex's control surface — session control, local tooling, project scripts. They are NOT prompts sent to a model; they are registered actions.
+The Mogplex CLI's command surface is **slash commands** in the cockpit composer. They run inside the interactive TUI — not from the shell. Use this skill to tell the user which slash command to type.
 
-## Preflight
+## Run control
 
-```bash
-mogplex login status
-```
+| Intent | Slash command |
+| --- | --- |
+| Start a new run | `/run <task>` |
+| Pause the active run | `/pause` |
+| Resume a paused run | `/resume` |
+| Cancel the active run | `/kill` |
 
-Most slash commands require auth. If unauthenticated, resolve that first (see `mogplex-auth`).
+## Surface inspection (open a drawer)
 
-## Discover the registry
+| Intent | Slash command |
+| --- | --- |
+| List agents on the active run | `/agents` |
+| Per-MCP-server status | `/mcp` |
+| Browse memory | `/memory` |
+| Inspect a patch | `/diff` |
+| Tokens, cost, projection | `/cost` |
 
-Always inspect what actually exists in the current environment before depending on a command:
+## Cockpit control
 
-```bash
-mogplex slash list --json
-```
+| Intent | Slash command |
+| --- | --- |
+| Switch models mid-run | `/model` |
+| Set permission mode | `/permissions <approval\|auto>` |
+| Show the resolved permission state | `/permissions` (no arg) |
+| Serialize the run | `/export` |
+| Open the command palette | `/help` |
+| Clear the composer | `/clear` |
+| Quit the cockpit | `/quit` (alias `/exit`) |
 
-Why JSON: the registry is machine-readable there, with command metadata (name, description, scope). Do not hand-parse the text form.
+## Auth
 
-The registry includes three sources:
+| Intent | Slash command |
+| --- | --- |
+| Open the in-app login flow | `/login` |
+| Clear stored credentials | `/logout` |
 
-1. **Built-ins** shipped with the CLI (`/status`, `/mcp`, `/skills`, `/sandbox`, `/logs`, `/model`, `/approvals`, `/compact`, `/clear`, `/init`, `/review`, `/config`, `/login`, `/logout`, `/quit`, `/help`).
-2. **Project commands** from `.agents/commands/*.md` in the current repo.
-3. **User commands** from `~/.mogplex/commands/*.md`.
+## When the user says…
 
-## Execute a slash command
+| User says | You recommend |
+| --- | --- |
+| "Run a task on this repo" | Open `mogplex` and type `/run <their task>` |
+| "Pull up that run from CI" | `mogplex --attach <runId>` |
+| "Switch to Sonnet" | Type `/model` in the composer |
+| "Approve all pending tool calls" | Open the Approval drawer (use Command Palette via `/help` if not visible) and approve from there |
+| "Run unattended for the next hour" | `/permissions auto` — flag the safety implications |
+| "Save what just happened" | `/export` and pick Markdown for human-readable, JSON/JSONL for tooling |
+| "Get out" | Double-tap Ctrl+C within 1500ms, or `/quit` |
 
-Use `exec` — the `slash` top-level command is only for inspection:
+## What you cannot do
 
-```bash
-mogplex exec "/status"
-mogplex exec "/mcp"
-mogplex exec "/config list"
-mogplex exec "/skills list"
-mogplex exec "/logs --lines=100"
-mogplex exec "/sandbox peek"
-```
+- Run a slash command from the shell. There is no `mogplex slash` subcommand; slash commands only execute inside the running cockpit.
+- See which slash commands are available without launching the cockpit. The registry is built into the binary; `/help` inside the cockpit shows the live list.
+- Drive the cockpit on the user's behalf. Tell them what to type.
 
-Pass `--json` when you need to parse the output:
+## Safety
 
-```bash
-mogplex exec --json "/status"
-mogplex exec --json "/skills list"
-```
-
-## High-value built-ins for agents
-
-| Command | Purpose | Safe to run without asking? |
-| --- | --- | --- |
-| `/status` | Model, usage, approval mode, cwd | yes, read-only |
-| `/skills list` | Installed Mogplex skills | yes, read-only |
-| `/mcp` | Configured MCP servers | yes, read-only |
-| `/config list` | Current config values | yes, read-only |
-| `/logs --lines=N` | Recent session errors | yes, logs are redacted |
-| `/sandbox peek` | Inspect sandbox state | yes, read-only |
-| `/config set …` | Mutate config | no, ask user first |
-| `/sandbox kill` | Destroy sandbox state | no, ask user first |
-| `/logout` | Remove stored credentials | no, ask user first |
-
-## Project-local slash commands
-
-When the user mentions a command you do not recognize (e.g. `/deploy-preview`), it is likely project-local. Check:
-
-```bash
-ls .agents/commands/ 2>/dev/null
-ls ~/.mogplex/commands/ 2>/dev/null
-```
-
-Each `.md` file in those directories registers a slash command. Read the file to understand what it does before executing it.
-
-## If a command is missing
-
-Work through this checklist before telling the user a command does not exist:
-
-1. `mogplex slash list --json` to confirm the registry in the current runtime.
-2. Check `.agents/commands/` for a project-scoped override or addition.
-3. Check `~/.mogplex/commands/` for a personal command.
-4. The capability may exist only as a top-level command (e.g. `mogplex login`) rather than a slash command. Run `mogplex --help`.
-5. The capability may be listed in `--help` but not yet implemented as a standalone subcommand. Try the slash form inside `exec "/..."`.
-
-## Common mistakes
-
-- Running `mogplex slash /status` (it does not execute slash commands).
-- Assuming every `/` item you see in a doc is available in the user's build — always confirm with `slash list --json`.
-- Running mutating slash commands (`/config set`, `/sandbox kill`, `/logout`) without user confirmation.
+- `/permissions auto` is the explicit user opt-in to "no questions asked." Recommend `/permissions approval` (the default) for normal use.
+- `/kill` cancels the active run immediately and interrupts in-flight tool calls. Confirm before suggesting it on a long run.
+- `/logout` clears stored credentials including hosted Mogplex state (synced model catalog, remote MCP). Confirm before suggesting.
 
 ## See also
 
-- [mogplex-exec](../mogplex-exec/SKILL.md) — the execution path for slash commands
-- [mogplex-auth](../mogplex-auth/SKILL.md) — auth preflight
-- [Slash commands guide](https://mogplex.dev/cli/guides/slash-commands)
+- [using-mogplex-cli](../using-mogplex-cli/SKILL.md)
+- [mogplex-auth](../mogplex-auth/SKILL.md)
+- [Slash command reference](https://www.mogplex.com/cli/commands)

@@ -1,0 +1,99 @@
+---
+title: Permissions
+description: Two-mode permission model — `approval` and `auto` — with global and per-project rules layered on disk.
+---
+
+The CLI's permission system has two halves:
+
+1. A **mode** that sets the baseline: `approval` (default, asks before touching the workspace) or `auto` (run anything without asking).
+2. **Rules** in config files that layer on top — `allow`, `deny`, and `ask` lists keyed by tool/command pattern.
+
+## The two modes
+
+| Mode | Spawned runtime defaults | Use when |
+| --- | --- | --- |
+| **`approval`** | sandbox `workspace-write`, approval policy `on-request` | You want gated workflows. Tool calls that touch the workspace pause and surface in the Approval drawer. |
+| **`auto`** | sandbox `danger-full-access`, approval policy `never` | You explicitly want everything to run unattended. Use deliberately — there is no second prompt. |
+
+Switch modes from the composer:
+
+```text
+/permissions approval
+/permissions auto
+```
+
+The new mode applies on the next `/run` (the process transport reads permissions at spawn time — no restart needed).
+
+## On-disk layout
+
+Two files, in order of precedence:
+
+```
+~/.mogplex/permissions.json                                # global
+~/.mogplex/projects/<repo-slug>/permissions.json           # project (overrides)
+```
+
+Both follow the same shape:
+
+```json
+{
+  "version": 1,
+  "mode": "approval",
+  "rules": {
+    "allow": ["bash:git status", "bash:pnpm test"],
+    "deny":  ["bash:rm -rf *"],
+    "ask":   ["bash:gh pr merge*"]
+  }
+}
+```
+
+- `version` must be `1`.
+- `mode` is optional in project files — when absent, the project inherits the global mode (or the built-in default).
+- `rules` are partial; missing lists default to empty.
+
+Files are written with mode `0600` and the projects directory is `0700` so credentials and policy stay private.
+
+## How rules resolve
+
+Each rule has one of three sources: `default`, `global`, or `project`. The resolver layers them like this:
+
+1. **Built-in defaults** for the active mode.
+2. **Global rules** from `~/.mogplex/permissions.json`.
+3. **Project rules** from `~/.mogplex/projects/<repo-slug>/permissions.json` — projects can be **more permissive** than the global file.
+
+The slash status output (`/permissions`) explains why a pattern landed in `allow` vs `ask` vs `deny`, including which file it came from.
+
+## Pattern format
+
+Rules are matched against an action descriptor like `bash:<command>`, `write:<path-glob>`, `read:<path-glob>`. Globs use shell-style wildcards. Concrete patterns:
+
+| Pattern | Matches |
+| --- | --- |
+| `bash:git status` | exact command |
+| `bash:pnpm test*` | command prefix |
+| `write:src/**` | any write under `src/` |
+| `read:.env*` | any read of dotenv-style files |
+
+## Example: be permissive in a sandbox repo
+
+```json
+{
+  "version": 1,
+  "rules": {
+    "allow": ["bash:*", "write:**", "read:**"]
+  }
+}
+```
+
+Drop that at `~/.mogplex/projects/<your-repo>/permissions.json` to make a single repo run unattended while the global policy stays strict.
+
+## What this does **not** control
+
+- Auth (who you are signed in as) — see [Authentication](/cli/guides/authentication).
+- MCP server enable/disable — see [Reference → Drawers](/cli/reference/drawers).
+- Whether the CLI quits on Ctrl+C — see [Reference → Keybindings](/cli/reference/keybindings).
+
+## Read next
+
+- [Approvals](/cli/concepts/approvals) — how the queue surfaces gated calls.
+- [Configuration and Flags](/cli/guides/configuration-and-flags) — env-var escape hatches.

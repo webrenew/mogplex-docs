@@ -1,15 +1,17 @@
 ---
 title: Authentication
-description: Understand Mogplex auth precedence, browser sign-in, stored provider keys, and what `mogplex login`, `/login`, and `/logout` actually change.
+description: In-app login, credential precedence, browser sign-in, stored provider keys, and what `/login` and `/logout` actually change.
 ---
 
-Mogplex can run with either direct provider credentials or your Mogplex
-account. On startup, it resolves auth in a fixed order.
+import { Callout } from 'fumadocs-ui/components/callout';
+
+The CLI ships to end users — auth is in-app. You do **not** need to set environment variables for normal use. Env vars exist as escape hatches for CI and ephemeral shells.
 
 ## Resolution order
 
-1. **Environment variable first.** If a provider env var is set in your shell,
-   Mogplex uses it.
+When the CLI starts up, it resolves credentials in this order:
+
+1. **Provider env var in the current shell.** If set, it wins — no matter what is stored on disk.
 
    | Provider   | Environment variable           |
    | ---------- | ------------------------------ |
@@ -24,121 +26,80 @@ account. On startup, it resolves auth in a fixed order.
    | Cohere     | `COHERE_API_KEY`               |
    | Vercel     | `VERCEL_API_TOKEN`             |
 
-2. **Fallback to stored credentials.** If the env var is absent, Mogplex reads
-   `~/.mogplex/auth.json`.
+2. **Stored credentials** in `~/.mogplex/auth.json` (mode `0600`).
 
-3. **No credentials means an interactive chooser or a clear failure.** Running
-   bare `mogplex` in an interactive terminal opens the auth chooser. In
-   non-interactive contexts, Mogplex exits with a clear message telling you to
-   authenticate first.
+3. **No credentials** → the in-app **login screen** appears (or, in non-interactive contexts, a clear failure).
 
-The practical rule is simple: shell env vars outrank everything else.
+The practical rule: shell env vars outrank everything else.
+
+## In-app login
+
+On first run, the login screen offers two paths:
+
+- **Sign in with Mogplex** — opens a browser flow for account-backed login. The CLI listens on a local callback and stores a Mogplex token. Recommended.
+- **Use a provider API key** — store an Anthropic, OpenAI, Google, Groq, Mistral, DeepSeek, xAI, Cohere, or Vercel AI Gateway key locally.
+
+You can re-open the login screen later from the composer:
+
+```text
+/login
+```
 
 ## What account-backed login means
 
-Browser login is not the same thing as storing a direct provider key locally.
+Browser login is not the same thing as storing a direct provider key.
 
-When you sign in with your Mogplex account, the CLI stores a `mogplex`
-credential in `~/.mogplex/auth.json` and can reuse hosted account state such
-as:
+When you sign in with Mogplex, the CLI stores a `mogplex` credential in `~/.mogplex/auth.json` and can reuse hosted state:
 
 - synced model catalog
 - remote MCP server definitions
-- the account-backed model access configured for your Mogplex user
+- account-backed model access configured for your Mogplex user
 
-This is the cleanest setup when you want the web app and CLI to share models,
-MCP configuration, and account identity.
+If account login succeeds but prompts fail, the hosted account usually does not have usable model access yet. Add a provider key in [Web Settings](/web/settings).
 
-If the account login succeeds but prompts still fail, the hosted account
-usually does not have usable model access yet. Add the needed provider key in
-[Web Settings](/web/settings).
+## Provider keys (env or stored)
 
-## Entry points
-
-### `mogplex`
-
-Running bare `mogplex` is the normal entrypoint:
-
-```bash
-mogplex
-```
-
-If no auth is available yet, Mogplex prompts you to either:
-
-- sign in with Mogplex in the browser
-- store a direct provider API key locally
-
-### `mogplex login`
-
-If you want to jump straight into setup, `mogplex login` opens the same
-interactive auth flow:
-
-```bash
-mogplex login
-```
-
-You can inspect the stored auth file without opening the TUI:
-
-```bash
-mogplex login status
-```
-
-### `/login`
-
-Inside a live session, `/login` is still the in-session path for switching or
-storing credentials. `/login mogplex` goes to browser login; `/login
-<provider>` asks for a provider key directly.
-
-## Provider keys
-
-Direct provider credentials still work and still take precedence over the
-account login path. This is the preferred pattern for CI, ephemeral shells, and
-environments where you do not want credentials written to disk.
+Direct provider credentials still work and still take precedence over the account login path. This is the preferred pattern for CI and ephemeral shells.
 
 ```bash
 export OPENAI_API_KEY=sk-...
 mogplex
 ```
 
-If both a stored credential and an env var exist for the same provider, the env
-var wins.
+If both a stored credential and an env var exist for the same provider, the env var wins.
 
-## `/logout` and what it really changes
+## `/logout`
 
-Use `/logout` inside a live session to remove a stored credential from
-`~/.mogplex/auth.json`.
+```text
+/logout
+```
 
-Three details matter:
+Clears the Mogplex token (and provider key, if stored) from `~/.mogplex/auth.json`. Three things to remember:
 
-- **Env vars still win.** If the matching env var is set, the next session will
-  still authenticate through that env var.
-- **Treat logout as affecting the next session.** If the current session already
-  constructed a provider adapter, restart the session when you need immediate
-  certainty that the old credential is gone.
-- **Logging out of Mogplex clears shared hosted state.** Remote model catalog
-  data and remote MCP server sync are cleared when the Mogplex account token is
-  no longer available.
+- **Env vars still win.** If the matching env var is set, the next session will still authenticate through it.
+- **Restart for certainty.** The current process may still hold the old adapter. Quit (`/quit`) and relaunch if you need an immediate clean slate.
+- **Logout clears hosted state.** Synced model catalog and remote MCP definitions vanish locally.
 
-## Common outcomes and what they mean
+You can also force logout-then-attach in one shot:
 
-- `mogplex login status` shows only `mogplex`: the CLI is in account-backed
-  mode.
-- `mogplex login status` shows a provider entry and the session uses that
-  provider: direct provider auth is active.
-- the CLI behaves differently than `login status` suggests: check env vars
-  first, because they outrank stored auth.
-- account login succeeds but prompts fail: the hosted account probably still
-  lacks model access in [Web Settings](/web/settings).
+```bash
+mogplex --attach run_abc123 --logout
+```
 
-## Logging and credential safety
+<Callout>
+  The CLI never reads `~/.mogplex/auth.json` to display secret material in
+  logs. Session logs at `~/.mogplex/logs/<session-id>.jsonl` redact API keys,
+  tokens, and the raw contents of `auth.json`.
+</Callout>
 
-Session logs at `~/.mogplex/logs/<session-id>.jsonl` do not contain:
+## Common outcomes
 
-- API keys
-- OAuth tokens or PATs
-- raw contents of `~/.mogplex/auth.json`
+- The login screen appears at startup → no credentials anywhere; sign in or store a provider key.
+- Login succeeds but prompts fail → account login is active but the hosted account lacks model access. Fix in [Web Settings](/web/settings).
+- The CLI behaves differently than the in-app login implies → check env vars first; they outrank stored auth.
 
-The runtime redacts those values before writing logs to disk.
+## See also
 
-When `MOGPLEX_DEBUG=1` is set, debug logs can still capture prompt content or
-tool output. Treat debug logs with the same care as your source code.
+- [Configuration and Flags](/cli/guides/configuration-and-flags) — env-var escape hatches.
+- [Concepts → Attach](/cli/concepts/attach) — `--logout` plus `--attach`.
+- [Skills → mogplex-auth](/cli/skills/mogplex-auth) — the agent skill that gates other Mogplex actions on auth.

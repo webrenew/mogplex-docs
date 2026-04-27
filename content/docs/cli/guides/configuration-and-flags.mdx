@@ -1,200 +1,87 @@
 ---
 title: Configuration and Flags
-description: Understand config.toml locations, profiles, environment precedence, and the global CLI flags that override Mogplex behavior per run.
+description: The CLI's single flag (`--attach`), the env-var escape hatches, and where local state lives on disk.
 ---
 
-Use this guide when you need to answer:
+import { Callout } from 'fumadocs-ui/components/callout';
 
-- where does Mogplex read configuration from?
-- which layer wins when config, env vars, profiles, and flags disagree?
-- which flags are safe to treat as per-run overrides?
+The CLI is configured **in-app**. There is one CLI flag and a small set of environment variables that exist as escape hatches.
 
-## The three layers to think about
+<Callout>
+  Env vars are not required for normal use. They exist for CI, attach
+  workflows, and tooling that needs to inject behavior. If you are setting
+  env vars to make day-to-day work happen, something is wrong — start with
+  the in-app login and `/permissions` instead.
+</Callout>
 
-Mogplex configuration is easiest to understand when you separate it into three
-jobs:
+## CLI flags
 
-- **config files** for stable defaults
-- **environment variables** for shell-scoped or secret state
-- **CLI flags** for one-off overrides on a single run
+| Flag | What it does |
+| --- | --- |
+| `--attach <runId>` | Attach to an in-flight run via the daemon transport. See [Concepts → Attach](/cli/concepts/attach). |
+| `--logout` | Clear the stored Mogplex token before launching. Combine with `--attach` if needed. |
+| `--events=jsonl` | Read events from stdin in JSONL format (used with stdio transport). |
 
-If behavior feels surprising, the usual cause is that one of those layers is
-outranking the others.
+That's it. Everything else is in-app — slash commands, drawers, the login screen.
 
-## Config file locations
+## Environment variables
 
-The main user config lives at:
+### Auth (provider keys)
 
-```text
-$MOGPLEX_HOME/config.toml
-```
+See the table in [Authentication → Resolution order](/cli/guides/authentication#resolution-order). Setting any provider env var overrides stored credentials for that provider.
 
-If `MOGPLEX_HOME` is unset, the default path is:
+### Transport selection
 
-```text
-~/.mogplex/config.toml
-```
+| Variable | Effect |
+| --- | --- |
+| `MOGPLEX_TRANSPORT=process` (or `=live`) | Force the process transport — spawn a local exec runtime. |
+| `MOGPLEX_TRANSPORT=daemon` | Force the daemon transport — connect to a running daemon. |
+| `MOGPLEX_TRANSPORT=stdio` | Force the stdio transport — read JSONL from stdin. |
+| `MOGPLEX_DAEMON_SOCKET` | Override the daemon socket path. |
+| `MOGPLEX_ATTACH_RUN_ID` | Equivalent to `--attach <runId>`. |
 
-Project-level config can also live inside a repo at:
+See [Concepts → Transports](/cli/concepts/transports) for the selection rules.
 
-```text
-./.mogplex/config.toml
-```
+### Storage
 
-Two environment details matter:
+| Variable | Effect |
+| --- | --- |
+| `MOGPLEX_HOME` | Override the home directory location (default `~/.mogplex/`). |
+| `CODEX_HOME` | Deprecated fallback; use `MOGPLEX_HOME` instead. |
 
-- `MOGPLEX_HOME` overrides the home directory location entirely
-- `CODEX_HOME` still works as a fallback, but it is deprecated in favor of
-  `MOGPLEX_HOME`
+## Local state on disk
 
-## Resolution order
+| Path | Contents |
+| --- | --- |
+| `~/.mogplex/auth.json` | Mogplex token and provider credentials (mode `0600`). |
+| `~/.mogplex/permissions.json` | Global permission mode and rules. |
+| `~/.mogplex/projects/<repo-slug>/permissions.json` | Per-project permission overrides. |
+| `~/.mogplex/logs/<session-id>.jsonl` | Structured session logs (secrets redacted). |
+| `~/.mogplex/bin/mogplex` | The CLI binary (default install location). |
 
-Mogplex resolves config from lowest priority to highest priority in this exact
-order:
+All Mogplex-owned files use restrictive modes (`0600` for files, `0700` for directories) so credentials and policy stay private.
 
-1. built-in defaults
-2. user config at `$MOGPLEX_HOME/config.toml`
-3. project config at `./.mogplex/config.toml`
-4. the active profile under `[profiles.<name>]`
-5. environment variables
-6. `--config KEY=VALUE` overrides
-7. per-invocation CLI flags such as `--sandbox` and `--model`
+## Configuring permissions
 
-That means a repo config can override your home config, env vars can override
-both, and explicit flags still win over everything else.
+Permissions are managed by editing the JSON files above or by using `/permissions <mode>` in the composer. See [Concepts → Permissions](/cli/concepts/permissions) for the on-disk schema and resolution rules.
 
-## Profiles
+## Configuring MCP
 
-Profiles are the clean way to switch between named CLI behaviors without
-rewriting your main config every time.
+MCP servers are configured in [Web Settings](/web/settings) when you're signed in to Mogplex (synced down on launch). The CLI's MCP drawer surfaces what's configured but does not edit it directly.
 
-Example:
+## Why the CLI doesn't read `config.toml`
 
-```toml
-model_provider = "openai"
-sandbox_mode = "read-only"
-approval_policy = "on-request"
+Earlier Mogplex CLI builds used `~/.mogplex/config.toml` for CLI-only options like `model_provider`, `sandbox_mode`, profiles, and `slash_commands`. The current cockpit replaces that surface with:
 
-[profiles.write]
-sandbox_mode = "workspace-write"
+- **In-app login** for `model_provider` and credentials.
+- **`/permissions <mode>`** + the permissions JSON files for sandbox and approval policy.
+- **`/model`** for runtime model selection.
+- **The slash command registry** (built-in) for the composer surface.
 
-[profiles.safe]
-sandbox_mode = "read-only"
-approval_policy = "never"
-```
+If you have an old `config.toml` from a previous install, it is ignored by the current CLI.
 
-Select a profile with either:
+## See also
 
-```bash
-mogplex --profile fast
-```
-
-or:
-
-```bash
-MOGPLEX_PROFILE=fast mogplex
-```
-
-`--profile` wins over `MOGPLEX_PROFILE`, and `CODEX_PROFILE` is only a fallback
-when the Mogplex-prefixed variable is absent.
-
-## One-off overrides with `--config`
-
-Use `--config` when you want to override a config key without editing any file.
-
-Examples:
-
-```bash
-mogplex --config sandbox_mode=workspace-write --config approval_policy=never
-mogplex --config model_provider=anthropic exec "summarize this repository"
-```
-
-This is useful when you want the run to stay self-documenting in shell history
-or CI logs.
-
-## Global flags that matter most
-
-The top-level CLI currently supports these high-signal flags:
-
-- `--config KEY=VALUE` for direct config-key overrides
-- `--sandbox MODE` for `read-only`, `workspace-write`, or
-  `danger-full-access`
-- `--approval POLICY` for `untrusted`, `on-failure`, `on-request`, or `never`
-- `--cwd DIR` to change the working directory
-- `--model NAME` to override the selected model
-- `--profile NAME` to activate one named profile
-- `--feature KEY[=VAL]` to toggle feature flags
-- `--color WHEN` for `auto`, `always`, or `never`
-
-These flags are parsed before Mogplex decides whether you are launching the TUI
-or exec mode, so they apply to both `mogplex` and `mogplex exec ...` unless the
-flag itself is exec-specific.
-
-## Output flags are exec-specific
-
-Structured output belongs to one-off runs, not the interactive TUI.
-
-Use these with `mogplex exec` or the bare-prompt exec shorthand:
-
-- `--output text`
-- `--output json`
-- `--output jsonl`
-- `--json`
-- `--jsonl`
-
-Examples:
-
-```bash
-mogplex exec --json "summarize this repository"
-mogplex --jsonl "review the staged diff for regressions"
-```
-
-If another program is going to parse the result, prefer JSON or JSONL instead
-of screen-oriented text.
-
-## Slash-command config still lives in `config.toml`
-
-The `slash_commands` section in `config.toml` is still the right place for
-slash-registry policy such as:
-
-- disabling specific command names
-- adding aliases
-- adding extra user-scope command directories
-
-Keep repo behavior in `.agents/commands/`, and keep personal registry policy in
-config.
-
-For the slash loader itself, see [Slash Commands](/cli/guides/slash-commands).
-For repo-local command files, see
-[Project Commands](/cli/guides/project-commands).
-
-## Startup behavior toggle
-
-Mogplex checks for published updates on startup and can print an update banner
-in interactive shells.
-
-If you want to suppress that banner for a shell session or script, set:
-
-```bash
-MOGPLEX_SKIP_UPDATE_CHECK=1
-```
-
-## Common mistakes
-
-- assuming project config beats environment variables: env vars still win
-- forgetting that `--profile` only selects `[profiles.NAME]`, not a different
-  config file
-- using `--json` with interactive `mogplex` and expecting the TUI to emit
-  machine-readable output
-- relying on `CODEX_HOME` or `CODEX_PROFILE` without realizing they are fallback
-  compatibility paths, not the preferred names
-
-## A practical split
-
-- put durable personal defaults in `$MOGPLEX_HOME/config.toml`
-- put repo-specific defaults in `./.mogplex/config.toml`
-- use profiles for named modes like `write`, `safe`, or `ci`
-- use flags when the override should only apply to one run
-
-That keeps the CLI predictable without turning every invocation into a wall of
-arguments.
+- [Authentication](/cli/guides/authentication)
+- [Concepts → Transports](/cli/concepts/transports)
+- [Concepts → Permissions](/cli/concepts/permissions)

@@ -1,15 +1,21 @@
 ---
 title: Skills
-description: Agent Skills that teach external agents (Claude Code, Claude Agent SDK, Cursor, opencode) how to drive a user's Mogplex workspace through the `mogplex` CLI — a drop-in substitute when a Mogplex MCP server is not available.
+description: Agent Skills that teach external agents (Claude Code, Claude Agent SDK, Cursor, opencode) how to guide a user through the Mogplex CLI cockpit.
 ---
 
-Mogplex ships a set of [Anthropic Agent Skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills) that let any skill-aware agent operate a user's Mogplex workspace through the CLI, without MCP, and without asking the user to paste tokens into a JSON config.
+Mogplex ships a set of [Anthropic Agent Skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills) that teach a skill-aware agent how to help users drive the Mogplex CLI.
 
-This page is the reference for the skill set itself. For the decision between Skills and the upcoming [MCP server](/extend/mcp-server), see [Extend → Skills vs MCP](/extend/skills).
+<Callout>
+  The current CLI is interactive-only — there is no headless `exec` surface
+  for an agent to call. These skills are **guidance skills**: they teach an
+  agent to recommend the right slash command, walk a user through the login
+  screen, and help author repo-local config (`AGENTS.md`,
+  `permissions.json`). Agents do not drive the cockpit directly.
+</Callout>
 
 ## Source of truth
 
-The canonical skill files live in the docs repo at `skills/<name>/SKILL.md` and follow the standard Anthropic skill format (YAML frontmatter with `name` and `description`, markdown body, file named `SKILL.md` in a directory that matches the skill name).
+The canonical skill files live at `skills/<name>/SKILL.md` in [`webrenew/mogplex-docs`](https://github.com/webrenew/mogplex-docs). The pages under this section mirror those files.
 
 ## Skills
 
@@ -17,28 +23,23 @@ The canonical skill files live in the docs repo at `skills/<name>/SKILL.md` and 
   <Card
     title="using-mogplex-cli"
     href="/cli/skills/using-mogplex-cli"
-    description="Umbrella skill. Routes the agent to the right command when the user asks for a Mogplex workspace action."
-  />
-  <Card
-    title="mogplex-exec"
-    href="/cli/skills/mogplex-exec"
-    description="Run a one-off, non-interactive Mogplex task and capture structured output."
+    description="Umbrella skill. Routes the agent to the right guidance when the user asks for a Mogplex CLI action."
   />
   <Card
     title="mogplex-slash"
     href="/cli/skills/mogplex-slash"
-    description="Discover the slash-command registry and run slash commands from the shell."
+    description="Tell the user which slash command to type in the cockpit composer."
   />
   <Card
     title="mogplex-auth"
     href="/cli/skills/mogplex-auth"
-    description="Verify or establish Mogplex CLI authentication before running other commands."
+    description="Walk the user through the in-app login screen, env-var escape hatches, and credential troubleshooting."
   />
 </Cards>
 
 ## Install
 
-The skill files are hosted in [`webrenew/mogplex-docs`](https://github.com/webrenew/mogplex-docs) under `skills/`. Pick one fetch method (this sets a `SKILLS` path variable), then copy into your agent host.
+The skill files are hosted at [`webrenew/mogplex-docs`](https://github.com/webrenew/mogplex-docs) under `skills/`. Pick one fetch method, then copy into your agent host.
 
 ### Claude Code
 
@@ -48,19 +49,17 @@ git clone https://github.com/webrenew/mogplex-docs.git
 SKILLS=mogplex-docs/skills
 
 # Option B — sparse download of just the skills/ tree
-#   degit copies the *contents* of skills/ into mogplex-skills/,
-#   so mogplex-skills is the skills tree (no nested skills/ dir).
 npx -y degit webrenew/mogplex-docs/skills mogplex-skills
 SKILLS=mogplex-skills
 ```
 
-Then, in the same shell:
+Then:
 
 ```bash
 # Global
 mkdir -p ~/.claude/skills && cp -R "$SKILLS"/* ~/.claude/skills/
 
-# Or per-project (run from your project root)
+# Or per-project
 mkdir -p .claude/skills && cp -R "$SKILLS"/* .claude/skills/
 ```
 
@@ -72,7 +71,7 @@ Skills picked up automatically via `settingSources: ["user", "project"]`:
 import { query } from "@anthropic-ai/claude-agent-sdk";
 
 const response = query({
-  prompt: "Run /status against my Mogplex workspace",
+  prompt: "How do I switch models in Mogplex?",
   options: { settingSources: ["user", "project"] },
 });
 ```
@@ -83,7 +82,7 @@ Copy the body of each `SKILL.md` into the host's project-rules or system-prompt-
 
 ## Design principles
 
-- **CLI-first.** Skills assume `mogplex` is on `PATH`. They never instruct the agent to read or write credential files directly.
-- **Auth preflight.** Every action-performing skill tells the agent to run `mogplex login status` first.
-- **Structured output.** Skills prefer `--json` / `--jsonl` for anything the agent has to parse.
-- **No silent writes.** Any command that mutates state is flagged so the agent asks the user before running it.
+- **Guidance, not execution.** Skills tell the user what to do in the cockpit. They do not try to drive the TUI.
+- **Auth handoff.** Auth lives in the cockpit's login screen. Skills recommend `/login` and explain env-var precedence.
+- **Repo-local config is fair game.** Skills can help the user author `AGENTS.md` and `~/.mogplex/projects/<repo-slug>/permissions.json` — those are plain files.
+- **No silent writes.** Anything that mutates user-owned state is recommended to the user, not done by the agent.

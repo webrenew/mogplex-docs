@@ -13,18 +13,17 @@ The canonical skill files and the per-skill reference pages live under [CLI → 
 
 | Skill | Role |
 | --- | --- |
-| [`using-mogplex-cli`](/cli/skills/using-mogplex-cli) | Umbrella. Routes the agent to the right command when the user asks for a Mogplex workspace action. |
-| [`mogplex-exec`](/cli/skills/mogplex-exec) | One-off non-interactive runs with `--json` / `--jsonl` output. |
-| [`mogplex-slash`](/cli/skills/mogplex-slash) | Discover and run Mogplex slash commands from the shell. |
-| [`mogplex-auth`](/cli/skills/mogplex-auth) | Auth preflight, env-var precedence, troubleshooting decision tree. |
+| [`using-mogplex-cli`](/cli/skills/using-mogplex-cli) | Umbrella. Guides the user through the Mogplex cockpit when they ask for a workspace action. |
+| [`mogplex-slash`](/cli/skills/mogplex-slash) | Recommends the right slash command for a user's intent. |
+| [`mogplex-auth`](/cli/skills/mogplex-auth) | Walks the user through the in-app login flow and credential troubleshooting. |
 
-Together they cover the same capability surface the [MCP server](/extend/mcp-server) will expose — tool execution, slash-command dispatch, skill and memory access, agent runs, and auth — without needing the host to speak MCP or hold a bearer token.
+The current Mogplex CLI is interactive-only — these are **guidance skills** that teach an agent to advise the user on cockpit workflows. They do not drive the TUI. When the [MCP server](/extend/mcp-server) ships, that path will give external agents direct programmatic access to Mogplex capabilities without going through the cockpit.
 
 ## Why this is the right path today
 
-- **No pasted tokens.** The `mogplex login` browser flow owns the credential and writes it to `~/.mogplex/auth.json` — see the [Authentication guide](/cli/guides/authentication) for precedence rules and file contents. The external agent never sees raw auth material.
+- **No pasted tokens.** The cockpit's in-app login flow owns the credential and writes it to `~/.mogplex/auth.json` — see the [Authentication guide](/cli/guides/authentication) for precedence rules and file contents. The external agent never sees raw auth material.
 - **Works in every skill-aware host.** The skill format is portable: Claude Code, Claude Agent SDK, and any host that reads `SKILL.md`-style files. Cursor project rules work too by copying the skill body.
-- **Thin wrapper.** Skills do not duplicate Mogplex logic — they are instructions for how to call the existing CLI, which calls the existing Mogplex runtime.
+- **Thin wrapper.** Skills do not duplicate Mogplex logic — they are instructions for how the user should drive the CLI cockpit, which talks to the existing Mogplex runtime.
 - **No infra dependency.** Ships the moment the CLI is on the user's `PATH`. Nothing to deploy, no tokens to provision.
 
 ## Skills vs MCP server at a glance
@@ -32,15 +31,15 @@ Together they cover the same capability surface the [MCP server](/extend/mcp-ser
 | | Skills (today) | MCP server (preview) |
 | --- | --- | --- |
 | Status | **Available** | Preview design; not live |
-| Protocol | Skill file + shell | MCP Streamable HTTP |
-| Auth | `mogplex login` → `~/.mogplex/auth.json` | OAuth 2.1 + PKCE (DCR) |
+| Protocol | Skill file (guidance) | MCP Streamable HTTP |
+| Auth | In-app login → `~/.mogplex/auth.json` | OAuth 2.1 + PKCE (DCR) |
 | Token pasted in config? | No | No |
-| Execution path | External agent shells out to `mogplex exec` | External agent calls MCP tool |
-| Streaming progress | `--jsonl` | MCP `notifications/progress` |
+| Execution path | Agent advises user; user drives the cockpit | External agent calls MCP tool directly |
+| Streaming progress | n/a — user watches the cockpit | MCP `notifications/progress` |
 | Host requirement | Skill-aware (Claude Code, Agent SDK, Cursor rules) | Remote-MCP-aware with OAuth |
 | Host reach today | High | Claude Code ≥ latest, Cursor, a few others |
 
-When the MCP server ships, both paths will stay supported. Skills will continue to be the right answer for hosts that don't speak remote MCP, for CI contexts, and for anyone who prefers shell-driven integration.
+When the MCP server ships, it becomes the right path for hosts that need programmatic access without involving the user. Skills will continue to be useful for hosts that don't speak remote MCP and for situations where the user is the right one to drive the cockpit.
 
 ## Install
 

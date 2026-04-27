@@ -1,112 +1,109 @@
 ---
 title: Slash Commands
-description: Understand the slash-command surface, how discovery works, and how to run slash commands inside a session or through exec mode.
+description: Common workflows in the composer — start a run, pause, switch model, view a diff, approve, export.
 ---
 
-Slash commands are the local control surface for the Mogplex CLI.
+For the full list of slash commands, see [Commands](/cli/commands). This guide walks the workflows that actually use them.
 
-They cover actions that are more like session control or local tooling than
-normal model prompts.
+## Start a run
 
-## Where slash commands work
-
-There are three relevant paths:
-
-1. Inside a live `mogplex` session
-2. From the shell with `mogplex slash list`
-3. From the shell with `mogplex exec "/..."` for one-off execution
-
-Today, `mogplex slash` is mainly a registry-inspection command. Actual slash
-execution from the shell goes through `mogplex exec "/..."`.
-
-## Important distinction
-
-There are two different surfaces that often get confused:
-
-- **top-level CLI commands** such as `mogplex exec` and `mogplex login`
-- **slash commands** such as `/status`, `/mcp`, and `/compact`
-
-Some capabilities exist today as slash commands even when the matching
-top-level command name is not fully wired yet.
-
-## Built-in slash commands
-
-The current built-in surface includes commands such as:
-
-- `/help`
-- `/status`
-- `/model`
-- `/approvals`
-- `/compact`
-- `/clear`
-- `/init`
-- `/review`
-- `/config`
-- `/mcp`
-- `/skills`
-- `/login`
-- `/logout`
-- `/logs`
-- `/sandbox`
-- `/quit`
-
-Use `mogplex slash list` to inspect the exact registry in your environment.
-
-## Discover the registry
-
-```bash
-mogplex slash list
-mogplex slash list --json
+```text
+/run review the staged diff for regressions
 ```
 
-The JSON form is the best choice if you want to inspect command metadata or
-build tooling on top of the slash registry.
+The Agents panel populates as core spawns workers. The Timeline streams events. Watch the Header for `transport: nominal` and a non-empty `model`.
 
-## Run a slash command from the shell
+## Pause and resume
 
-Use exec mode for actual execution:
-
-```bash
-mogplex exec "/status"
-mogplex exec "/config list"
-mogplex exec "/mcp"
-mogplex exec "/skills list"
+```text
+/pause
+/resume
 ```
 
-This is the current shell-safe path when you want one slash action without
-opening the TUI.
+`/pause` lets agents stop at the next safe point. Use it before you switch models or change permissions.
 
-## Project and user commands
+## Switch the model mid-run
 
-Mogplex also loads slash commands from markdown files in these locations:
+```text
+/model
+```
 
-- project scope: `.agents/commands/`
-- user scope: `~/.mogplex/commands/`
+Opens the **Model Picker** drawer. Pick a model and confirm. If the active permission mode gates `change_model` as `ask`, the change surfaces in the Approval drawer first.
 
-That lets you keep repo-specific slash commands alongside the codebase and keep
-personal commands in your home directory.
+## Inspect a diff
 
-The loader also supports config-driven aliasing, disabling, and extra user
-directories through the `slash_commands` config section.
+```text
+/diff
+```
 
-## High-value built-ins
+Opens the **Diff** drawer with the most recent patch. Step through hunks; approve or reject if the run is gated.
 
-Some built-ins are particularly useful day to day:
+## Approve or reject pending tool calls
 
-- `/status` for model, usage, approval, and cwd
-- `/compact` when the session is getting heavy
-- `/config` for inspecting or setting config values
-- `/mcp` for checking configured MCP servers
-- `/logs` for recent session errors
-- `/sandbox` for spawn, pause, resume, peek, and kill operations when a sandbox
-  manager is available
+The Approval drawer surfaces gated requests automatically. From the composer, you can also use the Command Palette:
 
-## If a command is missing
+```text
+/help
+```
 
-Check these in order:
+Then search "Approval" to focus the drawer.
 
-1. `mogplex slash list` to confirm the command exists in the current runtime
-2. the repo-local `.agents/commands/` directory
-3. your user-level `~/.mogplex/commands/` directory
-4. whether the capability only exists as a top-level command or only as a slash
-   command in the current build
+See [Concepts → Approvals](/cli/concepts/approvals).
+
+## Switch permission modes
+
+```text
+/permissions auto
+/permissions approval
+```
+
+`auto` runs everything without asking; `approval` (the default) gates anything that touches the workspace. The change applies on the next `/run` — no restart required.
+
+See [Concepts → Permissions](/cli/concepts/permissions).
+
+## Check cost and usage
+
+```text
+/cost
+```
+
+Per-agent and per-run breakdown. Crossed thresholds also appear in the Priority alerts strip.
+
+## Export the run
+
+```text
+/export
+```
+
+Opens the **Run Export** drawer. Pick a format (JSON, JSONL, Markdown) and scope.
+
+See [Reference → Export](/cli/reference/export).
+
+## Kill the run
+
+```text
+/kill
+```
+
+Cancels the active run immediately. Agents are stopped; in-flight tool calls are interrupted.
+
+## Quit the cockpit
+
+```text
+/quit
+```
+
+Or `/exit`, or double-tap `Ctrl+C` (single press is a soft-interrupt — see [Reference → Keybindings](/cli/reference/keybindings)).
+
+## Common pitfalls
+
+- **Typing `/run` with no arguments** — sends an empty task; you'll get an inline composer error.
+- **Forgetting that `/permissions` is per-spawn** — you set the mode now; it applies to the next `/run`.
+- **Using `q` with a drawer open** — `q` only quits when no drawer is open. While a drawer is open it's reserved for the drawer.
+- **Pressing Ctrl+C once and walking away** — that's a soft-interrupt, not a quit. Press it twice within 1500ms to exit.
+
+## See also
+
+- [Commands](/cli/commands) — full slash command reference
+- [Reference → Keybindings](/cli/reference/keybindings)
+- [Reference → Drawers](/cli/reference/drawers)

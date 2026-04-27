@@ -1,0 +1,77 @@
+---
+title: Approvals
+description: How tool calls get gated, the approval queue, risk levels, and what auto-reject means.
+---
+
+When the active permission mode is `approval`, tool calls that would touch the workspace, write memory, run commands, delete files, use remote tools, or change the model pause and route through the **Approval drawer**.
+
+## The flow
+
+```
+agent wants to run something
+        │
+        ▼
+permission resolver: allow / ask / deny?
+        │
+        ├── allow ──► runs immediately, surfaces as a normal timeline event
+        ├── deny  ──► auto-rejected, surfaces as a denied event
+        └── ask   ──► joins the approval queue
+```
+
+Items in the queue render in the **Approval drawer** with:
+
+- the action and target
+- an inferred **risk level** (`low`, `medium`, `high`)
+- the agent that requested it
+- the tool involved
+- a quick approve/reject affordance
+
+## Actions that can be gated
+
+Any of these can hit the queue:
+
+| Action | What it usually means |
+| --- | --- |
+| `apply_patch` | Apply a code change |
+| `write_memory` | Write to long-term memory |
+| `run_command` | Execute a shell command |
+| `delete_file` | Delete a file or directory |
+| `use_remote_tool` | Call a remote MCP tool |
+| `change_model` | Switch the model mid-run |
+
+## Risk levels
+
+| Level | Examples |
+| --- | --- |
+| **low** | Read-only commands, dry-run patches |
+| **medium** | Writes inside the workspace, shell commands with side effects |
+| **high** | Deletes, network calls, anything outside the workspace |
+
+The drawer color-codes by risk so you can scan quickly.
+
+## Approve, reject, batch
+
+- **Approve** runs the action immediately and resumes the agent.
+- **Reject** marks the action as denied; the agent decides how to proceed (usually picking a different approach).
+- **Batch approve** is available when multiple items are queued and obviously related.
+
+The store keeps **optimistic state** — once you approve, the UI assumes success until the event-loop confirms or contradicts. That means the drawer feels instant even if core takes a moment to act.
+
+## Auto-reject
+
+If a request matches a `deny` rule from the resolved permissions ([Permissions](/cli/concepts/permissions)), it's **auto-rejected** without ever joining the queue. The denial still appears in the timeline so you can see what was attempted.
+
+## What `auto` mode changes
+
+In `auto` mode, no requests join the queue — everything runs immediately. This is the explicit user opt-in to "no questions asked" and maps to the most permissive runtime flags. Switch back with `/permissions approval` whenever you want the gates back.
+
+## Where approvals show up
+
+- **Approval drawer** — the queue, opened with `/help` → "Open Approval" or via the command palette.
+- **Priority alerts strip** — high-risk pending approvals surface here so they aren't missed if a drawer is closed.
+- **Timeline** — every approved/rejected/auto-rejected action appears as a structured event.
+
+## Read next
+
+- [Permissions](/cli/concepts/permissions) — how `allow` / `ask` / `deny` rules are configured.
+- [Reference → Drawers](/cli/reference/drawers) — the Approval drawer in detail.

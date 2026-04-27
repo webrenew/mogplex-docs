@@ -1,185 +1,97 @@
 ---
 title: Quickstart
-description: Install the CLI, choose an auth path, run a first task, and confirm the current Mogplex CLI surface is working.
+description: Install, sign in, start a run, and confirm the CLI cockpit is working end-to-end.
 ---
 
-This page is for the fastest credible proof that the CLI is working.
-
-The shortest useful loop is:
+The shortest useful loop:
 
 1. install the binary
 2. start `mogplex`
-3. choose an auth path
-4. run one task
-5. confirm the slash and repo-local surfaces behave the way you expect
+3. sign in (in-app)
+4. start a run with `/run`
+5. watch agents and timeline; approve or kill as needed
 
 ## 1. Install
 
-See [Installation](/cli/installation) for platform-specific commands.
+See [Installation](/cli/installation).
 
-## 2. Start Mogplex
+## 2. Start the cockpit
 
 ```bash
 mogplex
 ```
 
-If you are not authenticated yet and you are in a normal interactive terminal,
-Mogplex prompts you to choose one of these exact startup paths:
+If you are not authenticated, the in-app login screen appears. Pick one:
 
-- **Sign in with Mogplex** to open the browser flow and reuse your account-backed
-  model access, synced model catalog, and synced MCP definitions
-- **Use an API key** to store a provider key locally for direct CLI use
+- **Sign in with Mogplex** — opens a browser for account-backed login. Recommended; reuses synced model catalog and remote MCP definitions.
+- **Use a provider API key** — store an Anthropic, OpenAI, Google, Groq, Mistral, DeepSeek, xAI, Cohere, or Vercel AI Gateway key locally.
 
-If you choose **Use an API key**, the current startup picker can store keys for:
+Stored credentials live in `~/.mogplex/auth.json` (file mode `0600`).
 
-- Anthropic
-- OpenAI
-- Google AI
-- Vercel AI Gateway
-- Groq
-- Mistral
-- DeepSeek
-- xAI
-- Cohere
+<Callout>
+  The CLI ships to end users — auth and config are in-app. Environment
+  variables exist as escape hatches only. See
+  [Configuration and Flags](/cli/guides/configuration-and-flags).
+</Callout>
 
-Stored credentials live under `~/.mogplex/auth.json`.
+## 3. Start a run
 
-Success at this step means the CLI reaches the prompt and does not bounce you
-back out with an auth error.
+In the composer:
 
-The practical choice is:
-
-- choose **Sign in with Mogplex** when you want the CLI to inherit hosted state
-  from the web app
-- choose **Use an API key** when this machine should behave independently of the
-  hosted account
-
-## 3. Alternative: use an environment variable
-
-If you prefer shell-managed credentials, direct provider env vars still work and
-take precedence over stored auth:
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-# or
-export OPENAI_API_KEY=sk-...
-mogplex
+```text
+/run review the staged diff for regressions
 ```
 
-That means a shell export can temporarily override whichever provider you
-previously stored through Mogplex login.
+The Agents panel populates as core spawns workers. The Timeline streams structured events. The Header shows model, mode, run status, and transport health.
 
-This is useful for CI, short-lived shells, or temporary provider switches, but
-it also explains why a shell can behave differently from what
-`mogplex login status` seems to imply.
+## 4. Drive the run
 
-Inside a session, the common entry points are:
+| Action | Command |
+| --- | --- |
+| Pause / resume | `/pause` then `/resume` |
+| Kill the run | `/kill` |
+| Switch models | `/model` (opens picker drawer) |
+| Open the diff | `/diff` |
+| See cost so far | `/cost` |
+| Open MCP detail | `/mcp` |
+| Inspect memory | `/memory` |
+| Export the run | `/export` |
+| List slash commands | `/help` |
+| Quit | `/quit` (alias `/exit`) |
 
-- `/help` to list in-session commands
-- `/status` to inspect model, usage, approval mode, and cwd
-- `/model` to switch models
-- `/compact` to summarize and continue with a smaller context window
+Full reference: [Commands](/cli/commands).
 
-For the full auth resolution order, see [Authentication](/cli/guides/authentication).
+## 5. Approvals
 
-If you want to inspect what Mogplex has already stored locally, run:
+If the active permission mode is `approval` (the default), tool calls that touch the workspace pause and surface in the Approval drawer. Approve or reject inline. See [Concepts → Approvals](/cli/concepts/approvals) and [Concepts → Permissions](/cli/concepts/permissions).
 
-```bash
-mogplex login status
-```
+## 6. Attach to an in-flight run
 
-## 4. Run one real task
-
-If you want a live session, stay inside `mogplex` and ask for work directly.
-
-If you want a one-shot result with normal shell exit behavior, use exec mode:
-
-```bash
-mogplex exec "review the staged diff for regressions"
-```
-
-Bare prompts also route to non-interactive exec mode:
+If a run was started somewhere else (web app, CI, another shell), you can pull up its cockpit with:
 
 ```bash
-mogplex "summarize this repository"
+mogplex --attach <runId>
 ```
 
-Use `mogplex exec` when you want the intent to be explicit in scripts,
-automation, or shell history.
+See [Concepts → Attach](/cli/concepts/attach).
 
-A good first success check is a repo-local prompt such as:
+## What "working" looks like
 
-```bash
-mogplex exec "summarize this repository and point out the likely entrypoints"
-```
-
-If that works, you know auth, model access, and the non-interactive path are
-all alive.
-
-## 5. Inspect the slash surface
-
-```bash
-mogplex slash list
-```
-
-That shows the built-in in-session commands plus any project or user commands
-loaded from `.agents/commands/` and `~/.mogplex/commands/`.
-
-If you want to execute a slash command from the shell instead of only listing
-it, go through exec mode:
-
-```bash
-mogplex exec "/status"
-```
-
-That is the right split:
-
-- `mogplex slash list` to discover what exists
-- `mogplex exec "/..."` to execute a slash command non-interactively
-
-## 6. Make Mogplex repo-aware
-
-Inside a repo, the next upgrade is to add repo-local instructions and commands:
-
-- `AGENTS.md` for stable repo guidance
-- `.agents/commands/` for repo-scoped slash commands
-- `/init` inside a live session to scaffold the basics quickly
-- optional `agent.json` when you want project-level config beyond markdown
-  instructions
-
-See [Project Commands](/cli/guides/project-commands) for the full pattern.
-
-## 7. Know what "working" looks like
-
-By this point, a healthy setup looks like:
-
-- `mogplex` opens cleanly
-- `mogplex login status` matches the auth mode you chose
-- `mogplex exec "..."` returns a normal result
-- `mogplex slash list` shows the commands you expect
-- repo-local instructions affect behavior once you add them
-
-If you cannot say yes to those, the problem is usually one of three things:
-
-- auth source confusion between env vars and stored login
-- missing provider or hosted model access
-- missing repo-local files such as `AGENTS.md` or `.agents/commands/`
+- `mogplex` opens cleanly to the cockpit (or to the login screen on first run).
+- Header shows `transport: nominal` once core is connected.
+- `/run <task>` produces agents in the Agents panel and events in the Timeline.
+- Approvals appear in the Approval drawer when the run touches the workspace.
+- Ctrl+C does **not** quit — it logs a soft-interrupt. Press it twice within 1500ms (or type `/quit`) to exit.
 
 ## Common first-run issues
 
-- `mogplex` opens, but you do not have usable models: if you used account login,
-  check [Web Settings](/web/settings) and add an API key or gateway key there.
-- `mogplex login status` shows stored auth, but the current shell behaves
-  differently: an env var is probably overriding stored credentials.
-- `mogplex exec` works, but a slash command is missing: confirm it appears in
-  `mogplex slash list` first.
+- Login succeeds but no models available — add a provider key in [Web Settings](/web/settings) (account-backed login inherits hosted model access).
+- Header says `transport: offline` — core is unreachable. Check network and retry; the daemon transport surfaces a reconnect banner.
+- A slash command "doesn't work" — check `/help` for the actual registry.
 
-From there, the best next docs are:
+## Read next
 
-- [Authentication](/cli/guides/authentication) for credential precedence and
-  browser sign-in
-- [Exec Mode](/cli/guides/exec-mode) for one-off tasks
-- [Slash Commands](/cli/guides/slash-commands) for project-local command
-  discovery and `/init`
-- [Project Commands](/cli/guides/project-commands) for repo-local instruction
-  files and command packs
+- [Concepts → Architecture](/cli/concepts/architecture) for the mental model.
+- [Concepts → Permissions](/cli/concepts/permissions) for `approval` vs `auto` modes.
+- [Reference → Keybindings](/cli/reference/keybindings) for focus rotation and exit behavior.
+- [Guides → Authentication](/cli/guides/authentication) for credential precedence.

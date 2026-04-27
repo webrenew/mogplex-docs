@@ -1,0 +1,49 @@
+---
+title: Export
+description: Serialize a run for sharing or archival via `/export` and the Run Export drawer.
+---
+
+Use `/export` to capture the active (or attached) run as a portable artifact. Opens the **Run Export** drawer with format and scope choices.
+
+## What gets included
+
+- Run metadata: id, repo, branch, model, mode, start/end timestamps.
+- Agents: roles, models, final status.
+- Timeline: structured events (tool calls, patches, approvals, errors, lifecycle).
+- Cost & usage: token counts and cost per agent.
+- Approvals: every queued item with its decision.
+- Memory writes performed during the run.
+
+The export is built from the same store the cockpit renders from, so what you see in the panels is what lands in the artifact.
+
+## Formats
+
+The Run Export drawer offers a small set of serializers:
+
+| Format | Use when |
+| --- | --- |
+| **JSON** | You want the structured data for tooling. One object per run. |
+| **JSONL** | You want streaming events for replay or analysis. |
+| **Markdown** | You want a human-readable summary suitable for PRs or post-mortems. |
+
+Pick a scope — full run, timeline only, approvals only, etc. — before exporting.
+
+## Where the file lands
+
+By default the artifact is written under the active run's local export directory. The drawer prints the resolved path on completion.
+
+## When to export
+
+- **Post-mortem** — capture a failed run for review.
+- **Sharing** — send a teammate the markdown summary or the JSON for tooling.
+- **Audit** — keep a record of every approval decision and tool call.
+- **Resume context** — feed a JSONL export back into another tool that consumes Mogplex events.
+
+## Detach without exporting
+
+Quitting (or killing the CLI process) does not auto-export. If you need the artifact, run `/export` first.
+
+## Read next
+
+- [Concepts → Attach](/cli/concepts/attach) — exporting works on attached runs too
+- [Drawers](/cli/reference/drawers) — the Run Export drawer

@@ -26,9 +26,9 @@ The core question is: your teammate is in Claude Code, Cursor, or a custom Claud
 | --- | --- |
 | Is skill-aware (Claude Code, Agent SDK, Cursor project rules) | [Skills](/extend/skills) |
 | Supports remote MCP with OAuth, and the Mogplex MCP server is live | [MCP server](/extend/mcp-server) |
-| Needs a scripted integration from any shell or CI | `mogplex exec --json "…"` — see the [Exec mode guide](/cli/guides/exec-mode) |
+| Needs scripted, headless access to Mogplex | Wait for the [MCP server](/extend/mcp-server) — the current CLI is interactive-only |
 
-Skills are the recommended path until the MCP server is generally available. They cover every capability an MCP tool call would — tool execution, slash-command dispatch, skill listings, memory read/write, auth — and they do not require the user to paste a token anywhere.
+Skills are the recommended path until the MCP server is generally available. They teach a skill-aware agent to guide the user through the Mogplex cockpit (slash commands, login flow, repo-local config) without ever needing the user to paste a token.
 
 ## How this section relates to the rest of the docs
 
@@ -38,6 +38,6 @@ Skills are the recommended path until the MCP server is generally available. The
 
 ## Design principles this section follows
 
-- **No pasted tokens.** Whether the user picks Skills or MCP, the auth flow owns the credential — either `mogplex login` writing to `~/.mogplex/auth.json` (Skills path) or OAuth 2.1 + PKCE against the browser session (MCP path). In both cases the external agent never sees raw auth material.
-- **One source of truth per capability.** Tools, agents, skills, and memories are implemented once in the Mogplex runtime and exposed through whichever surface the host supports. Both paths call the same underlying services.
-- **Auth preflight is mandatory.** Both paths require a working credential before any action runs. Skills enforce it with a `command -v mogplex` + `mogplex login status` gate; MCP enforces it at the Streamable HTTP bearer-token middleware.
+- **No pasted tokens.** Whether the user picks Skills or MCP, the auth flow owns the credential — either the cockpit's in-app login writing to `~/.mogplex/auth.json` (Skills path) or OAuth 2.1 + PKCE against the browser session (MCP path). In both cases the external agent never sees raw auth material.
+- **One source of truth per capability.** Tools, agents, skills, and memories are implemented once in the Mogplex runtime. Skills point the user at the cockpit; MCP exposes the underlying services directly.
+- **Auth preflight is mandatory.** Both paths require a working credential before any action runs. Skills enforce it with a `command -v mogplex` install check and a recommendation to launch the cockpit; MCP enforces it at the Streamable HTTP bearer-token middleware.

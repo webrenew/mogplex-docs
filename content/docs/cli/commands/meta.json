@@ -1,11 +1,5 @@
 {
   "title": "Commands",
   "defaultOpen": true,
-  "pages": [
-    "index",
-    "exec",
-    "login",
-    "slash",
-    "reserved-names"
-  ]
+  "pages": ["index"]
 }
