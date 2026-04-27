@@ -1,6 +1,6 @@
 ---
 name: mogplex-slash
-description: Recommends the right Mogplex slash command for a user's intent and explains what each command does in the cockpit composer. Use when the user asks how to start, pause, kill, attach, model-switch, approve, or export a Mogplex run.
+description: Recommends the right Mogplex slash command for a user's intent and explains what each command does in the cockpit composer. Use when the user asks how to start, pause, kill, or control a Mogplex run, attach to one from CI, switch models, manage approvals, or export.
 ---
 
 # Mogplex slash commands

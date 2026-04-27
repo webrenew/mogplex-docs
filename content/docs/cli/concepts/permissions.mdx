@@ -28,11 +28,11 @@ The new mode applies on the next `/run` (the process transport reads permissions
 
 ## On-disk layout
 
-Two files, in order of precedence:
+Two files, in scope order. Both layer additively — see [How rules resolve](#how-rules-resolve) for what wins when they disagree.
 
 ```
 ~/.mogplex/permissions.json                                # global
-~/.mogplex/projects/<repo-slug>/permissions.json           # project (overrides)
+~/.mogplex/projects/<repo-slug>/permissions.json           # project-scoped (can only loosen)
 ```
 
 Both follow the same shape:

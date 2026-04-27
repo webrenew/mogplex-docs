@@ -26,7 +26,7 @@ When the CLI starts up, it resolves credentials in this order:
    | Cohere     | `COHERE_API_KEY`               |
    | Vercel     | `VERCEL_API_TOKEN`             |
 
-2. **Stored credentials** in `~/.mogplex/auth.json` (mode `0600`).
+2. **Stored credentials** in `~/.mogplex/auth.json` (mode `0600`). If you previously used Codex and have `CODEX_HOME` set, the CLI still honors it but it is deprecated — set `MOGPLEX_HOME` instead. See [Configuration and Flags → Storage](/cli/guides/configuration-and-flags#storage).
 
 3. **No credentials** → the in-app **login screen** appears (or, in non-interactive contexts, a clear failure).
 
