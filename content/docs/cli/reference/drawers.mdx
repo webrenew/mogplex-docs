@@ -1,0 +1,95 @@
+---
+title: Drawers
+description: Every drawer in the cockpit — what it does, how to open it, when to use it.
+---
+
+Drawers are modal overlays for deep views. Each one registers with the drawer registry at module load, so the [Command Palette](#command-palette) can list every drawer the build ships.
+
+## Diff
+
+Shows the diff for a patch produced during a run. Opens with `/diff` or by selecting a patch event in the Timeline.
+
+What you can do:
+
+- step through hunks
+- inspect the full file context
+- approve / reject the patch (when permission mode requires it)
+
+## Approval
+
+The pending-approval queue. Each item shows action, target, risk level, and the requesting agent. See [Concepts → Approvals](/cli/concepts/approvals) for how items get here.
+
+What you can do:
+
+- approve or reject inline
+- batch-approve obviously related items
+- jump to the related Timeline event
+
+## MCP
+
+Per-server view of every configured MCP server and its capabilities. Open with `/mcp` or via the MCP strip.
+
+What you can do:
+
+- inspect available tools per server
+- see why a server is `unavailable` or `degraded`
+- follow links into [Web Settings](/web/settings) for shared MCP configuration
+
+## Memory
+
+Browse and manage memory entries. Open with `/memory`.
+
+What you can do:
+
+- read existing entries
+- delete entries (gated by permission mode)
+- see what was written during the active run
+
+The CLI never mutates memory directly — every write goes through core and may surface in the Approval queue.
+
+## Agent Detail
+
+Focused view of one agent. Open by selecting an agent card and pressing enter.
+
+What you can do:
+
+- read the agent's current plan and recent actions
+- inspect tool calls in flight
+- soft-interrupt the agent (`Ctrl+C` while focused)
+
+## Model Picker
+
+Switch the active run's model. Open with `/model`.
+
+What you can do:
+
+- pick from the synced model catalog (account-backed login) or local config
+- preview pricing where available
+- swap models mid-run (gated by permission mode if `change_model` is `ask`)
+
+## Cost
+
+Per-run cost and token usage with thresholds and projections. Open with `/cost`. See [Cost & Usage](/cli/reference/cost-and-usage) for thresholds and warnings.
+
+## Run Export
+
+Serialize the current run for sharing or archival. Open with `/export`. See [Export](/cli/reference/export) for formats.
+
+## Command Palette
+
+Fuzzy-find every action the cockpit exposes — slash commands, drawers, run controls, focus targets. Lists actions by category:
+
+| Category | Examples |
+| --- | --- |
+| `command` | `/run`, `/pause`, `/diff`, `/mcp` |
+| `drawer` | Open MCP, Open Diff, Open Memory, Open Agent Detail, Open Model Picker, Open Cost, Open Run Export, Open Approval |
+| `control` | Pause Run, Resume Run, Cancel Run, Export Run |
+| `focus` | Focus Agents, Focus Timeline, Focus Composer |
+
+The Palette is the safety net when you don't remember a slash command name.
+
+## Read next
+
+- [Panels](/cli/reference/panels)
+- [Commands](/cli/commands) — slash command reference
+- [Concepts → Approvals](/cli/concepts/approvals)

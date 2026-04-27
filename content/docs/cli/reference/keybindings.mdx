@@ -1,0 +1,79 @@
+---
+title: Keybindings
+description: Focus rotation, exit behavior, drawer keys, and the Ctrl+C soft-interrupt.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Exit
+
+| Action | What happens |
+| --- | --- |
+| **`Ctrl+C` (single press)** | Soft-interrupt — logs `[soft-interrupt]` to stderr. **Does not quit.** |
+| **`Ctrl+C` twice within 1500ms** | Clean exit. Restores terminal state, stops the dispatcher, destroys the renderer. |
+| **`q`** | Clean exit, but **only when no drawer or help overlay is open**. While a drawer is open, `q` is reserved for the drawer. |
+| **`/quit` (alias `/exit`)** | Clean exit from the composer. |
+
+<Callout>
+  The double-tap-to-exit rule prevents accidental quit-on-Ctrl+C while a long
+  run is in flight. Hitting Ctrl+C once is the conventional "soft cancel" —
+  hitting it twice means you really want out.
+</Callout>
+
+## Focus
+
+| Action | Key |
+| --- | --- |
+| Focus the Agents panel | `focus:agents` (via Command Palette or palette shortcut) |
+| Focus the Timeline | `focus:timeline` |
+| Focus the Composer | `focus:composer` |
+
+The exact shortcut keys are surfaced in the Command Palette (`/help` to open the palette and search "Focus").
+
+## Drawer keys
+
+When a drawer is open:
+
+| Key | Action |
+| --- | --- |
+| `Esc` | Close the drawer |
+| `↑` / `↓` | Move selection within the drawer |
+| `Enter` | Activate the focused item (varies per drawer) |
+| `a` | Approve (Approval drawer) |
+| `r` | Reject (Approval drawer) |
+| `q` | (reserved by the drawer; does not quit the app) |
+
+Each drawer can register its own additional keymap. See the per-drawer entries in [Reference → Drawers](/cli/reference/drawers).
+
+## Composer
+
+| Key | Action |
+| --- | --- |
+| `Enter` | Send |
+| `Shift+Enter` | Newline |
+| `Tab` | Autocomplete slash command |
+| `↑` / `↓` | Browse composer history |
+
+## Command Palette
+
+| Key | Action |
+| --- | --- |
+| Open palette | Listed in `/help`, also via the `Open Command Palette` action |
+| Type | Fuzzy-search across commands, drawers, controls, focus targets |
+| `Enter` | Run the selected action |
+
+## Signals
+
+| Signal | Behavior |
+| --- | --- |
+| `SIGINT` (Ctrl+C) | Soft-interrupt then double-tap to exit (see above) |
+| `SIGTERM` | Clean exit |
+| crash / unhandled exception | Terminal state is restored on the way out |
+
+The terminal is always restored on exit — cursor visible, raw mode off — even if the renderer crashed.
+
+## Read next
+
+- [Panels](/cli/reference/panels)
+- [Drawers](/cli/reference/drawers)
+- [Commands](/cli/commands)

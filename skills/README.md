@@ -1,6 +1,8 @@
 # Mogplex Agent Skills
 
-Skills that teach external agents how to drive a user's Mogplex workspace through the `mogplex` CLI — a drop-in substitute when a Mogplex MCP server is not available.
+Skills that teach external agents (Claude Code, Claude Agent SDK, Cursor, opencode) how to **guide a user through the Mogplex CLI cockpit**.
+
+The current Mogplex CLI is interactive-only — there is no headless `exec` surface for an agent to call. These skills are guidance skills: they teach an agent to recommend the right slash command, walk a user through the in-app login screen, and help author repo-local config.
 
 Each subdirectory is a single skill with a `SKILL.md` using standard YAML frontmatter (`name`, `description`). The format is consumable by:
 
@@ -13,10 +15,9 @@ Each subdirectory is a single skill with a `SKILL.md` using standard YAML frontm
 
 | Skill | When it applies |
 | --- | --- |
-| [`using-mogplex-cli`](./using-mogplex-cli) | Umbrella skill. The agent needs to interact with the user's Mogplex workspace and no Mogplex MCP is configured. |
-| [`mogplex-exec`](./mogplex-exec) | Run a one-off Mogplex task non-interactively and consume structured output. |
-| [`mogplex-slash`](./mogplex-slash) | Discover and execute Mogplex slash commands from the shell. |
-| [`mogplex-auth`](./mogplex-auth) | Verify or establish Mogplex authentication before running other commands. |
+| [`using-mogplex-cli`](./using-mogplex-cli) | Umbrella skill. The user wants help driving the Mogplex cockpit. |
+| [`mogplex-slash`](./mogplex-slash) | Recommend the right slash command for a user's intent. |
+| [`mogplex-auth`](./mogplex-auth) | Walk the user through the in-app login flow and troubleshoot credentials. |
 
 ## Install into Claude Code
 
@@ -46,7 +47,7 @@ mkdir -p .claude/skills && cp -R mogplex-skills/* .claude/skills/
 import { query } from "@anthropic-ai/claude-agent-sdk";
 
 const response = query({
-  prompt: "Run /status against my Mogplex workspace",
+  prompt: "How do I switch models in Mogplex?",
   options: {
     settingSources: ["user", "project"],
     // Skills loaded from settingSources' `skills/` dirs automatically
@@ -56,7 +57,7 @@ const response = query({
 
 ## Design principles
 
-- **CLI-first.** Skills assume `mogplex` is on PATH. They never instruct the agent to read or write credential files directly.
-- **Auth preflight.** Every action-performing skill tells the agent to run `mogplex login status` first and surface a clear error if unauthenticated.
-- **Structured output.** Skills prefer `--json` / `--jsonl` output for anything the agent has to parse.
-- **No silent writes.** Any command that mutates state is called out explicitly so the agent asks the user before running it.
+- **Guidance, not execution.** Skills tell the user what to do in the cockpit. They do not try to drive the TUI.
+- **Auth handoff.** Auth lives in the cockpit's login screen. Skills recommend `/login` and explain env-var precedence.
+- **Repo-local config is fair game.** Skills can help the user author `AGENTS.md` and `~/.mogplex/projects/<repo-slug>/permissions.json` — those are plain files.
+- **No silent writes.** Anything that mutates user-owned state is recommended to the user, not done by the agent.

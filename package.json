@@ -4,7 +4,6 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "prebuild": "tsx scripts/gen-cli-reference.ts",
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
@@ -55,7 +54,6 @@
     "lint-staged": "^16.4.0",
     "postcss": "^8.5.9",
     "tailwindcss": "^4.2.2",
-    "tsx": "^4.19.4",
     "typescript": "^6.0.2"
   }
 }

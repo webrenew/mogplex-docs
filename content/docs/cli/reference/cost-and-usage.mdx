@@ -1,0 +1,50 @@
+---
+title: Cost & Usage
+description: How the cockpit tracks tokens, cost, run limits, and surfaces warnings before you hit a wall.
+---
+
+The CLI tracks usage and cost as structured events flow in, then surfaces warnings when configured thresholds are crossed.
+
+## Where you see it
+
+| Surface | What it shows |
+| --- | --- |
+| **Header** | The active model and (when available) abbreviated usage |
+| **Cost drawer** (`/cost`) | Per-agent and per-run breakdown: input/output tokens, cost, projection, model |
+| **Priority alerts strip** | Warnings for crossed thresholds and approaching run limits |
+
+## What gets tracked
+
+- **Tokens** — input and output, per agent and per run.
+- **Cost** — derived from token counts and the model's pricing where known.
+- **Run limits** — configurable caps that, when crossed, can trigger a pause or warning depending on policy.
+
+Numbers come from structured `usage_*` events emitted by core. The CLI does not estimate or extrapolate beyond what it's told.
+
+## Thresholds and crossings
+
+Thresholds are evaluated against incoming usage events. Crossing a threshold is itself an event that:
+
+- updates the Cost drawer
+- adds a row to the Priority alerts strip
+- surfaces in the Timeline
+
+Typical thresholds:
+
+| Type | Example |
+| --- | --- |
+| Soft warning | Approaching 80% of a run's token budget |
+| Hard warning | Crossed the configured cost ceiling |
+| Run limit | Maximum number of agent steps reached |
+
+## What the cockpit does at a threshold
+
+By default, threshold crossings are informational — you see them, you decide. If your permission mode and rules are configured to gate on `run_command` or `change_model`, the agent's next action may also surface in the Approval drawer.
+
+The cockpit never silently kills a run for crossing a soft threshold.
+
+## Read next
+
+- [Drawers](/cli/reference/drawers) — the Cost drawer
+- [Concepts → Approvals](/cli/concepts/approvals) — gating on actions
+- [Export](/cli/reference/export) — capture cost data with the run artifact

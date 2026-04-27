@@ -1,0 +1,21 @@
+---
+title: Overview
+description: The mental model for how the Mogplex CLI works — architecture, transports, permissions, approvals, and attach mode.
+---
+
+These pages explain the load-bearing concepts behind the CLI cockpit. Read them in order if you're new; jump to the one you need otherwise.
+
+<Cards>
+  <Card title="Architecture" href="/cli/concepts/architecture" description="Transport → dispatcher → store → React. Structured events only, no polling, contracts as the boundary with core." />
+  <Card title="Transports" href="/cli/concepts/transports" description="The three transports (process, daemon, stdio) and how the router picks one." />
+  <Card title="Permissions" href="/cli/concepts/permissions" description="Two-mode permission model. Global + per-project rules layered on disk." />
+  <Card title="Approvals" href="/cli/concepts/approvals" description="How tool calls get gated, the queue, and what auto-reject means." />
+  <Card title="Attach" href="/cli/concepts/attach" description="`--attach <runId>` to pull up a run that started somewhere else." />
+</Cards>
+
+## Pick a page by question
+
+- "What actually happens when I press a key?" → [Architecture](/cli/concepts/architecture)
+- "Why did the CLI pick this transport?" → [Transports](/cli/concepts/transports)
+- "Why is this tool call asking me / why isn't it?" → [Permissions](/cli/concepts/permissions) and [Approvals](/cli/concepts/approvals)
+- "How do I see a run that started in CI?" → [Attach](/cli/concepts/attach)

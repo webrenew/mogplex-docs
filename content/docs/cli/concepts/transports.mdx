@@ -1,0 +1,61 @@
+---
+title: Transports
+description: The three transports the CLI speaks (process, daemon, stdio) and the rules the router uses to pick one.
+---
+
+The CLI talks to Mogplex core over one of three transports. The router (`transport/router.ts`) is the **only** place that picks one.
+
+## The three transports
+
+| Transport | When it's used | What it does |
+| --- | --- | --- |
+| **process** | Default for an interactive terminal | Spawns a local exec runtime as a child process. The CLI watches its structured event stream and sends commands back. |
+| **daemon** | Attach mode (`--attach`) or `MOGPLEX_TRANSPORT=daemon` | Connects to a running mogplex daemon over a Unix socket. Lets you observe and steer a run that is already in flight. |
+| **stdio** | `MOGPLEX_TRANSPORT=stdio` or non-TTY stdin | Reads JSONL events from stdin and writes commands to stdout. Used for piping events from another process. |
+
+## Selection rules
+
+The router resolves the transport in this exact order:
+
+1. `MOGPLEX_TRANSPORT=process` or `MOGPLEX_TRANSPORT=live` → **process**
+2. `MOGPLEX_TRANSPORT=daemon` **or** `--attach <runId>` is set → **daemon**
+3. `MOGPLEX_TRANSPORT=stdio` **or** stdin is a pipe (non-TTY) → **stdio**
+4. Default (TTY stdin, no attach) → **process**
+
+If selection somehow falls through, the router falls back to **daemon** and emits a `transport_fallback` diagnostic.
+
+## Examples
+
+```bash
+# Default — spawn a local exec process
+mogplex
+
+# Attach to an in-flight run via the daemon socket
+mogplex --attach run_abc123
+
+# Force stdio (typically used by tooling, not humans)
+echo '{"type":"snapshot",...}' | MOGPLEX_TRANSPORT=stdio mogplex
+
+# Force the process transport even when stdin is a pipe
+MOGPLEX_TRANSPORT=process mogplex
+```
+
+## Permissions and the process transport
+
+The process transport reads runtime permissions from the active mode **at spawn time**. That means `/permissions auto` (or `/permissions approval`) takes effect on the **next** `/run` without restarting the CLI. Same store, same transport — only the spawn flags change.
+
+See [Permissions](/cli/concepts/permissions).
+
+## Daemon socket location
+
+When using the daemon transport, the socket path is read from `MOGPLEX_DAEMON_SOCKET`. If unset, the daemon's default location is used.
+
+## Why this matters
+
+Most users never think about transports. They matter when:
+
+- You're debugging "why isn't my run showing up?" — usually the transport selection picked the wrong thing because `MOGPLEX_TRANSPORT` is set in the shell.
+- You want to attach to a long-running CI run from your laptop — that's daemon mode.
+- You're piping structured events from another tool into the cockpit — that's stdio.
+
+For the env-var reference, see [Configuration and Flags](/cli/guides/configuration-and-flags).

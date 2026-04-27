@@ -1,0 +1,50 @@
+---
+title: Architecture
+description: One-page mental model — transport → dispatcher → store → React, structured events only, no polling.
+---
+
+Data flow in the CLI is one-directional:
+
+```
+transport  →  dispatcher  →  store  →  React (panels + drawers)
+                                 ↑
+                                 └── commands flow back out via the dispatcher
+```
+
+The TUI consumes events and sends commands. Nothing else.
+
+## What lives where
+
+| Layer | Responsibility |
+| --- | --- |
+| **Transport** | Speaks the wire protocol with Mogplex core: process spawn, daemon socket, or stdio JSONL. Emits structured events. Receives commands. |
+| **Dispatcher** | Bridges transport ↔ store. Validates events with Zod schemas before they touch state. |
+| **Store** | A single Zustand store holds all UI state — connection, active run, agents, timeline, MCP, memory, approvals, warnings, permissions. |
+| **Reducer** | Pure transitions over events. New event in, new state out. |
+| **React** | Panels and drawers subscribe to the store via selectors. Rendering is OpenTUI primitives — no DOM, no browser. |
+| **Contracts** | Zod schemas + TypeScript types for every event, command, and state shape. The boundary with core. No React, no OpenTUI imports here. |
+
+## Hard rules
+
+These are invariants, not preferences:
+
+- **Structured events only.** Stdout chunks are not the source of truth. Real protocol events flow through the transport as typed messages validated by Zod schemas in `contracts/`.
+- **No polling.** Reducers, subscriptions, async iterables. No `setInterval` for status checks.
+- **Single store.** Components subscribe via selectors. Don't keep parallel local state for things in the store.
+- **One transport selector.** The router (`transport/router.ts`) is the only place that picks a transport — see [Transports](/cli/concepts/transports).
+- **Approval-gated actions go through the approval system.** Drawers and panels never shortcut it.
+- **Permissions hydrate from disk before any transport is selected.** So `/permissions <mode>` takes effect on the next run without a restart.
+
+## Why these rules matter
+
+The CLI is supposed to be a credible operator surface for runs that may take minutes or hours and may touch a real workspace. That depends on the data model being honest:
+
+- If the UI is event-driven, you can attach to a running session and rebuild the same screen.
+- If state is centralized, the timeline, agents, and approvals can never disagree.
+- If approvals are gated through one queue, "did I really approve this?" has a single answer.
+
+## Read next
+
+- [Transports](/cli/concepts/transports) — how core actually talks to the CLI.
+- [Permissions](/cli/concepts/permissions) — what gets asked vs. allowed vs. denied.
+- [Reference → Panels](/cli/reference/panels) — what each panel renders from the store.

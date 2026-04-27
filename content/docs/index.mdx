@@ -7,8 +7,9 @@ Mogplex is easiest to understand as one product with two working surfaces:
 
 - the **web app** is the shared control plane for GitHub coverage, repo setup,
   reusable agents, routing, settings, and runtime inspection
-- the **CLI** is the local runtime for doing work directly in a checked-out repo
-  from your terminal
+- the **CLI** is the terminal-native command center for supervising AI coding
+  runs locally — agents, runs, MCP, memory, diffs, approvals, cost, and model
+  routing on one screen
 
 You do not need to understand the whole product before you get value from it.
 
@@ -20,7 +21,7 @@ The first useful question is simpler:
   <Card
     title="CLI"
     href="/cli"
-    description="Interactive sessions, `exec`, slash commands, and repo-local workflows."
+    description="Terminal cockpit for runs, agents, approvals, diffs, cost, and model routing — with attach mode for in-flight runs."
   />
   <Card
     title="Web app"
@@ -52,19 +53,18 @@ In practice, most users do this:
 ## Start in the CLI when...
 
 - The repo is already checked out locally.
-- You want Mogplex to inspect, review, edit, or automate one task from the
-  terminal.
-- The source of truth is the working copy on disk, not a hosted route.
-- You want slash commands, repo-local instructions, or shell-friendly `exec`
-  runs.
+- You want to watch a run end-to-end without leaving the terminal.
+- You need to approve or reject tool calls as they happen.
+- You want to attach to an in-flight run that started elsewhere
+  (`mogplex --attach <runId>`).
 
 ## Fast decision guide
 
 - “I need Mogplex to see my repos and respond to GitHub events.”
   Start with [Web App](/web), especially [Settings](/web/settings),
   [Installations](/web/installations), and [Projects](/web/spaces).
-- “I already have the repo open locally and want Mogplex to do one task.”
-  Start with [CLI](/cli), then use `mogplex` or `mogplex exec`.
+- “I already have the repo open locally and want to drive Mogplex from the terminal.”
+  Start with [CLI](/cli) and run `mogplex`.
 - “I need one GitHub event to wake one agent.”
   Start with [Triggers](/web/triggers).
 - “I need standing work owned by one repo, like PR review or cron.”
@@ -91,32 +91,23 @@ If you want one setup order that works for most accounts and repos, use this:
 ## The fastest end-to-end proof
 
 If you only want to prove Mogplex works before you invest in deeper routing
-setup, install the CLI and run one session:
+setup, install the CLI and start a run:
 
 ```bash
 curl -fsSL https://www.mogplex.com/install.sh | sh
 mogplex
 ```
 
-If you are not authenticated yet, the CLI walks you into either browser sign-in
-with Mogplex or direct local provider-key setup.
+The CLI opens the in-app login screen on first run. Sign in with Mogplex or
+store a provider key locally; environment variables exist as escape hatches
+only and are not required for normal use.
 
 That first proof is credible when:
 
-- `mogplex` opens an interactive session
-- you can authenticate with either your Mogplex account or a provider key
-- `mogplex exec "summarize this repository"` returns a normal one-off result
-- the same account later appears correctly in [Web Settings](/web/settings) if
-  you use account-backed login
-
-If you prefer shell-managed credentials, direct provider env vars still work:
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-# or
-export OPENAI_API_KEY=sk-...
-mogplex
-```
+- `mogplex` opens the cockpit and the Header shows `transport: nominal`
+- `/run summarize this repository` produces agents in the Agents panel and
+  events in the Timeline
+- the same account appears correctly in [Web Settings](/web/settings)
 
 ## What “working” should mean after the first hour
 
@@ -125,7 +116,7 @@ By the end of an initial pass, you should be able to say yes to these:
 - Mogplex can see the repos you expect.
 - The repo owner has GitHub App coverage, not just OAuth visibility.
 - At least one reusable agent is configured the way you expect.
-- One local CLI task completes successfully.
+- One local CLI run completes successfully.
 - You know whether this job belongs in Triggers, Assignments, or Automations.
 
 If one of those is still false, the best next pages are usually:

@@ -6,11 +6,7 @@ description: Install the Mogplex CLI on macOS, Linux, or Windows and verify that
 import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 
-Use the hosted installer to download the current release binary for your
-platform. No Node.js runtime is required for this path.
-
-The public URLs under `www.mogplex.com` redirect to the canonical installer
-host at `install.mogplex.com`, so either path is expected.
+Use the hosted installer to download the current release for your platform. No Node.js runtime is required.
 
 ## Install
 
@@ -38,52 +34,35 @@ iwr -useb https://www.mogplex.com/install.ps1 | iex
 
 ## What the installer changes
 
-The hosted installer downloads the current release archive, extracts the
-`mogplex` binary, and installs it into the Mogplex home bin directory by
-default:
+The installer downloads the current release archive, extracts the `mogplex` binary, and installs it into the Mogplex home bin directory:
 
 - macOS and Linux: `~/.mogplex/bin/mogplex`
-- Windows: `%USERPROFILE%\\.mogplex\\bin\\mogplex.exe`
+- Windows: `%USERPROFILE%\.mogplex\bin\mogplex.exe`
 
-After that, it tries to make `mogplex` runnable immediately:
+It then tries to make `mogplex` runnable immediately:
 
-- on macOS and Linux it first tries to link `mogplex` into a writable directory
-  that is already on your `PATH`
-- if that is not possible, it falls back to updating your shell profile or
-  printing the export command you need
-- on Windows it updates the user `PATH` when needed for future PowerShell
-  sessions
+- on macOS and Linux it first tries to link `mogplex` into a writable directory already on your `PATH`
+- if that is not possible, it updates your shell profile or prints the export command
+- on Windows it updates the user `PATH` for future PowerShell sessions
 
-If you want to install somewhere else, set `MOGPLEX_INSTALL_DIR` before running
-the installer.
+If you want a different install location, set `MOGPLEX_INSTALL_DIR` before running the installer.
 
-## Advanced installer options
+## Installer environment variables
 
-The installer also supports a small set of environment variables:
+- `MOGPLEX_INSTALL_DIR` — override the install location.
+- `MOGPLEX_VERSION` — pin to a specific release instead of the latest.
+- `MOGPLEX_BASE_URL` — override the manifest host (must be HTTPS).
 
-- `MOGPLEX_INSTALL_DIR`
-  Override the install location.
-- `MOGPLEX_VERSION`
-  Pin the installer to a specific release instead of the latest one.
-- `MOGPLEX_BASE_URL`
-  Override the manifest host. The installer requires this to use HTTPS.
-
-If you only want a custom install directory, you do not need to pin a version.
-Add `MOGPLEX_VERSION` only when you intentionally want a fixed release.
-
-Example:
+Examples:
 
 ```bash
 MOGPLEX_INSTALL_DIR="$HOME/.local/bin" \
-curl -fsSL https://www.mogplex.com/install.sh | sh
+  curl -fsSL https://www.mogplex.com/install.sh | sh
 ```
 
-Version pinning still works when you need it:
-
 ```bash
-# Example using the current release; replace 0.1.14 if you want a different pin.
-MOGPLEX_VERSION=0.1.14 \
-curl -fsSL https://www.mogplex.com/install.sh | sh
+MOGPLEX_VERSION=0.2.0 \
+  curl -fsSL https://www.mogplex.com/install.sh | sh
 ```
 
 ## Verify the install
@@ -92,68 +71,37 @@ curl -fsSL https://www.mogplex.com/install.sh | sh
 mogplex --version
 ```
 
-If the binary is on your `PATH`, you should see the installed version string.
-The installer tries to make `mogplex` available immediately by linking it into
-a writable `PATH` directory or by updating your shell profile.
-
-The installer also ends by printing:
-
-```text
-run: mogplex
-```
-
-That is the intended next step. A successful install is not just "the script
-finished"; it is "the current shell can run `mogplex`."
-
-If your current shell still does not see it yet, run:
+If your current shell still does not see it, run:
 
 ```bash
 rehash
-# or open a fresh login shell
+# or
 exec zsh -l
 ```
 
-On macOS and Linux, the installer requires `curl` or `wget` for download, plus
-an archive extractor that matches the published asset format: `tar` for
-`.tar.gz`, or `unzip` or `ditto` for `.zip`.
-
-## First run after install
+## First run
 
 ```bash
 mogplex
 ```
 
-If you are not authenticated yet, Mogplex prompts you to either:
-
-- sign in with your Mogplex account in the browser
-- store a direct provider API key locally
+The first launch opens the in-app login screen. Sign in with your Mogplex account or store a provider key locally — Mogplex never requires environment variables for normal use.
 
 For the full first-run flow, continue with [Quickstart](/cli/quickstart).
 
 ## Upgrade
 
-Re-run the installer. It detects an existing installation and replaces the
-binary in place.
+Re-run the installer. It detects the existing install and replaces the binary in place.
 
 ## Troubleshooting
 
-- `mogplex: command not found`: the install succeeded but your current shell has
-  not picked up the updated `PATH` yet.
-- The installer downloads but fails before extraction: confirm the machine has
-  an extractor for the published archive format (`tar` for `.tar.gz`, or
-  `unzip` or `ditto` for `.zip`).
-- You pinned `MOGPLEX_BASE_URL` and the script exits immediately: the installer
-  rejects non-HTTPS hosts.
-- Browser login works, but the CLI still has no model access: check the hosted
-  account in [Web Settings](/web/settings) and confirm the account has a usable
-  provider key or gateway key.
-- You want a shell-managed setup instead: skip stored provider login and use
-  env vars such as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`.
+- `mogplex: command not found` — the install succeeded but your shell has not picked up the updated `PATH`. Rehash or open a new shell.
+- The installer downloads but fails before extraction — confirm your machine has the right extractor (`tar` for `.tar.gz`, `unzip` or `ditto` for `.zip`).
+- You pinned `MOGPLEX_BASE_URL` and the script exits immediately — the installer rejects non-HTTPS hosts.
+- Login succeeds but prompts fail — your account probably lacks model access. Add a provider key in [Web Settings](/web/settings).
 
 ## Uninstall
 
-Delete the `mogplex` binary from the location the installer reported. Your
-session data in `~/.mogplex/` is left untouched.
+Delete the `mogplex` binary from the location the installer reported. Local state in `~/.mogplex/` is left untouched.
 
-Remove that directory too if you want to clear config, auth, logs, slash
-commands, and other local state.
+Remove that directory too if you want to clear config, auth, logs, permissions, and other local state.

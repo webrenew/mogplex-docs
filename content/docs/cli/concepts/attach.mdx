@@ -1,0 +1,74 @@
+---
+title: Attach
+description: Use `--attach <runId>` to pull up the cockpit for a run that started somewhere else (CI, web app, another shell).
+---
+
+Attach mode lets you observe and steer a run that's already in flight. The CLI connects to the Mogplex daemon, replays the run's history into the local store, and then streams new events as they happen.
+
+## Use it
+
+```bash
+mogplex --attach run_abc123
+```
+
+Or via env var (handy when the CLI is launched by another tool):
+
+```bash
+MOGPLEX_ATTACH_RUN_ID=run_abc123 mogplex
+```
+
+When `--attach` is set, the [transport router](/cli/concepts/transports) selects the **daemon** transport regardless of TTY state.
+
+## What attach does
+
+1. Connects to the daemon socket (override with `MOGPLEX_DAEMON_SOCKET` if needed).
+2. Asks for the run snapshot.
+3. **Replays** the run's history into the store — agents, timeline, approvals, MCP, memory, cost are all rebuilt from events.
+4. Subscribes to new events for the run.
+
+You see the same cockpit you'd see if you'd started the run yourself.
+
+## What you can do once attached
+
+Everything the cockpit normally does:
+
+- Watch the agents and timeline live.
+- Open diffs, memory, MCP, cost drawers.
+- Approve or reject pending tool calls.
+- Pause, resume, kill the run.
+- Switch models with `/model`.
+- Export the run with `/export`.
+
+You're a real operator on the run, not a read-only observer.
+
+## When to use it
+
+- A run was started in CI or by a webhook and you need to take over.
+- A teammate started a run on a shared daemon and you want to watch.
+- Your previous CLI session crashed and you want to reattach to its run.
+- The web app shows a long-running run and you want a richer terminal view.
+
+## Auth and permissions
+
+Attach uses your local Mogplex token (or provider key) the same way as any other session. Permission mode is still respected — if you attach in `approval` mode and the run produces a gated action, the Approval drawer surfaces it for **you** to decide.
+
+## Detach without killing the run
+
+Quit the CLI normally (`/quit`, double-tap Ctrl+C). The run keeps going on the daemon. Reattach any time with the same `--attach <runId>`.
+
+To **kill** the run, use `/kill` from inside the cockpit before detaching.
+
+## Logout-then-attach
+
+If you need to clear stored auth before reconnecting:
+
+```bash
+mogplex --attach run_abc123 --logout
+```
+
+That clears the Mogplex token (forces the login screen) and then proceeds to attach.
+
+## Read next
+
+- [Transports](/cli/concepts/transports) — how the daemon transport gets selected.
+- [Reference → Export](/cli/reference/export) — turning an attached run into an artifact.

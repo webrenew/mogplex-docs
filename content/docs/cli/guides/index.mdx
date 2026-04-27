@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: Deep dives into how the Mogplex CLI behaves once you need more than the install and quickstart pages.
+description: Behavioral guides for the Mogplex CLI — auth, configuration, slash workflows, and repo-local conventions.
 ---
 
 Use these pages when you want behavior and decision-making, not just syntax.
@@ -9,52 +9,38 @@ Use these pages when you want behavior and decision-making, not just syntax.
   <Card
     title="Authentication"
     href="/cli/guides/authentication"
-    description="Credential precedence, browser sign-in, stored keys, and what `mogplex`, `mogplex login`, `/login`, and `/logout` actually do."
+    description="In-app login, credential precedence, and what `/login` and `/logout` actually do."
   />
   <Card
     title="Configuration and Flags"
     href="/cli/guides/configuration-and-flags"
-    description="Understand config.toml locations, profiles, global flags, and which layer wins when overrides disagree."
-  />
-  <Card
-    title="Exec Mode"
-    href="/cli/guides/exec-mode"
-    description="Use `mogplex exec` and bare prompt invocation for one-off tasks, scripts, and structured output."
+    description="The single CLI flag (`--attach`), the env-var escape hatches, and where on-disk state lives."
   />
   <Card
     title="Slash Commands"
     href="/cli/guides/slash-commands"
-    description="Inspect the slash registry, run slash commands from exec mode, and understand project/user command discovery."
+    description="Common workflows in the composer — start a run, pause, switch model, view a diff, approve."
   />
   <Card
     title="Project Commands"
     href="/cli/guides/project-commands"
-    description="Use AGENTS.md, .agents/commands, and /init to make Mogplex repo-aware instead of generic."
+    description="Use `AGENTS.md` and per-project permission files to make Mogplex behave like part of the repo."
   />
 </Cards>
 
 ## Pick a guide by question
 
-- "Why is the CLI choosing this provider or model?"
-  Read [Authentication](/cli/guides/authentication).
-- "Where should this default live: config file, env var, profile, or flag?"
-  Read [Configuration and Flags](/cli/guides/configuration-and-flags).
-- "Should this task be interactive or one-shot?"
-  Read [Exec Mode](/cli/guides/exec-mode).
-- "Why does this slash command exist in one place but not another?"
-  Read [Slash Commands](/cli/guides/slash-commands).
-- "How do I make Mogplex behave like part of this repo?"
-  Read [Project Commands](/cli/guides/project-commands).
+- "Why is the CLI choosing this provider or model?" → [Authentication](/cli/guides/authentication)
+- "Where does this default live and which env var overrides it?" → [Configuration and Flags](/cli/guides/configuration-and-flags)
+- "How do I drive a run from the composer?" → [Slash Commands](/cli/guides/slash-commands)
+- "How do I make Mogplex behave like part of this repo?" → [Project Commands](/cli/guides/project-commands)
 
 ## Read these in order if you are new
 
 1. [Installation](/cli/installation)
 2. [Quickstart](/cli/quickstart)
-3. [Authentication](/cli/guides/authentication)
-4. [Configuration and Flags](/cli/guides/configuration-and-flags)
-5. [Exec Mode](/cli/guides/exec-mode)
+3. [Concepts → Architecture](/cli/concepts/architecture)
+4. [Authentication](/cli/guides/authentication)
+5. [Configuration and Flags](/cli/guides/configuration-and-flags)
 6. [Slash Commands](/cli/guides/slash-commands)
 7. [Project Commands](/cli/guides/project-commands)
-
-If you already have the CLI working, skip straight to the behavioral page that
-matches the thing you are trying to understand.

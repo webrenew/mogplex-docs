@@ -1,51 +1,60 @@
 ---
-title: Overview
-description: Reference for the Mogplex CLI command surface, with implemented standalone commands promoted and reserved names summarized separately.
+title: Slash Commands
+description: Every slash command you can type in the Mogplex CLI composer.
 ---
 
-Pick a command from the sidebar, or run `mogplex --help` in your terminal to see
-the full list.
+The CLI's command surface is **slash commands** in the composer. There are no top-level subcommands beyond bare `mogplex` (open the cockpit) and `mogplex --attach <runId>` (attach mode).
 
-Use the sidebar for the production-ready standalone commands. For the full flag
-list of any command name, run `mogplex <command> --help`. That output is the
-source of truth and reflects whichever CLI version you have installed.
+## Run control
 
-## Start here
+| Command | What it does |
+| --- | --- |
+| `/run <task>` | Start a new run with the given task as the initial prompt. |
+| `/pause` | Pause the active run. Agents stop at the next safe point. |
+| `/resume` | Resume a paused run. |
+| `/kill` | Cancel the active run. Agents are stopped; in-flight tool calls are interrupted. |
 
-The most important entrypoints for day-to-day use are:
+## Surface inspection
 
-- `mogplex` for an interactive session
-- `mogplex exec "<prompt>"` for a one-off task
-- `mogplex login` and `mogplex login status` for stored credentials
-- `mogplex slash list` for the slash-command registry
+| Command | What it does |
+| --- | --- |
+| `/agents` | List agents on the active run with status and current action. |
+| `/mcp` | Open the MCP drawer — per-server status and tools. |
+| `/memory` | Open the Memory drawer — browse and manage entries. |
+| `/diff` | Open the Diff drawer — inspect patches produced by the run. |
+| `/cost` | Open the Cost drawer — tokens, cost, projections per agent. |
 
-## Current state of the command surface
+## Cockpit control
 
-The help output currently lists more command names than the CLI has fully wired
-as standalone subcommands.
+| Command | What it does |
+| --- | --- |
+| `/model` | Open the Model Picker drawer — switch the run's model. |
+| `/permissions <mode>` | Set the active permission mode (`approval` or `auto`). Takes effect on next run. |
+| `/permissions` | (no arg) Show the resolved permission state and where each rule came from. |
+| `/export` | Open the Run Export drawer — serialize the run as JSON, JSONL, or Markdown. |
+| `/help` | Open the Command Palette to fuzzy-search every action. |
+| `/clear` | Clear the composer. |
+| `/quit` (alias `/exit`) | Clean exit. |
 
-In the current build, the most established standalone paths are:
+## Auth
 
-- `exec`
-- `login`
-- `slash`
+| Command | What it does |
+| --- | --- |
+| `/login` | Open the in-app login flow. |
+| `/logout` | Clear stored Mogplex token. The login screen appears next launch. |
 
-The additional names that still appear in `mogplex --help` but are not yet
-real standalone entrypoints are summarized on
-[Reserved Names](/cli/commands/reserved-names) instead of being treated as
-first-class command pages in the main nav.
+## Composing tasks
 
-## What this reference is for
+Anything that is **not** a slash command is sent to the active agent as a task or follow-up:
 
-Use the command pages when you already know the command you want and need the
-canonical name, aliases, or help entrypoint.
+```text
+> rebuild the validation layer using zod and update the tests
+```
 
-For interactive workflows that happen inside a live session, use
-`mogplex slash list` and the [Quickstart](/cli/quickstart).
+If you type a partial slash command, autocomplete candidates appear above the line. Unknown slash commands surface as inline composer errors so you don't accidentally send them as prompts.
 
-For auth behavior and credential precedence, use the
-[Authentication guide](/cli/guides/authentication).
+## See also
 
-For one-off scripting and slash execution, use the
-[Exec Mode guide](/cli/guides/exec-mode) and
-[Slash Commands guide](/cli/guides/slash-commands).
+- [Reference → Drawers](/cli/reference/drawers) — what each drawer does once opened.
+- [Concepts → Permissions](/cli/concepts/permissions) — what `/permissions <mode>` actually changes.
+- [Concepts → Attach](/cli/concepts/attach) — `--attach <runId>` for in-flight runs.

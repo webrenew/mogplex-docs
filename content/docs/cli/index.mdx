@@ -1,129 +1,74 @@
 ---
 title: Overview
-description: Use the Mogplex CLI for interactive terminal sessions, one-off exec runs, slash commands, and repo-local instructions.
+description: Mogplex CLI is a terminal-native command center for supervising AI coding runs — agents, runs, MCP, memory, diffs, approvals, cost, and model routing on one screen.
 ---
 
-The Mogplex CLI (`mogplex`) is the local runtime for Mogplex.
+The Mogplex CLI (`mogplex`) is a terminal-native command center for supervising AI coding runs.
 
-Use it for interactive terminal sessions, one-off `exec` runs, slash-command
-workflows, local MCP configuration, and repo-scoped conventions like
-`AGENTS.md`, optional `agent.json`, and `.agents/commands/`.
+It is not a log viewer. It is the operator cockpit for everything happening on a run: the agents working on it, the timeline of events, the MCP servers in use, the memory being read and written, the diffs being produced, the tool calls waiting for approval, and the cost and tokens being burned.
+
+```
+agents  ·  runs  ·  tools  ·  MCP servers  ·  context  ·  memory
+diffs   ·  cost  ·  tokens ·  model routing ·  approval gates  ·  process control
+```
 
 <Cards>
   <Card title="Installation" href="/cli/installation" />
   <Card title="Quickstart" href="/cli/quickstart" />
-  <Card title="Commands" href="/cli/commands" />
+  <Card title="Concepts" href="/cli/concepts" description="Architecture, transports, permissions modes, approvals, and attach mode." />
+  <Card title="Reference" href="/cli/reference" description="Panels, drawers, keybindings, cost & usage, export." />
+  <Card title="Commands" href="/cli/commands" description="Slash command reference — every `/...` you can type in the composer." />
   <Card title="Guides" href="/cli/guides" />
-  <Card title="Skills" href="/cli/skills" description="Agent Skills that let Claude Code, the Agent SDK, and other hosts drive Mogplex through the CLI." />
+  <Card title="Skills" href="/cli/skills" description="Agent Skills that guide users through the Mogplex cockpit — slash commands, login flow, and repo-local config." />
 </Cards>
 
-## Start here when the repo on disk is the source of truth
+## Where the CLI fits
 
-The CLI is the best Mogplex surface when:
+- **Web app** is the shared control plane: GitHub coverage, repo setup, reusable agents, hosted runs, routing, settings.
+- **CLI** is the persistent terminal cockpit you sit in front of while a run is happening — start it, watch it, steer it, approve it, kill it.
 
-- the repo is already checked out locally
-- you want work to happen in the terminal instead of through GitHub events
-- you need repo-local instructions, slash commands, or shell-friendly one-off
-  runs
+The CLI consumes structured events from the Mogplex core and sends commands back. It does not spawn Claude Code or Codex directly; it observes and controls runs that core orchestrates.
 
-The web app still matters for shared account state, but the CLI is the faster
-tool for actual repo-in-place execution.
+## What the CLI shows
 
-## Choose the right CLI mode
+The screen is split into panels you can focus and drawers you can open:
 
-- `mogplex` launches the interactive session. Use this when you want back and
-  forth, slash commands, model switching, and a persistent local workflow.
-- `mogplex exec "<prompt>"` runs one non-interactive task and exits. Use this
-  for scripts, wrappers, and quick one-off work.
-- `mogplex "<prompt>"` is a shorthand for a one-off non-interactive run.
-- `mogplex slash list` shows the slash-command registry available in the
-  current environment.
-- `mogplex exec "/status"` or another slash line executes a slash command
-  without opening the full TUI.
+- **Header** — repo, branch, model, mode, run status, dirty flag, permission mode, transport health
+- **Agents** — every agent on the active run with status, model, current action
+- **Timeline** — structured events streaming in
+- **Context & Memory** — what's loaded, what's been written
+- **MCP strip** — which MCP servers are ready
+- **Command input** — slash commands and composer
+- **Priority alerts** — things you should not miss
 
-The important distinction is that `mogplex slash list` is for discovery.
-Actual slash execution from the shell goes through exec mode.
+Drawers cover the deep views: diffs, approvals, MCP detail, memory, agent detail, model picker, cost, run export, and a command palette for everything else.
+
+See [Reference → Panels](/cli/reference/panels) and [Reference → Drawers](/cli/reference/drawers).
 
 ## What the CLI is best at
 
-- repo-in-place work from your terminal
-- one-off review or edit tasks without opening the browser
-- local slash-command workflows
-- reusing models, MCP definitions, and tokens synced from your Mogplex account
+- Watching a run end-to-end without leaving the terminal.
+- Approving or rejecting tool calls as they happen.
+- Switching models, pausing, resuming, killing, exporting a run.
+- Attaching to an in-flight run that started somewhere else (`--attach <runId>`).
 
-## What the CLI loads from your machine and repo
+## Files the CLI reads
 
-These files explain most CLI behavior:
+- `~/.mogplex/auth.json` — Mogplex token and provider credentials.
+- `~/.mogplex/permissions.json` — global permission mode and rules.
+- `~/.mogplex/projects/<repo-slug>/permissions.json` — project-level overrides.
+- `~/.mogplex/logs/` — structured session logs (secrets redacted).
 
-- `~/.mogplex/auth.json` stores browser login or provider credentials.
-- `~/.mogplex/config.toml` stores CLI configuration and profiles.
-- `./.mogplex/config.toml` stores project-level config overrides inside a repo.
-- `~/.mogplex/logs/` stores structured session logs.
-- `AGENTS.md` teaches Mogplex how to work inside a specific repo.
-- `.agents/commands/` adds repo-scoped slash commands.
-- `~/.mogplex/commands/` adds user-scoped slash commands across repos.
-- `agent.json` is an optional project-level config file the interactive CLI can
-  scaffold on first run in a repo.
+## Slash commands at a glance
 
-That list is worth understanding because “why is Mogplex behaving like this?”
-usually comes down to one of those local files or an environment variable.
+`/run <task>`, `/pause`, `/resume`, `/kill`, `/agents`, `/mcp`, `/diff`, `/memory`, `/model`, `/cost`, `/export`, `/help`, `/clear`, `/quit` (alias `/exit`).
 
-## The shortest reliable setup
-
-1. Install the binary with [Installation](/cli/installation).
-2. Run `mogplex`.
-3. Authenticate either through your Mogplex account or a direct provider key.
-4. Run a first task in the repo.
-5. Inspect the slash registry with `mogplex slash list`.
-
-If you want shared configuration from the hosted product, connect the account in
-the [web app](/web/settings) first so the CLI can reuse synced models and MCP
-definitions.
-
-## Web app vs CLI
-
-The cleanest setup is usually:
-
-1. configure GitHub, models, API keys, and shared MCP servers in the
-   [web app](/web/settings)
-2. do local repo work in the CLI
-3. inspect hosted runs and cost in [Observability](/web/observability)
-
-That split keeps shared account state in one place and local execution in the
-tool that is best at working inside a repo.
-
-## What a healthy CLI setup looks like
-
-- `mogplex` opens cleanly
-- `mogplex exec "..."` works without special ceremony
-- `mogplex slash list` shows the registry you expect
-- repo-local instructions actually change behavior inside the repo
-- shared hosted state appears only when you intended to use account-backed login
-
-## Common “where do I start?” questions
-
-- "Should I start with `mogplex` or `mogplex exec`?"
-  Start with `mogplex` for back-and-forth work and `mogplex exec` for one task
-  plus an exit code.
-- "How do repo-specific conventions get loaded?"
-  Through `AGENTS.md`, `.agents/commands/`, optional `agent.json`, and your
-  local config.
-- "Where do I change defaults, profiles, or per-run safety controls?"
-  In [Configuration and Flags](/cli/guides/configuration-and-flags).
-- "Why does the CLI behave differently across shells?"
-  Environment variables beat stored auth, and repo-local instruction files can
-  change the assembled prompt.
-- "Where should I configure shared models and MCP servers?"
-  In the [web app settings](/web/settings) if you want account-backed sync, or
-  locally in CLI config if you want shell-only behavior.
+Full reference: [Slash commands](/cli/commands).
 
 ## Read next
 
-- [Quickstart](/cli/quickstart) for the first working session
-- [Authentication](/cli/guides/authentication) for credential precedence
-- [Configuration and Flags](/cli/guides/configuration-and-flags) for config
-  files, profiles, and per-run overrides
-- [Exec Mode](/cli/guides/exec-mode) for one-off tasks
-- [Slash Commands](/cli/guides/slash-commands) for the local control surface
-- [Project Commands](/cli/guides/project-commands) for repo-local instructions,
-  slash files, and `/init`
+- [Installation](/cli/installation)
+- [Quickstart](/cli/quickstart)
+- [Concepts → Architecture](/cli/concepts/architecture)
+- [Concepts → Permissions](/cli/concepts/permissions)
+- [Concepts → Attach](/cli/concepts/attach)

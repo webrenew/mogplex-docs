@@ -1,40 +1,44 @@
 ---
 name: using-mogplex-cli
-description: Umbrella skill for driving a user's Mogplex workspace through the `mogplex` CLI when no Mogplex MCP server is available. Use when the user asks to run a Mogplex workspace action, execute a Mogplex slash command, or use Mogplex skills, agents, or memories from outside the Mogplex web app. Also triggers on mentions of "mogplex", ".agents/commands/", or "~/.mogplex/".
+description: Umbrella skill for guiding a user through the Mogplex CLI cockpit when no Mogplex MCP server is available. Use when the user asks how to start a run, attach to a run, switch models, manage approvals, or configure permissions in the Mogplex CLI. Also triggers on mentions of "mogplex", "AGENTS.md", or "~/.mogplex/".
 ---
 
 # Using the Mogplex CLI
 
-Mogplex exposes its workspace, slash-command registry, agent roster, skills, and memories through a local CLI (`mogplex`). When a Mogplex MCP server is not available, use the CLI as the integration surface instead of asking the user to paste tokens or configure servers manually.
+The Mogplex CLI is an interactive cockpit. There is no headless `exec` surface — agents cannot drive the TUI directly. Use this skill to **advise** the user on what to run, what to type in the composer, and what to put in repo-local config files.
 
 ## When to use this skill
 
-- The user references their Mogplex account, workspace, agents, skills, or memories.
-- The user asks you to run a `/slash` command that belongs to Mogplex (`/status`, `/mcp`, `/skills`, `/sandbox`, `/logs`, etc.).
-- The user asks you to run a project-local slash command stored in `.agents/commands/` or a personal one in `~/.mogplex/commands/`.
-- The task would normally be an MCP tool call against Mogplex but no such MCP is connected.
+- The user references their Mogplex account, runs, agents, MCP, memory, approvals, or cost.
+- The user asks how to do something in the Mogplex cockpit.
+- The user wants to author `AGENTS.md` or per-project `permissions.json`.
 
-## Preflight — always run first
+## Preflight
 
-Before any command that talks to Mogplex, verify the CLI is installed and authenticated. The install check must gate the auth check — do not continue if `mogplex` is not on `PATH`:
+Confirm the CLI is installed before recommending it:
 
 ```bash
-command -v mogplex >/dev/null 2>&1 || { echo "mogplex CLI not installed — ask the user to install it first"; exit 1; }
-mogplex login status
+command -v mogplex >/dev/null 2>&1 || { echo "mogplex CLI not installed" >&2; exit 1; }
 ```
 
-If the first line fails, stop and tell the user to install the CLI (point them at [Installation](https://mogplex.dev/cli/installation)) before running anything else. If `login status` runs but shows no stored credential and no provider env var is set, follow [`mogplex-auth`](../mogplex-auth/SKILL.md). Do not attempt to edit `~/.mogplex/auth.json` directly.
+The `exit 1` matters: skill-aware hosts gate on the exit code, so a missing binary must fail the preflight rather than silently passing. If it's missing, point the user at https://www.mogplex.com/cli/installation.
 
-## Core command map
+You **cannot** check auth state from outside the cockpit — there is no `mogplex login status` subcommand. Tell the user that the cockpit will surface the login screen on first launch if no credential is stored.
 
-| Intent | Command | Reference skill |
-| --- | --- | --- |
-| Run a one-off prompt, get a final result | `mogplex exec "<prompt>"` | [mogplex-exec](../mogplex-exec/SKILL.md) |
-| Get machine-readable output | `mogplex exec --json "<prompt>"` | [mogplex-exec](../mogplex-exec/SKILL.md) |
-| List available slash commands | `mogplex slash list --json` | [mogplex-slash](../mogplex-slash/SKILL.md) |
-| Run a slash command non-interactively | `mogplex exec "/status"` | [mogplex-slash](../mogplex-slash/SKILL.md) |
-| Check auth state | `mogplex login status` | [mogplex-auth](../mogplex-auth/SKILL.md) |
-| Start a live session | `mogplex` | — (hand off to user) |
+## Core guidance map
+
+| Intent | What to tell the user |
+| --- | --- |
+| Start a run | Launch `mogplex`, then type `/run <task>` in the composer. |
+| Attach to an in-flight run | `mogplex --attach <runId>` |
+| Switch models | Type `/model` in the composer to open the Model Picker drawer. |
+| Approve / reject pending tool calls | The Approval drawer surfaces them automatically; the user clicks Approve or Reject. |
+| Switch permission modes | Type `/permissions auto` or `/permissions approval` in the composer. |
+| Inspect cost | Type `/cost` to open the Cost drawer. |
+| Export the run | Type `/export` to open the Run Export drawer. |
+| Quit | Type `/quit`, or double-tap Ctrl+C within 1500ms. |
+
+For the full slash list see https://www.mogplex.com/cli/commands.
 
 ## Decision flow
 
@@ -42,38 +46,43 @@ If the first line fails, stop and tell the user to install the CLI (point them a
 user wants Mogplex action
         │
         ▼
-is it conversational / multi-turn? ── yes ──► tell user to run `mogplex` themselves;
-        │                                      do not try to drive a TUI
-        no
+is the cockpit already open in the user's terminal?
+        │
+        no  ──► tell them to run `mogplex` (or `mogplex --attach <runId>`)
+        yes
+        │
         ▼
-is it a slash command (/foo)? ── yes ──► mogplex exec "/foo"   (see mogplex-slash)
+is it a slash command? ── yes ──► tell user to type "/<command>" in the composer
         │
         no
         ▼
-is it a one-off prompt?      ── yes ──► mogplex exec --json "..."   (see mogplex-exec)
+is it a config / file change?
+        │
+        yes ──► help them author the file (AGENTS.md, permissions.json)
+        no  ──► describe the workflow in the cockpit (panels, drawers)
 ```
 
-## Reading output
+## What you cannot do
 
-- Text output is for humans. Do not parse it.
-- Use `--json` for a single final object, `--jsonl` for streaming events.
-- Top-level flags `--output text|json|jsonl` also work. Pick one and stick with it per invocation.
+- Drive the TUI from a script. The CLI is interactive-only.
+- Read auth state from outside the cockpit. There is no `login status` subcommand; only the cockpit knows.
+- Mutate `~/.mogplex/auth.json` directly. Tell the user to use `/login` or `/logout` in the cockpit.
+- Run a slash command headlessly. Slash commands only execute inside the running cockpit.
 
-## Known limits
+## What you **can** do
 
-- `mogplex exec` cannot hold a conversation. If the user says "then do X", run a new `exec` with the follow-up phrased as a complete task, or hand off to an interactive session.
-- The `slash` top-level command currently only lists the registry. Execution goes through `exec "/..."`.
-- Some capabilities show up in `mogplex --help` but are not real top-level commands yet; they exist only as slash commands. Trust `mogplex slash list --json` over help text.
-- The agent cannot read `~/.mogplex/auth.json`. All credential state must be inspected via `mogplex login status`.
+- Author `AGENTS.md` at the repo root with stable repo guidance (build commands, conventions, layout).
+- Author `~/.mogplex/projects/<repo-slug>/permissions.json` with `allow` / `deny` / `ask` rules — see https://www.mogplex.com/cli/concepts/permissions for the schema.
+- Recommend env-var escape hatches (`MOGPLEX_TRANSPORT`, `MOGPLEX_ATTACH_RUN_ID`, provider keys) — see https://www.mogplex.com/cli/guides/configuration-and-flags.
 
 ## Safety
 
-- Any slash command that mutates state (`/config set`, `/logout`, `/sandbox kill`) should be confirmed with the user before running. Mogplex does not sandbox the CLI itself.
-- Prefer provider env vars (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `MOGPLEX_API_KEY`, …) over writing credentials to disk in CI contexts.
-- Logs at `~/.mogplex/logs/<session-id>.jsonl` redact secrets by default. Do not export or share them without reviewing.
+- Confirm with the user before authoring or modifying any file under `~/.mogplex/` — those affect every Mogplex run on the machine.
+- Never write a key into a shell rc file on the user's behalf.
+- Recommend `/permissions approval` (the default) over `/permissions auto` unless the user explicitly opts into unattended runs.
 
 ## See also
 
-- [Exec mode guide](https://mogplex.dev/cli/guides/exec-mode)
-- [Slash commands guide](https://mogplex.dev/cli/guides/slash-commands)
-- [Authentication guide](https://mogplex.dev/cli/guides/authentication)
+- [mogplex-slash](../mogplex-slash/SKILL.md) — recommending slash commands
+- [mogplex-auth](../mogplex-auth/SKILL.md) — guiding the login flow
+- [Slash Commands guide](https://www.mogplex.com/cli/guides/slash-commands)
