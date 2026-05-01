@@ -42,7 +42,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/postcss": "^4.2.4",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.0",
@@ -52,8 +52,8 @@
     "eslint-config-next": "16.2.4",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "postcss": "^8.5.9",
-    "tailwindcss": "^4.2.2",
+    "postcss": "^8.5.13",
+    "tailwindcss": "^4.2.4",
     "typescript": "^6.0.2"
   }
 }
