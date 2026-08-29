@@ -1,5 +1,5 @@
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from 'ai';
+import { convertToModelMessages, isStepCount, streamText, tool, type UIMessage } from 'ai';
 import { z } from 'zod';
 import { source } from '@/lib/source';
 import { Document, type DocumentData } from 'flexsearch';
@@ -77,22 +77,20 @@ export async function POST(req: Request, ctx: RouteContext<"/api/chat">) {
 
   const result = streamText({
     model: openrouter.chat(process.env.OPENROUTER_MODEL ?? 'anthropic/claude-3.5-sonnet'),
-    stopWhen: stepCountIs(5),
+    instructions: systemPrompt,
+    stopWhen: isStepCount(5),
     tools: {
       search: searchTool,
     },
-    messages: [
-      { role: 'system', content: systemPrompt },
-      ...(await convertToModelMessages<ChatUIMessage>(reqJson.messages ?? [], {
-        convertDataPart(part) {
-          if (part.type === 'data-client')
-            return {
-              type: 'text',
-              text: `[Client Context: ${JSON.stringify(part.data)}]`,
-            };
-        },
-      })),
-    ],
+    messages: await convertToModelMessages<ChatUIMessage>(reqJson.messages ?? [], {
+      convertDataPart(part) {
+        if (part.type === 'data-client')
+          return {
+            type: 'text',
+            text: `[Client Context: ${JSON.stringify(part.data)}]`,
+          };
+      },
+    }),
     toolChoice: 'auto',
   });
 
