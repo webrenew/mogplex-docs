@@ -23,19 +23,19 @@
     "*.{json,md,mdx}": []
   },
   "dependencies": {
-    "@ai-sdk/react": "^4.0.87",
+    "@ai-sdk/react": "^4.0.94",
     "@openrouter/ai-sdk-provider": "^3.0.0",
     "@radix-ui/react-presence": "^1.1.10",
-    "ai": "^7.0.84",
+    "ai": "^7.0.91",
     "class-variance-authority": "^0.7.1",
     "flexsearch": "^0.8.212",
-    "fumadocs-core": "16.14.3",
-    "fumadocs-mdx": "15.2.3",
-    "fumadocs-ui": "16.14.3",
+    "fumadocs-core": "16.15.5",
+    "fumadocs-mdx": "15.4.0",
+    "fumadocs-ui": "16.15.5",
     "geist": "^1.7.2",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "lucide-react": "^1.31.0",
-    "next": "16.3.0",
+    "lucide-react": "^1.39.0",
+    "next": "16.3.4",
     "next-themes": "^0.4.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -44,7 +44,7 @@
     "remark-rehype": "^11.1.2",
     "tailwind-merge": "^3.6.0",
     "unist-util-visit": "^5.1.0",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
